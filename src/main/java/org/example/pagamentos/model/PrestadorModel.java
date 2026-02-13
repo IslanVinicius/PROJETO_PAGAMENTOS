@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor @AllArgsConstructor
 @Entity
 @Table(name = "PRESTADORES")
-public class Prestador {
+public class PrestadorModel {
 
 
     @Id @Getter
@@ -24,7 +24,7 @@ public class Prestador {
     @Column(name = "CPF", nullable = false, unique = true)
     private String cpf;
 
-    @OneToOne(mappedBy = "prestador", cascade = CascadeType.ALL)
-    private Dados_Bancarios_Prestador dados_bancarios_prestador;
+    @OneToOne(mappedBy = "prestadorModel", cascade = CascadeType.ALL)
+    private Dados_BancariosModel dados_bancarios_model;
 
 }

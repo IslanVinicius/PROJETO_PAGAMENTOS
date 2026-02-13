@@ -1,12 +1,16 @@
 package org.example.pagamentos.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "DADOS_BANCARIOS_PRESTADOR")
-public class Dados_Bancarios_Prestador {
+public class Dados_BancariosModel {
 
     @Id @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,7 +19,7 @@ public class Dados_Bancarios_Prestador {
 
     @OneToOne @Getter @Setter
     @JoinColumn(name = "COD_PRESTADOR",nullable = false,unique = true)
-    private Prestador prestador;
+    private PrestadorModel prestadorModel;
 
     @Getter @Setter @Column(name = "BANCO")
     private String banco;

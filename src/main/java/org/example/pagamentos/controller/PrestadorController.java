@@ -1,6 +1,6 @@
 package org.example.pagamentos.controller;
 
-import org.example.pagamentos.model.Prestador;
+import org.example.pagamentos.model.PrestadorModel;
 import org.example.pagamentos.service.PrestadorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,18 +15,18 @@ public class PrestadorController {
     private PrestadorService prestadorService;
 
     @GetMapping
-    public List<Prestador> procurarTodos(){
+    public List<PrestadorModel> procurarTodos(){
         return prestadorService.procurarTodos();
     }
 
     @GetMapping("/{id}")
-    public Prestador procurarPorID(@PathVariable int id){
+    public PrestadorModel procurarPorID(@PathVariable int id){
         return prestadorService.procurarPorID(id);
     }
 
     @PostMapping
-    public Prestador salvar(@RequestBody Prestador prestador){
-        return prestadorService.CadastrarPrestador(prestador);
+    public PrestadorModel salvar(@RequestBody PrestadorModel prestadorModel){
+        return prestadorService.CadastrarPrestador(prestadorModel);
     }
 
     @DeleteMapping("/{id}")
@@ -35,8 +35,8 @@ public class PrestadorController {
     }
 
     @PutMapping("/{id}")
-    public Prestador atualizar(@PathVariable int id,@RequestBody Prestador prestador){
-        return prestadorService.atualizarPrestador(id,prestador);
+    public PrestadorModel atualizar(@PathVariable int id, @RequestBody PrestadorModel prestadorModel){
+        return prestadorService.atualizarPrestador(id, prestadorModel);
     }
 
 }

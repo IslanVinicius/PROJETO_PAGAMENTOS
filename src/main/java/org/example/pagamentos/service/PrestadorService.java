@@ -1,6 +1,6 @@
 package org.example.pagamentos.service;
 
-import org.example.pagamentos.model.Prestador;
+import org.example.pagamentos.model.PrestadorModel;
 import org.example.pagamentos.repository.PrestadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,26 +12,26 @@ public class PrestadorService {
     @Autowired
     private PrestadorRepository prestadorRepository;
 
-    public List<Prestador> procurarTodos(){
+    public List<PrestadorModel> procurarTodos(){
         return prestadorRepository.findAll();
     }
 
-    public Prestador procurarPorID(int id) {
+    public PrestadorModel procurarPorID(int id) {
         return prestadorRepository.findById(id).orElseThrow(()-> new RuntimeException("Usuário não encontrado"));
     }
 
-    public Prestador CadastrarPrestador(Prestador prestador) {
-        return prestadorRepository.save(prestador);
+    public PrestadorModel CadastrarPrestador(PrestadorModel prestadorModel) {
+        return prestadorRepository.save(prestadorModel);
     }
 
-    public Prestador atualizarPrestador(int id,Prestador dados) {
+    public PrestadorModel atualizarPrestador(int id, PrestadorModel dados) {
 
-        Prestador prestador = prestadorRepository.findById(id).orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
+        PrestadorModel prestadorModel = prestadorRepository.findById(id).orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
 
-        prestador.setNome(dados.getNome());
-        prestador.setCpf(dados.getCpf());
+        prestadorModel.setNome(dados.getNome());
+        prestadorModel.setCpf(dados.getCpf());
 
-        return prestadorRepository.save(prestador);
+        return prestadorRepository.save(prestadorModel);
     }
 
     public void deletarPrestador(int id) {
