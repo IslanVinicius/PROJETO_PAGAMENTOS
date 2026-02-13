@@ -24,4 +24,7 @@ public class Prestador {
     @Column(name = "CPF", nullable = false, unique = true)
     private String cpf;
 
+    @OneToOne(mappedBy = "prestador", cascade = CascadeType.ALL)
+    private Dados_Bancarios_Prestador dados_bancarios_prestador;
+
 }

@@ -28,8 +28,8 @@ public class PrestadorService {
 
         Prestador prestador = prestadorRepository.findById(id).orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
 
-        prestador.setNome(prestador.getNome());
-        prestador.setCpf(prestador.getCpf());
+        prestador.setNome(dados.getNome());
+        prestador.setCpf(dados.getCpf());
 
         return prestadorRepository.save(prestador);
     }
