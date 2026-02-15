@@ -34,4 +34,7 @@ public class OrcamentoModel {
     @Getter @Setter
     @Column(name = "VALOR")
     private Float valor;
+
+    @OneToOne(mappedBy = "orcamento")
+    private SolicitacaoAprovacaoModel solicitacao;
 }
