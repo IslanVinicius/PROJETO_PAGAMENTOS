@@ -1,4 +1,5 @@
 package org.example.pagamentos.DTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,9 @@ import java.time.LocalDate;
 public class OrcamentoDTO {
 
     private Long orcamentoID;
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate movimento;
+    private Long idPrestador;
     private Long empresaID;
     private String empresaNome;
     private String descricao;

@@ -12,9 +12,9 @@ import lombok.Setter;
 public class PrestadorModel {
 
 
-    @Id @Getter
+    @Id @Getter  @Setter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer cod_prestador;
+    private Long cod_prestador;
 
     @Getter @Setter
     @Column(name = "NOME", nullable = false, length = 50)

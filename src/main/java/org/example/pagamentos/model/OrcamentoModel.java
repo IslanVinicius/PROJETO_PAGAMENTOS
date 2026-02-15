@@ -23,6 +23,10 @@ public class OrcamentoModel {
     @Getter @Setter
     private EmpresaModel empresa;
 
+    @ManyToOne @JoinColumn(name = "COD_PRESTADOR", nullable = false)
+    @Getter @Setter
+    private PrestadorModel prestador;
+
     @Getter @Setter
     @Column(name = "DESCRICAO")
     private String descricao;

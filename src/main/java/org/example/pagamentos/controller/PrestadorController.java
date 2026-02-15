@@ -1,8 +1,10 @@
 package org.example.pagamentos.controller;
 
+import org.example.pagamentos.DTO.PrestadorDTO;
 import org.example.pagamentos.model.PrestadorModel;
 import org.example.pagamentos.service.PrestadorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,28 +17,29 @@ public class PrestadorController {
     private PrestadorService prestadorService;
 
     @GetMapping
-    public List<PrestadorModel> procurarTodos(){
-        return prestadorService.procurarTodos();
+    public ResponseEntity<List<PrestadorDTO>> procurarTodos(){
+        return ResponseEntity.ok().body(prestadorService.procurarTodos());
     }
 
     @GetMapping("/{id}")
-    public PrestadorModel procurarPorID(@PathVariable int id){
-        return prestadorService.procurarPorID(id);
+    public ResponseEntity<PrestadorDTO> procurarPorID(@PathVariable Long id){
+        return ResponseEntity.ok().body(prestadorService.procurarPorID(id));
     }
 
     @PostMapping
-    public PrestadorModel salvar(@RequestBody PrestadorModel prestadorModel){
-        return prestadorService.CadastrarPrestador(prestadorModel);
+    public ResponseEntity<PrestadorDTO> salvar(@RequestBody PrestadorDTO prestadorDTO){
+        return ResponseEntity.ok().body(prestadorService.CadastrarPrestador(prestadorDTO));
     }
 
     @DeleteMapping("/{id}")
-    public void remover(@PathVariable int id){
+    public ResponseEntity<Void> deletar(@PathVariable Long id){
         prestadorService.deletarPrestador(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public PrestadorModel atualizar(@PathVariable int id, @RequestBody PrestadorModel prestadorModel){
-        return prestadorService.atualizarPrestador(id, prestadorModel);
+    public ResponseEntity<PrestadorDTO> atualizar(@PathVariable Long id, @RequestBody PrestadorDTO prestadorDTO){
+        return ResponseEntity.ok().body(prestadorService.atualizarPrestador(id, prestadorDTO));
     }
 
 }

@@ -1,28 +1,45 @@
 package org.example.pagamentos.controller;
 
-import org.example.pagamentos.model.EmpresaModel;
+import org.example.pagamentos.DTO.EmpresaDTO;
 import org.example.pagamentos.service.EmpresaService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/empresa")
 public class EmpresaController {
-    @Autowired
-    private EmpresaService empresaService;
+
+    private final EmpresaService empresaService;
+    EmpresaController(EmpresaService empresaService) {
+        this.empresaService = empresaService;
+    }
 
     @GetMapping
-    public List<EmpresaModel> buscarTodos(){
-        return empresaService.buscarTodos();
+    public ResponseEntity<List<EmpresaDTO>> buscarTodos(){
+        return ResponseEntity.ok().body(empresaService.buscarTodos());
     }
 
     @GetMapping("/{id}")
-    public EmpresaModel buscarPorID(@PathVariable Long id){
-        return empresaService.buscarPorId(id);
+    public ResponseEntity<EmpresaDTO> buscarPorID(@PathVariable Long id){
+        return ResponseEntity.ok().body(empresaService.buscarPorId(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<EmpresaDTO> salvar(@RequestBody EmpresaDTO empresaDTO){
+        EmpresaDTO empresa = empresaService.cadastrarEmpresa(empresaDTO);
+        return ResponseEntity.status(201).body(empresa);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> remover(@PathVariable Long id){
+        empresaService.deletarEmpresa(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmpresaDTO> atualizar(@PathVariable Long id,@RequestBody EmpresaDTO empresaDTO){
+        return ResponseEntity.ok().body(empresaService.atualizarEmpresa(id, empresaDTO));
     }
 }

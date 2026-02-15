@@ -3,8 +3,10 @@ package org.example.pagamentos.service;
 import org.example.pagamentos.DTO.OrcamentoDTO;
 import org.example.pagamentos.model.EmpresaModel;
 import org.example.pagamentos.model.OrcamentoModel;
+import org.example.pagamentos.model.PrestadorModel;
 import org.example.pagamentos.repository.EmpresaRespository;
 import org.example.pagamentos.repository.OrcamentoRepository;
+import org.example.pagamentos.repository.PrestadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,17 +14,28 @@ import java.util.List;
 
 @Service
 public class OrcamentoService {
-    @Autowired
-    private OrcamentoRepository orcamentoRepository;
-    @Autowired
-    private EmpresaRespository empresaRespository;
+    private final OrcamentoRepository orcamentoRepository;
+    private final EmpresaRespository empresaRepository;
+    private final PrestadorRepository prestadorRepository;
 
-    public void salvar(OrcamentoDTO orcamentoDTO) {
+    public OrcamentoService(OrcamentoRepository  orcamentoRepository,
+                            EmpresaRespository empresaRepository,
+                            PrestadorRepository prestadorRepository) {
+        this.orcamentoRepository = orcamentoRepository;
+        this.empresaRepository = empresaRepository;
+        this.prestadorRepository = prestadorRepository;
+    }
 
-        EmpresaModel empresaModel = empresaRespository
-                                    .findById(orcamentoDTO
-                                    .getEmpresaID())
-                                    .orElseThrow(()-> new RuntimeException("Empresa não encontrada"));
+
+    public OrcamentoDTO salvar(OrcamentoDTO orcamentoDTO) {
+
+        EmpresaModel empresaModel = empresaRepository
+                                    .getReferenceById(orcamentoDTO
+                                    .getEmpresaID());
+
+        PrestadorModel prestadorModel = prestadorRepository
+                                    .getReferenceById(orcamentoDTO
+                                    .getIdPrestador());
 
         OrcamentoModel orcamentoModel = new OrcamentoModel();
 
@@ -30,8 +43,11 @@ public class OrcamentoService {
         orcamentoModel.setValor(orcamentoDTO.getValor());
         orcamentoModel.setMovimento(orcamentoDTO.getMovimento());
         orcamentoModel.setEmpresa(empresaModel);
+        orcamentoModel.setPrestador(prestadorModel);
 
         orcamentoRepository.save(orcamentoModel);
+
+        return toDTO(orcamentoModel);
     }
 
     public List<OrcamentoDTO> listarTodos() {
@@ -53,6 +69,27 @@ public class OrcamentoService {
         return toDTO(orcamentoModel);
     }
 
+    public void deletarPorID(Long orcamentoID) {
+
+        OrcamentoModel orcamentoModel = orcamentoRepository
+                .findById(orcamentoID)
+                .orElseThrow(()-> new RuntimeException("Orcamento não encontrado"));
+
+        orcamentoRepository.delete(orcamentoModel);
+    }
+
+    public OrcamentoDTO atualizarOrcamento(Long orcamentoID, OrcamentoDTO orcamentoDTO) {
+        OrcamentoModel orcamentoModel = orcamentoRepository
+                .findById(orcamentoID)
+                .orElseThrow(()-> new RuntimeException("Orcamento não encontrado"));
+
+        orcamentoModel.setDescricao(orcamentoDTO.getDescricao());
+        orcamentoModel.setValor(orcamentoDTO.getValor());
+        orcamentoModel.setMovimento(orcamentoDTO.getMovimento());
+
+        return  toDTO(orcamentoRepository.save(orcamentoModel));
+    }
+
 
 
     private OrcamentoDTO toDTO(OrcamentoModel orcamentoModel) {
@@ -63,6 +100,8 @@ public class OrcamentoService {
         orcamentoDTO.setDescricao(orcamentoModel.getDescricao());
         orcamentoDTO.setValor(orcamentoModel.getValor());
         orcamentoDTO.setMovimento(orcamentoModel.getMovimento());
+        orcamentoDTO.setEmpresaNome(orcamentoModel.getEmpresa().getNome());
+        orcamentoDTO.setIdPrestador(orcamentoModel.getPrestador().getCod_prestador());
 
         return orcamentoDTO;
     }
