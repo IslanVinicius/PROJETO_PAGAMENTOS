@@ -28,8 +28,7 @@ public class EmpresaController {
 
     @PostMapping
     public ResponseEntity<EmpresaDTO> salvar(@RequestBody EmpresaDTO empresaDTO){
-        EmpresaDTO empresa = empresaService.cadastrarEmpresa(empresaDTO);
-        return ResponseEntity.status(201).body(empresa);
+        return ResponseEntity.status(201).body(empresaService.cadastrarEmpresa(empresaDTO));
     }
 
     @DeleteMapping("/{id}")
