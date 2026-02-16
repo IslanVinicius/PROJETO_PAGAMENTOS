@@ -67,7 +67,7 @@ public class PrestadorService {
     private PrestadorDTO toDTO(PrestadorModel prestadorModel) {
         PrestadorDTO prestadorDTO = new PrestadorDTO();
 
-        prestadorDTO.setCod_prestador(prestadorModel.getCod_prestador());
+        prestadorDTO.setCod_prestador(prestadorModel.getCodPrestador());
         prestadorDTO.setNome(prestadorModel.getNome());
         prestadorDTO.setCpf(prestadorModel.getCpf());
 

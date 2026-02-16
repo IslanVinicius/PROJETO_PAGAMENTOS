@@ -1,4 +1,3 @@
-
 package org.example.pagamentos.DTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -7,22 +6,25 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.pagamentos.Enums.StatusSolicitacao;
 
 import java.time.LocalDate;
 
-@NoArgsConstructor @AllArgsConstructor
 @Getter @Setter
-public class SolicitacaoAprovacaoDTO {
+@AllArgsConstructor @NoArgsConstructor
+public class PagamentoDTO {
 
     @NotBlank
-    private Long solicitacaoAprovacaoId;
+    private Long pagamentoID;
 
-    @JsonFormat(pattern = "dd/MM/yyyy")
+    @NotBlank
+    private Long solicitacaoID;
+
+    @NotBlank @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate movimento;
 
     @NotBlank
-    private Long orcamentoId;
+    private Long prestadorID;
 
-    private StatusSolicitacao statusSolicitacao;
+    @NotBlank
+    private Long dadosBancariosID;
 }

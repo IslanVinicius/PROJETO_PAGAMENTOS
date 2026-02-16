@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 @Entity
@@ -35,5 +37,6 @@ public class Dados_BancariosModel {
 
     @Column(name = "CHAVE_PIX")
     private String chavePix;
+
 
 }

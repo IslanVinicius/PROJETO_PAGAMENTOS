@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/solicitacoes-aprovacao")
+@RequestMapping("/solicitacao-aprovacao")
 public class SolicitacaoAprovacaoController {
 
     private final SolicitacaoAprovacaoService solicitacaoAprovacaoService;

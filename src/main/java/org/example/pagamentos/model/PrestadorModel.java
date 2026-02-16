@@ -14,7 +14,7 @@ public class PrestadorModel {
 
     @Id @Getter  @Setter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cod_prestador;
+    private Long codPrestador;
 
     @Getter @Setter
     @Column(name = "NOME", nullable = false, length = 50)

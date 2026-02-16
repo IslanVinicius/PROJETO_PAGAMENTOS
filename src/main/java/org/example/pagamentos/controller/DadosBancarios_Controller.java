@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/dadosbancarios")
+@RequestMapping("/dados-bancarios")
 public class DadosBancarios_Controller {
 
     private final Dados_Bancarios_Service dados_Bancarios_Service;

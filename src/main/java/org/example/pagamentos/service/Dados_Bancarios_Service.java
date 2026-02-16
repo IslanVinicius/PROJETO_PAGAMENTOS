@@ -8,10 +8,12 @@ import org.example.pagamentos.repository.Dados_Bancarios_Repository;
 import org.example.pagamentos.repository.PrestadorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Transactional
 public class Dados_Bancarios_Service {
 
     private final PrestadorRepository prestadorRepository;
@@ -38,12 +40,9 @@ public class Dados_Bancarios_Service {
                 .toList();
     }
 
+    @Transactional
     public void deletarPorID(Long id) {
-        Dados_BancariosModel dados =dados_Bancarios_Repository
-                .findById(id)
-                .orElseThrow(() -> new RuntimeException("Dados não encontrado"));
-
-        dados_Bancarios_Repository.delete(dados);
+        dados_Bancarios_Repository.forcedDelete(id);
     }
 
     public Dados_BancariosDTO cadastrarDados(Dados_BancariosDTO dados){
@@ -53,7 +52,7 @@ public class Dados_Bancarios_Service {
                 .findById(dados.getCodPrestador())
                 .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
 
-        dadosModel.setId(dados.getDadosId());
+
         dadosModel.setPrestadorModel(prestador);
         dadosModel.setAgencia(dados.getAgencia());
         dadosModel.setTipoConta(dados.getTipoConta());
@@ -62,14 +61,14 @@ public class Dados_Bancarios_Service {
         dadosModel.setChavePix(dados.getChavePix());
 
 
-        return toDTO(dadosModel);
+        return toDTO(dados_Bancarios_Repository.save(dadosModel));
     }
 
     private Dados_BancariosDTO toDTO(Dados_BancariosModel dados){
         Dados_BancariosDTO dto = new Dados_BancariosDTO();
 
         dto.setDadosId(dados.getId());
-        dto.setCodPrestador(dados.getPrestadorModel().getCod_prestador());
+        dto.setCodPrestador(dados.getPrestadorModel().getCodPrestador());
         dto.setConta(dados.getConta());
         dto.setTipoConta(dados.getTipoConta());
         dto.setBanco(dados.getBanco());

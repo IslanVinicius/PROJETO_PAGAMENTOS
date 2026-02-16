@@ -1,11 +1,15 @@
 package org.example.pagamentos.service;
 
 import org.example.pagamentos.DTO.SolicitacaoAprovacaoDTO;
+import org.example.pagamentos.Enums.StatusSolicitacao;
 import org.example.pagamentos.model.SolicitacaoAprovacaoModel;
 import org.example.pagamentos.repository.OrcamentoRepository;
+import org.example.pagamentos.repository.PagamentoRepository;
 import org.example.pagamentos.repository.SolicitacaoAprovacaoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -13,11 +17,14 @@ public class SolicitacaoAprovacaoService {
 
     private final SolicitacaoAprovacaoRepository solicitacaoAprovacaoRepository;
     private final OrcamentoRepository orcamentoRepository;
+    private final PagamentoService pagamentoService;
 
     public SolicitacaoAprovacaoService(SolicitacaoAprovacaoRepository solicitacaoAprovacaoRepository,
-                                       OrcamentoRepository orcamentoRepository) {
+                                       OrcamentoRepository orcamentoRepository,
+                                       PagamentoService pagamentoService) {
         this.solicitacaoAprovacaoRepository = solicitacaoAprovacaoRepository;
         this.orcamentoRepository = orcamentoRepository;
+        this.pagamentoService = pagamentoService;
     }
 
     public SolicitacaoAprovacaoDTO procurarPorID(Long id) {
@@ -59,11 +66,34 @@ public class SolicitacaoAprovacaoService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Solicitação não encontrada"));
 
-        model.setMovimento(dto.getMovimento());
-        model.setStatusSolicitacao(dto.getStatusSolicitacao());
+
+        if(model.getStatusSolicitacao() != dto.getStatusSolicitacao()){
+
+            if(dto.getStatusSolicitacao() == StatusSolicitacao.APROVADO){
+                aprovarSolicitacao(model);
+            } else {
+              model.setStatusSolicitacao(dto.getStatusSolicitacao());
+            }
+
+        }
+
+        dto.setMovimento(LocalDate.now());
 
         return toDTO(solicitacaoAprovacaoRepository.save(model));
     }
+
+    @Transactional
+    public void aprovarSolicitacao(SolicitacaoAprovacaoModel model){
+
+        if (model.getStatusSolicitacao() == StatusSolicitacao.APROVADO) {
+            throw new RuntimeException("Solicitação já está aprovada.");
+        }
+
+        model.setStatusSolicitacao(StatusSolicitacao.APROVADO);
+
+        pagamentoService.gerarPagamentoAutomatico(model);
+    }
+
 
     private SolicitacaoAprovacaoDTO toDTO(SolicitacaoAprovacaoModel model) {
 

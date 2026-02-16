@@ -29,21 +29,17 @@ public class OrcamentoService {
 
     public OrcamentoDTO salvar(OrcamentoDTO orcamentoDTO) {
 
-        EmpresaModel empresaModel = empresaRepository
-                                    .getReferenceById(orcamentoDTO
-                                    .getEmpresaID());
-
-        PrestadorModel prestadorModel = prestadorRepository
-                                    .getReferenceById(orcamentoDTO
-                                    .getIdPrestador());
 
         OrcamentoModel orcamentoModel = new OrcamentoModel();
 
         orcamentoModel.setDescricao(orcamentoDTO.getDescricao());
         orcamentoModel.setValor(orcamentoDTO.getValor());
         orcamentoModel.setMovimento(orcamentoDTO.getMovimento());
-        orcamentoModel.setEmpresa(empresaModel);
-        orcamentoModel.setPrestador(prestadorModel);
+        orcamentoModel.setEmpresa(empresaRepository.findById(orcamentoDTO.getEmpresaID()).orElseThrow(()-> new RuntimeException("Empresa não encontrada")));
+
+        System.out.println( "TESTE:::::::::::::: " + orcamentoModel.getEmpresa().getIdEmpresa());
+
+        orcamentoModel.setPrestador(prestadorRepository.findById(orcamentoDTO.getIdPrestador()).orElseThrow(()-> new RuntimeException("Prestador não encontrado")));
 
         orcamentoRepository.save(orcamentoModel);
 
@@ -96,12 +92,11 @@ public class OrcamentoService {
 
         OrcamentoDTO orcamentoDTO = new OrcamentoDTO();
         orcamentoDTO.setOrcamentoID(orcamentoModel.getOrcamentoID());
-        orcamentoDTO.setEmpresaNome(orcamentoModel.getEmpresa().getNome());
         orcamentoDTO.setDescricao(orcamentoModel.getDescricao());
         orcamentoDTO.setValor(orcamentoModel.getValor());
         orcamentoDTO.setMovimento(orcamentoModel.getMovimento());
-        orcamentoDTO.setEmpresaNome(orcamentoModel.getEmpresa().getNome());
-        orcamentoDTO.setIdPrestador(orcamentoModel.getPrestador().getCod_prestador());
+        orcamentoDTO.setIdPrestador(orcamentoModel.getPrestador().getCodPrestador());
+        orcamentoDTO.setEmpresaID(orcamentoModel.getEmpresa().getIdEmpresa());
 
         return orcamentoDTO;
     }

@@ -30,6 +30,9 @@ public class SolicitacaoAprovacaoModel {
     @Column(name = "STATUS", nullable = false)
     private StatusSolicitacao statusSolicitacao;
 
+    @OneToOne(mappedBy = "solicitacaoAprovacao")
+    private PagamentoModel  pagamento;
+
     @PrePersist
     public void definirStatusPadrao() {
         if (statusSolicitacao == null) {
