@@ -1,0 +1,31 @@
+:root {
+    /* Cores principais (já existentes) */
+    --primary-bg: #0D0D5C;
+    --primary-card: #EAEAEA;
+    --primary-input: #DCDCDC;
+    --primary-button: #4B4BFF;
+    --primary-button-hover: #3F3FD6;
+    --text-primary: #0D0D5C;
+    --text-secondary: #6B6B6B;
+    --danger: #FF4B4B;
+
+    /* Novas cores para categorias */
+    --success: #28a745;
+    --warning: #ffc107;
+    --info: #17a2b8;
+
+    /* Espaçamentos (já existem) */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 30px;
+
+    /* Bordas (já existem) */
+    --border-radius-sm: 10px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 20px;
+
+    /* Sombras (já existem) */
+    --box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+}

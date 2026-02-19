@@ -1,0 +1,78 @@
+.mainContainer {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--primary-bg);
+}
+
+.content {
+    flex: 1;
+    margin-left: 280px;
+    padding: var(--spacing-xl);
+    min-height: 100vh;
+}
+
+.card {
+    background-color: var(--primary-card);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--box-shadow);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--spacing-xl);
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* ... estilos existentes ... */
+
+.contentBody {
+    margin-top: var(--spacing-lg);
+}
+
+.contentBody p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Estilos para quando os formulários forem adicionados */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.formGroup label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+    padding: var(--spacing-sm);
+    border: 1px solid var(--primary-input);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: var(--primary-button);
+}
