@@ -1,0 +1,92 @@
+/* Adicione no início do seu arquivo CSS */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fundo geral */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #0D0D5C;
+}
+
+/* Centralização total */
+.container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card */
+.card {
+  width: 420px;
+  background-color: #EAEAEA;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* Logo */
+.logo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.logotext{
+  color: #6B6B6B;
+}
+
+/* Inputs */
+.card input {
+  width: 100%;
+  height: 45px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #DCDCDC;
+  text-align: center;
+  font-weight: 600;
+  outline: none;
+}
+
+/* Botão */
+.card button {
+  width: 100%;
+  height: 45px;
+  background-color: #4B4BFF;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card button:hover {
+  background-color: #3F3FD6;
+}
+
+/* Footer */
+.footer {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #6B6B6B;
+}
