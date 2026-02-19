@@ -35,11 +35,15 @@ public class OrcamentoService {
         orcamentoModel.setDescricao(orcamentoDTO.getDescricao());
         orcamentoModel.setValor(orcamentoDTO.getValor());
         orcamentoModel.setMovimento(orcamentoDTO.getMovimento());
-        orcamentoModel.setEmpresa(empresaRepository.findById(orcamentoDTO.getEmpresaID()).orElseThrow(()-> new RuntimeException("Empresa não encontrada")));
+        orcamentoModel.setEmpresa(empresaRepository
+                .findById(orcamentoDTO
+                        .getEmpresaID())
+                .orElseThrow(()-> new RuntimeException("Empresa não encontrada")));
 
-        System.out.println( "TESTE:::::::::::::: " + orcamentoModel.getEmpresa().getIdEmpresa());
-
-        orcamentoModel.setPrestador(prestadorRepository.findById(orcamentoDTO.getIdPrestador()).orElseThrow(()-> new RuntimeException("Prestador não encontrado")));
+        orcamentoModel.setPrestador(prestadorRepository
+                .findById(orcamentoDTO
+                        .getIdPrestador())
+                .orElseThrow(()-> new RuntimeException("Prestador não encontrado")));
 
         orcamentoRepository.save(orcamentoModel);
 

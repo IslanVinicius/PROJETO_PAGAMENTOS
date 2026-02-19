@@ -4,6 +4,9 @@ import EmpresaCadastro from "./EmpresaCadastro";
 import styles from "./MainPage.module.css";
 import PrestadorCadastro from './PrestadorCadastro';
 import DadosBancariosCadastro from './DadosBancariosCadastro';
+import OrcamentoCadastro from './OrcamentoCadastro';
+import SolicitacaoAprovacaoCadastro from './SolicitacaoAprovacaoCadastro';
+import AprovacaoCadastro from './AprovacaoCadastro';
 
 function MainPage({ onLogout }) {
     const [activePage, setActivePage] = useState("empresa");
@@ -18,27 +21,19 @@ function MainPage({ onLogout }) {
             case "empresa":
                 return <EmpresaCadastro />
 
+            case "dadosBancarios":
+                return <DadosBancariosCadastro />;
+
             case "orcamento":
                 return (
-                    <div className={styles.card}>
-                        <div className={styles.header}>
-                            <span>💰</span>
-                            <h2>Gerar Orçamento</h2>
-                        </div>
-                        <p>Em desenvolvimento...</p>
-                    </div>
+                    <OrcamentoCadastro />
                 );
 
             case "pedidoAprovacao":
-                return (
-                    <div className={styles.card}>
-                        <div className={styles.header}>
-                            <span>📋</span>
-                            <h2>Gerar Pedido de Aprovação</h2>
-                        </div>
-                        <p>Em desenvolvimento...</p>
-                    </div>
-                );
+                return <SolicitacaoAprovacaoCadastro />;
+
+            case "aprovacao":
+                return <AprovacaoCadastro />;
 
             default:
                 return (

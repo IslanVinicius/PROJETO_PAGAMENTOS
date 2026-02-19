@@ -21,7 +21,8 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
         {
             title: "PEDIDOS",
             items: [
-                { id: "pedidoAprovacao", icon: "📋", label: "Gerar Pedido de Aprovação", iconClass: styles.iconPedido }
+                { id: "pedidoAprovacao", icon: "📋", label: "Gerar Pedido de Aprovação", iconClass: styles.iconPedido },
+                { id: "aprovacao", icon: "✅", label: "Aprovar Solicitações", iconClass: styles.iconPedido }
             ]
         }
     ];
