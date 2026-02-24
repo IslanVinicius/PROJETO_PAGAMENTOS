@@ -1,7 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./Sidebar.module.css";
+import { useAuth } from "../../contexts/AuthContext";
 
-function Sidebar({ activePage, onPageChange, onLogout }) {
+function Sidebar({ activePage, onPageChange }) {
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
+
     // Separando os menus por categoria
     const menuSections = [
         {
@@ -27,6 +37,10 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
         }
     ];
 
+    // Pegar informações do usuário do token (se disponíveis)
+    const userName = user?.name || "Usuário Teste";
+    const userEmail = user?.email || "usuario@email.com";
+
     return (
         <div className={styles.sidebar}>
             <div className={styles.header}>
@@ -37,8 +51,8 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
 
             <div className={styles.user}>
                 <div className={styles.avatar}>👤</div>
-                <div className={styles.name}>Usuário Teste</div>
-                <div className={styles.email}>usuario@email.com</div>
+                <div className={styles.name}>{userName}</div>
+                <div className={styles.email}>{userEmail}</div>
             </div>
 
             <div className={styles.menu}>
@@ -60,7 +74,7 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
             </div>
 
             <div className={styles.footer}>
-                <div className={styles.logoutBtn} onClick={onLogout}>
+                <div className={styles.logoutBtn} onClick={handleLogout}>
                     <span className={styles.icon}>🚪</span>
                     <span>Sair</span>
                 </div>
