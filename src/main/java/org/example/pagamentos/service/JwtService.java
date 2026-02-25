@@ -16,7 +16,7 @@ public class JwtService {
             "minha-chave-super-secreta-com-no-minimo-256-bits-aqui";
 
     private static final long EXPIRATION =
-            1000 * 60 * 60; // 1 hora
+            System.currentTimeMillis() + 86400000; // 1 hora
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
@@ -39,7 +39,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(
-                        new Date(System.currentTimeMillis() + EXPIRATION)
+                        new Date(EXPIRATION)
                 )
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();

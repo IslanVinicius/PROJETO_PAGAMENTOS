@@ -1,51 +1,25 @@
-const API_URL = 'http://localhost:8080'; // mesma base da API
+import { api } from './api';
 
 export const prestadorService = {
-    // GET /prestador - listar todos
     async listar() {
-        const response = await fetch(`${API_URL}/prestador`);
-        if (!response.ok) throw new Error('Erro ao listar prestadores');
+        const response = await api.get('/prestador');
         return await response.json();
     },
-
-    // GET /prestador/:id - obter um
     async obter(id) {
-        const response = await fetch(`${API_URL}/prestador/${id}`);
-        if (!response.ok) throw new Error('Erro ao obter prestador');
+        const response = await api.get(`/prestador/${id}`);
         return await response.json();
     },
-
-    // POST /prestador - criar
     async criar(dados) {
-        const response = await fetch(`${API_URL}/prestador`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (!response.ok) throw new Error('Erro ao criar prestador');
+        const response = await api.post('/prestador', dados);
         return await response.json();
     },
-
-    // PUT /prestador/:id - atualizar
     async atualizar(id, dados) {
-        const response = await fetch(`${API_URL}/prestador/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (!response.ok) throw new Error('Erro ao atualizar prestador');
+        const response = await api.put(`/prestador/${id}`, dados);
         return await response.json();
     },
-
-    // DELETE /prestador/:id - deletar
     async deletar(id) {
-        const response = await fetch(`${API_URL}/prestador/${id}`, {
-            method: 'DELETE'
-        });
-        if (response.status === 204) {
-            return { success: true };
-        }
-        if (!response.ok) throw new Error('Erro ao deletar prestador');
+        const response = await api.delete(`/prestador/${id}`);
+        if (response.status === 204) return { success: true };
         const text = await response.text();
         return text ? JSON.parse(text) : { success: true };
     }

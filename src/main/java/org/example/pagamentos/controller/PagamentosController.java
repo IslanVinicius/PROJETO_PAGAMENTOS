@@ -9,7 +9,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
-@RequestMapping("/pagamentos")
+@RequestMapping("/api/pagamentos")
 public class PagamentosController {
     private final PagamentoService pagamentoService;
     public PagamentosController(PagamentoService pagamentoService) {

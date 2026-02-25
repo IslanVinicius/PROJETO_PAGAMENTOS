@@ -1,86 +1,128 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import styles from "./Sidebar.module.css";
 import { useAuth } from "../../contexts/AuthContext";
+import styles from "./Sidebar.module.css";
 
-function Sidebar({ activePage, onPageChange }) {
-    const navigate = useNavigate();
-    const { user, logout } = useAuth();
+function Sidebar({ activePage, onPageChange, onLogout }) {
+  const { user } = useAuth();
+  const role = user?.role;
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
+  return (
+    <div className={styles.sidebar}>
+      <div className={styles.header}>
+        <div className={styles.logo}>Sistema Financeiro</div>
+      </div>
 
-    // Separando os menus por categoria
-    const menuSections = [
-        {
-            title: "CADASTROS",
-            items: [
-                { id: "prestador", icon: "👤", label: "Cadastro de Prestador", iconClass: styles.iconCadastro },
-                { id: "empresa", icon: "🏢", label: "Cadastro de Empresa", iconClass: styles.iconCadastro },
-                { id: "dadosBancarios", icon: "🏦", label: "Dados Bancários", iconClass: styles.iconCadastro}
-            ]
-        },
-        {
-            title: "ORÇAMENTOS",
-            items: [
-                { id: "orcamento", icon: "💰", label: "Gerar Orçamento", iconClass: styles.iconOrcamento }
-            ]
-        },
-        {
-            title: "PEDIDOS",
-            items: [
-                { id: "pedidoAprovacao", icon: "📋", label: "Gerar Pedido de Aprovação", iconClass: styles.iconPedido },
-                { id: "aprovacao", icon: "✅", label: "Aprovar Solicitações", iconClass: styles.iconPedido }
-            ]
-        }
-    ];
-
-    // Pegar informações do usuário do token (se disponíveis)
-    const userName = user?.name || "Usuário Teste";
-    const userEmail = user?.email || "usuario@email.com";
-
-    return (
-        <div className={styles.sidebar}>
-            <div className={styles.header}>
-                <div className={styles.logo}>
-                    💳 <span>SISTEMA DE PAGAMENTOS</span>
-                </div>
+      <div className={styles.menu}>
+        {role === "ROLE_ADMIN" && (
+          <>
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "empresa" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("empresa")}
+            >
+              Cadastro Empresa
             </div>
 
-            <div className={styles.user}>
-                <div className={styles.avatar}>👤</div>
-                <div className={styles.name}>{userName}</div>
-                <div className={styles.email}>{userEmail}</div>
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "prestador" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("prestador")}
+            >
+              Cadastro Prestador
             </div>
 
-            <div className={styles.menu}>
-                {menuSections.map((section, index) => (
-                    <div key={index} className={styles.menuSection}>
-                        <div className={styles.sectionTitle}>{section.title}</div>
-                        {section.items.map(item => (
-                            <div
-                                key={item.id}
-                                className={`${styles.menuItem} ${activePage === item.id ? styles.active : ''}`}
-                                onClick={() => onPageChange(item.id)}
-                            >
-                                <span className={item.iconClass || styles.icon}>{item.icon}</span>
-                                <span>{item.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                ))}
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "dadosBancarios" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("dadosBancarios")}
+            >
+              Dados Bancários
             </div>
 
-            <div className={styles.footer}>
-                <div className={styles.logoutBtn} onClick={handleLogout}>
-                    <span className={styles.icon}>🚪</span>
-                    <span>Sair</span>
-                </div>
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "orcamento" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("orcamento")}
+            >
+              Gerar Orçamento
             </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "pedidoAprovacao" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("pedidoAprovacao")}
+            >
+              Pedido Aprovação
+            </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "aprovacao" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("aprovacao")}
+            >
+              Aprovar Orçamento
+            </div>
+          </>
+        )}
+
+        {role === "ROLE_SOLICITANTE" && (
+          <>
+            <div
+              className={styles.menuItem}
+              onClick={() => onPageChange("prestador")}
+            >
+              Cadastro Prestador
+            </div>
+
+            <div
+              className={styles.menuItem}
+              onClick={() => onPageChange("orcamento")}
+            >
+              Gerar Orçamento
+            </div>
+          </>
+        )}
+
+        {role === "ROLE_ESCRITORIO" && (
+          <>
+            <div
+              className={styles.menuItem}
+              onClick={() => onPageChange("orcamento")}
+            >
+              Gerar Orçamento
+            </div>
+
+            <div
+              className={styles.menuItem}
+              onClick={() => onPageChange("pedidoAprovacao")}
+            >
+              Pedido Aprovação
+            </div>
+          </>
+        )}
+
+        {role === "ROLE_APROVADOR" && (
+          <div
+            className={styles.menuItem}
+            onClick={() => onPageChange("aprovacao")}
+          >
+            Aprovar Orçamento
+          </div>
+        )}
+      </div>
+
+      <div className={styles.footer}>
+        <div className={styles.logoutBtn} onClick={onLogout}>
+          Sair
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default Sidebar;

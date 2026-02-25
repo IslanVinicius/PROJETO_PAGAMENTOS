@@ -1,51 +1,25 @@
-const API_URL = 'http://localhost:8080';
+import { api } from './api';
 
 export const orcamentoService = {
-    // GET /orcamento - listar todos
     async listar() {
-        const response = await fetch(`${API_URL}/orcamento`);
-        if (!response.ok) throw new Error('Erro ao listar orçamentos');
+        const response = await api.get('/orcamento');
         return await response.json();
     },
-
-    // GET /orcamento/:id - obter um
     async obter(id) {
-        const response = await fetch(`${API_URL}/orcamento/${id}`);
-        if (!response.ok) throw new Error('Erro ao obter orçamento');
+        const response = await api.get(`/orcamento/${id}`);
         return await response.json();
     },
-
-    // POST /orcamento - criar
     async criar(dados) {
-        const response = await fetch(`${API_URL}/orcamento`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (!response.ok) throw new Error('Erro ao criar orçamento');
+        const response = await api.post('/orcamento', dados);
         return await response.json();
     },
-
-    // PUT /orcamento/:id - atualizar
     async atualizar(id, dados) {
-        const response = await fetch(`${API_URL}/orcamento/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (!response.ok) throw new Error('Erro ao atualizar orçamento');
+        const response = await api.put(`/orcamento/${id}`, dados);
         return await response.json();
     },
-
-    // DELETE /orcamento/:id - deletar
     async deletar(id) {
-        const response = await fetch(`${API_URL}/orcamento/${id}`, {
-            method: 'DELETE'
-        });
-        if (response.status === 204) {
-            return { success: true };
-        }
-        if (!response.ok) throw new Error('Erro ao deletar orçamento');
+        const response = await api.delete(`/orcamento/${id}`);
+        if (response.status === 204) return { success: true };
         const text = await response.text();
         return text ? JSON.parse(text) : { success: true };
     }

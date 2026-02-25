@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Login from "./components/Login/Login";
 import MainPage from "./components/MainPage/MainPage";
 import "./styles/global.css";  // ✅ ÚNICO ARQUIVO CSS IMPORTADO AQUI
+import PrivateRoute from "./routes/PrivateRoute";
 
 // Componente para rotas protegidas
 function ProtectedRoute({ children }) {
@@ -19,14 +20,10 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/MainPage"
-        element={
-          <ProtectedRoute>
-            <MainPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/admin" element={<PrivateRoute><MainPage /></PrivateRoute>} />
+      <Route path="/solicitante" element={<PrivateRoute><MainPage /></PrivateRoute>} />
+      <Route path="/escritorio" element={<PrivateRoute><MainPage /></PrivateRoute>} />
+      <Route path="/aprovador" element={<PrivateRoute><MainPage /></PrivateRoute>} />
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );

@@ -1,33 +1,74 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import EmpresaCadastro from "./EmpresaCadastro";
+import PrestadorCadastro from "./PrestadorCadastro";
+import DadosBancariosCadastro from "./DadosBancariosCadastro";
+import OrcamentoCadastro from "./OrcamentoCadastro";
+import SolicitacaoAprovacaoCadastro from "./SolicitacaoAprovacaoCadastro";
+import AprovacaoCadastro from "./AprovacaoCadastro";
 import styles from "./MainPage.module.css";
-import PrestadorCadastro from './PrestadorCadastro';
-import DadosBancariosCadastro from './DadosBancariosCadastro';
-import OrcamentoCadastro from './OrcamentoCadastro';
-import SolicitacaoAprovacaoCadastro from './SolicitacaoAprovacaoCadastro';
-import AprovacaoCadastro from './AprovacaoCadastro';
+import { useAuth } from "../../contexts/AuthContext";
 
-function MainPage({ onLogout }) {
-    const [activePage, setActivePage] = useState("empresa");
+function MainPage() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const role = user?.role;
+
+    // 🔥 Permissões por role
+    const rolePermissions = {
+        ROLE_ADMIN: [
+            "empresa",
+            "prestador",
+            "dadosBancarios",
+            "orcamento",
+            "pedidoAprovacao",
+            "aprovacao"
+        ],
+        ROLE_SOLICITANTE: ["prestador", "orcamento"],
+        ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao"],
+        ROLE_APROVADOR: ["aprovacao"]
+    };
+
+    const [activePage, setActivePage] = useState("");
+
+    useEffect(() => {
+        if (role && rolePermissions[role]) {
+            setActivePage(rolePermissions[role][0]);
+        }
+    }, [role]);
+
+    // ✅ FUNÇÃO DE LOGOUT (estava faltando)
+    const handleLogout = () => {
+        logout();
+        navigate("/");
+    };
 
     const renderContent = () => {
+        if (!rolePermissions[role]?.includes(activePage)) {
+            return (
+                <div className={styles.card}>
+                    <div className={styles.header}>
+                        <span>🚫</span>
+                        <h2>Acesso Negado</h2>
+                    </div>
+                    <p>Você não tem permissão para acessar esta página.</p>
+                </div>
+            );
+        }
+
         switch (activePage) {
             case "prestador":
-                return (
-                    <PrestadorCadastro />
-                );
+                return <PrestadorCadastro />;
 
             case "empresa":
-                return <EmpresaCadastro />
+                return <EmpresaCadastro />;
 
             case "dadosBancarios":
                 return <DadosBancariosCadastro />;
 
             case "orcamento":
-                return (
-                    <OrcamentoCadastro />
-                );
+                return <OrcamentoCadastro />;
 
             case "pedidoAprovacao":
                 return <SolicitacaoAprovacaoCadastro />;
@@ -53,7 +94,7 @@ function MainPage({ onLogout }) {
             <Sidebar
                 activePage={activePage}
                 onPageChange={setActivePage}
-                onLogout={onLogout}
+                onLogout={handleLogout}
             />
             <div className={styles.content}>
                 {renderContent()}

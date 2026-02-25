@@ -4,31 +4,22 @@ import { useAuth } from "../../contexts/AuthContext";
 import styles from "./Login.module.css";
 
 function Login() {
-  const navigate = useNavigate();
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    username: "",
-    password: ""
-  });
-
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Limpar erro quando usuário começa a digitar
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validação básica
     if (!formData.username || !formData.password) {
       setError("Por favor, preencha todos os campos");
       return;
@@ -38,14 +29,17 @@ function Login() {
     setError("");
 
     try {
-      // Chamar a função de login do contexto
-      await login(formData.username, formData.password);
+      const user = await login(formData.username, formData.password);
+      const role = user.role; // ou user.authorities[0] dependendo do JWT
 
-      // Se chegou aqui, login foi bem-sucedido
-      navigate("/MainPage"); // ou a rota da sua main page
-
-    } catch (error) {
-      setError(error.message || "Erro ao fazer login. Tente novamente.");
+      // Redirecionamento por role
+      if (role === "ROLE_ADMIN") navigate("/admin");
+      else if (role === "ROLE_SOLICITANTE") navigate("/solicitante");
+      else if (role === "ROLE_ESCRITORIO") navigate("/escritorio");
+      else if (role === "ROLE_APROVADOR") navigate("/aprovador");
+      else navigate("/");
+    } catch (err) {
+      setError(err.message || "Erro ao fazer login. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +50,7 @@ function Login() {
       <div className={styles.card}>
         <div className={styles.logo}>
           💳
-          <span>SISTEMA DE PAGAMENTOS</span>
+          <span className={styles.titulo}> SISTEMA DE PAGAMENTOS</span>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -69,7 +63,6 @@ function Login() {
             onChange={handleChange}
             disabled={loading}
           />
-
           <input
             type="password"
             name="password"
@@ -79,18 +72,8 @@ function Login() {
             onChange={handleChange}
             disabled={loading}
           />
-
-          {error && (
-            <div className={styles.error}>
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className={styles.button}
-            disabled={loading}
-          >
+          {error && <div className={styles.error}>{error}</div>}
+          <button type="submit" className={styles.button} disabled={loading}>
             {loading ? "ENTRANDO..." : "ENTRAR"}
           </button>
         </form>

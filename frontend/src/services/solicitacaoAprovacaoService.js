@@ -1,51 +1,25 @@
-const API_URL = 'http://localhost:8080';
+import { api } from './api';
 
 export const solicitacaoAprovacaoService = {
-    // GET /solicitacao-aprovacao - listar todos
     async listar() {
-        const response = await fetch(`${API_URL}/solicitacao-aprovacao`);
-        if (!response.ok) throw new Error('Erro ao listar solicitações');
+        const response = await api.get('/solicitacao-aprovacao');
         return await response.json();
     },
-
-    // GET /solicitacao-aprovacao/:id - obter um
     async obter(id) {
-        const response = await fetch(`${API_URL}/solicitacao-aprovacao/${id}`);
-        if (!response.ok) throw new Error('Erro ao obter solicitação');
+        const response = await api.get(`/solicitacao-aprovacao/${id}`);
         return await response.json();
     },
-
-    // POST /solicitacao-aprovacao - criar
     async criar(dados) {
-        const response = await fetch(`${API_URL}/solicitacao-aprovacao`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (!response.ok) throw new Error('Erro ao criar solicitação');
+        const response = await api.post('/solicitacao-aprovacao', dados);
         return await response.json();
     },
-
-    // PUT /solicitacao-aprovacao/:id - atualizar
     async atualizar(id, dados) {
-        const response = await fetch(`${API_URL}/solicitacao-aprovacao/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (!response.ok) throw new Error('Erro ao atualizar solicitação');
+        const response = await api.put(`/solicitacao-aprovacao/${id}`, dados);
         return await response.json();
     },
-
-    // DELETE /solicitacao-aprovacao/:id - deletar
     async deletar(id) {
-        const response = await fetch(`${API_URL}/solicitacao-aprovacao/${id}`, {
-            method: 'DELETE'
-        });
-        if (response.status === 204) {
-            return { success: true };
-        }
-        if (!response.ok) throw new Error('Erro ao deletar solicitação');
+        const response = await api.delete(`/solicitacao-aprovacao/${id}`);
+        if (response.status === 204) return { success: true };
         const text = await response.text();
         return text ? JSON.parse(text) : { success: true };
     }

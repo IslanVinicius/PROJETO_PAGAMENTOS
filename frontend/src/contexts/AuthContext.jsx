@@ -8,7 +8,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token");
     if (!token) return null;
-
     return jwtDecode(token);
   });
 
@@ -16,6 +15,7 @@ export function AuthProvider({ children }) {
     const token = await loginService(username, password);
     const decoded = jwtDecode(token);
     setUser(decoded);
+    return decoded; // 👈 importante para o componente usar
   }
 
   function logout() {
