@@ -5,6 +5,10 @@ export const orcamentoService = {
         const response = await api.get('/orcamento');
         return await response.json();
     },
+    async listarDisponiveis() {
+            const response = await api.get('/orcamento/disponiveis');
+            return await response.json();
+        },
     async obter(id) {
         const response = await api.get(`/orcamento/${id}`);
         return await response.json();

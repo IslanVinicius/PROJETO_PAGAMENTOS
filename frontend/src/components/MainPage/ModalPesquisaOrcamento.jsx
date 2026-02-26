@@ -30,7 +30,7 @@ function ModalPesquisaOrcamento({ isOpen, onClose, onSelect }) {
     const carregarOrcamentos = async () => {
         setLoading(true);
         try {
-            const data = await orcamentoService.listar();
+            const data = await orcamentoService.listarDisponiveis();
             const orcamentosFormatados = data.map(item => ({
                 orcamentoID: item.orcamentoID,
                 descricao: item.descricao,

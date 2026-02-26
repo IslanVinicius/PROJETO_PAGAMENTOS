@@ -427,3 +427,69 @@
     letter-spacing: 0.5px;
     transition: 0.3s;
 }
+
+/* Botões adicionais para os modos */
+.btnEdit {
+    background-color: var(--primary-button);
+    color: white;
+}
+
+.btnEdit:hover {
+    background-color: var(--primary-button-hover);
+}
+
+.btnNew {
+    background-color: var(--success);
+    color: white;
+}
+
+.btnNew:hover {
+    background-color: #218838;
+}
+
+.btnCancel {
+    background-color: var(--text-secondary);
+    color: white;
+}
+
+.btnCancel:hover {
+    background-color: #5a6268;
+}
+
+/* Ajuste para o status display (já existe, mas garanto a classe) */
+.statusDisplay {
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: 0.3s;
+}
+
+
+.statusSelect {
+    height: 45px;
+    padding: 0 var(--spacing-md);
+    border: 2px solid var(--primary-input);
+    border-radius: var(--border-radius-sm);
+    background-color: white;
+    color: var(--text-primary);
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+    width: 100%;
+    cursor: pointer;
+}
+
+.statusSelect:focus {
+    border-color: var(--primary-button);
+}
+
+.statusSelect:disabled {
+    background-color: var(--primary-input);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}

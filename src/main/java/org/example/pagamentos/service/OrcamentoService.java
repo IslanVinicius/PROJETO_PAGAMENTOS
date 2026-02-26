@@ -51,14 +51,19 @@ public class OrcamentoService {
     }
 
     public List<OrcamentoDTO> listarTodos() {
-
-        List<OrcamentoModel> orcamentoModels = orcamentoRepository.findAll();
-
         return orcamentoRepository.findAll()
                                   .stream()
                                   .map(this::toDTO)
                                   .toList();
 
+    }
+
+    public List<OrcamentoDTO> listarOrcamentosDisponiveis(){
+        return orcamentoRepository
+                .procurarOrcamentosDisponiveis()
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public OrcamentoDTO buscarPorID(Long orcamentoID) {

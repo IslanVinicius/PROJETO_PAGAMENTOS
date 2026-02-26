@@ -40,6 +40,11 @@ public class OrcamentoController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/disponiveis")
+    public ResponseEntity<List<OrcamentoDTO>> buscarOrcamentosDisponiveis() {
+        return ResponseEntity.ok().body(orcamentoService.listarOrcamentosDisponiveis());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<OrcamentoDTO>  atualizar(@PathVariable Long id, @RequestBody OrcamentoDTO orcamentoDTO) {
         return ResponseEntity.ok().body(orcamentoService.atualizarOrcamento(id, orcamentoDTO));

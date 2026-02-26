@@ -7,7 +7,7 @@ import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
 function OrcamentoCadastro() {
     const [orcamentoID, setOrcamentoID] = useState('');
     const [movimento, setMovimento] = useState('');
-    const [movimentoDate, setMovimentoDate] = useState(''); // Para o input date
+    const [movimentoDate, setMovimentoDate] = useState('');
     const [idPrestador, setIdPrestador] = useState('');
     const [empresaID, setEmpresaID] = useState('');
     const [descricao, setDescricao] = useState('');
@@ -19,6 +19,8 @@ function OrcamentoCadastro() {
     const [searchResults, setSearchResults] = useState([]);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
+    const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
+    const [originalData, setOriginalData] = useState({});
 
     const [modalPrestadorAberto, setModalPrestadorAberto] = useState(false);
     const [modalEmpresaAberto, setModalEmpresaAberto] = useState(false);
@@ -33,7 +35,6 @@ function OrcamentoCadastro() {
     const formatarDataParaInput = (dataBR) => {
         if (!dataBR) return '';
         if (dataBR.includes('-') && dataBR.split('-')[0].length === 4) return dataBR;
-
         const partes = dataBR.split('/');
         if (partes.length === 3) {
             const [dia, mes, ano] = partes;
@@ -50,7 +51,6 @@ function OrcamentoCadastro() {
         setLoading(true);
         try {
             const data = await orcamentoService.listar();
-            console.log('Orçamentos recebidos:', data);
             const orcamentosFormatados = data.map(item => ({
                 orcamentoID: item.orcamentoID,
                 movimento: item.movimento,
@@ -60,11 +60,27 @@ function OrcamentoCadastro() {
                 valor: item.valor
             }));
             setOrcamentos(orcamentosFormatados);
+            if (orcamentosFormatados.length > 0) {
+                selecionarOrcamento(orcamentosFormatados[0], 0);
+            }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
             setLoading(false);
         }
+    };
+
+    const selecionarOrcamento = (orcamento, index) => {
+        setCurrentIndex(index);
+        setOrcamentoID(orcamento.orcamentoID);
+        setMovimento(orcamento.movimento);
+        setMovimentoDate(formatarDataParaInput(orcamento.movimento));
+        setIdPrestador(orcamento.idPrestador);
+        setEmpresaID(orcamento.empresaID);
+        setDescricao(orcamento.descricao);
+        setValor(orcamento.valor);
+        setOriginalData({ ...orcamento });
+        setModo('visualizacao');
     };
 
     const handleSearch = () => {
@@ -87,17 +103,7 @@ function OrcamentoCadastro() {
 
     const selectOrcamento = (orcamento) => {
         const index = orcamentos.findIndex(o => o.orcamentoID === orcamento.orcamentoID);
-        setCurrentIndex(index);
-        setOrcamentoID(orcamento.orcamentoID);
-
-        // Atualiza movimento e movimentoDate
-        setMovimento(orcamento.movimento);
-        setMovimentoDate(formatarDataParaInput(orcamento.movimento));
-
-        setIdPrestador(orcamento.idPrestador);
-        setEmpresaID(orcamento.empresaID);
-        setDescricao(orcamento.descricao);
-        setValor(orcamento.valor);
+        selecionarOrcamento(orcamento, index);
         setSearchResults([]);
         setSearchTerm('');
         setMessage({ type: '', text: '' });
@@ -109,6 +115,54 @@ function OrcamentoCadastro() {
 
     const handleEmpresaSelecionada = (empresaId) => {
         setEmpresaID(empresaId);
+    };
+
+    const handleEditar = () => {
+        setOriginalData({ orcamentoID, movimento, movimentoDate, idPrestador, empresaID, descricao, valor });
+        setModo('edicao');
+    };
+
+    const handleNovo = () => {
+        setOriginalData({});
+        setOrcamentoID('');
+        setMovimento('');
+        setMovimentoDate('');
+        setIdPrestador('');
+        setEmpresaID('');
+        setDescricao('');
+        setValor('');
+        setModo('criacao');
+    };
+
+    const handleCancelar = () => {
+        if (modo === 'edicao' && originalData.orcamentoID) {
+            setOrcamentoID(originalData.orcamentoID);
+            setMovimento(originalData.movimento);
+            setMovimentoDate(originalData.movimentoDate);
+            setIdPrestador(originalData.idPrestador);
+            setEmpresaID(originalData.empresaID);
+            setDescricao(originalData.descricao);
+            setValor(originalData.valor);
+        } else if (modo === 'criacao' && orcamentos.length > 0 && currentIndex >= 0) {
+            const atual = orcamentos[currentIndex];
+            setOrcamentoID(atual.orcamentoID);
+            setMovimento(atual.movimento);
+            setMovimentoDate(formatarDataParaInput(atual.movimento));
+            setIdPrestador(atual.idPrestador);
+            setEmpresaID(atual.empresaID);
+            setDescricao(atual.descricao);
+            setValor(atual.valor);
+        } else if (modo === 'criacao' && orcamentos.length === 0) {
+            setOrcamentoID('');
+            setMovimento('');
+            setMovimentoDate('');
+            setIdPrestador('');
+            setEmpresaID('');
+            setDescricao('');
+            setValor('');
+        }
+        setModo('visualizacao');
+        setMessage({ type: '', text: '' });
     };
 
     const handleSave = async () => {
@@ -127,7 +181,7 @@ function OrcamentoCadastro() {
 
         setLoading(true);
         try {
-            if (orcamentoID) {
+            if (modo === 'edicao' && orcamentoID) {
                 const atualizado = await orcamentoService.atualizar(orcamentoID, dados);
                 const orcamentoMapeado = {
                     orcamentoID: atualizado.orcamentoID,
@@ -138,8 +192,9 @@ function OrcamentoCadastro() {
                     valor: atualizado.valor
                 };
                 setOrcamentos(prev => prev.map(o => o.orcamentoID === orcamentoID ? orcamentoMapeado : o));
+                setOriginalData(orcamentoMapeado);
                 setMessage({ type: 'success', text: 'Orçamento atualizado!' });
-            } else {
+            } else if (modo === 'criacao') {
                 const novo = await orcamentoService.criar(dados);
                 const novoMapeado = {
                     orcamentoID: novo.orcamentoID,
@@ -151,18 +206,14 @@ function OrcamentoCadastro() {
                 };
                 setOrcamentos(prev => {
                     const updated = [...prev, novoMapeado];
-                    setCurrentIndex(updated.length - 1);
+                    setTimeout(() => {
+                        selecionarOrcamento(novoMapeado, updated.length - 1);
+                    }, 0);
                     return updated;
                 });
-                setOrcamentoID(novoMapeado.orcamentoID);
-                setMovimento(novoMapeado.movimento);
-                setMovimentoDate(formatarDataParaInput(novoMapeado.movimento));
-                setIdPrestador(novoMapeado.idPrestador);
-                setEmpresaID(novoMapeado.empresaID);
-                setDescricao(novoMapeado.descricao);
-                setValor(novoMapeado.valor);
                 setMessage({ type: 'success', text: 'Orçamento cadastrado!' });
             }
+            setModo('visualizacao');
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
@@ -183,7 +234,15 @@ function OrcamentoCadastro() {
             const filtered = orcamentos.filter(o => o.orcamentoID !== orcamentoID);
             setOrcamentos(filtered);
             if (filtered.length === 0) {
-                clearForm();
+                setOrcamentoID('');
+                setMovimento('');
+                setMovimentoDate('');
+                setIdPrestador('');
+                setEmpresaID('');
+                setDescricao('');
+                setValor('');
+                setCurrentIndex(-1);
+                setOriginalData({});
             } else {
                 let newIndex = currentIndex;
                 if (newIndex >= filtered.length) {
@@ -198,7 +257,9 @@ function OrcamentoCadastro() {
                 setEmpresaID(current.empresaID);
                 setDescricao(current.descricao);
                 setValor(current.valor);
+                setOriginalData({ ...current });
             }
+            setModo('visualizacao');
             setMessage({ type: 'success', text: 'Orçamento excluído!' });
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
@@ -207,45 +268,23 @@ function OrcamentoCadastro() {
         }
     };
 
-    const clearForm = () => {
-        setOrcamentoID('');
-        setMovimento('');
-        setMovimentoDate('');
-        setIdPrestador('');
-        setEmpresaID('');
-        setDescricao('');
-        setValor('');
-        setCurrentIndex(-1);
-        setMessage({ type: '', text: '' });
-    };
-
     const handleNext = () => {
+        if (modo !== 'visualizacao') return;
         if (currentIndex < orcamentos.length - 1) {
             const next = orcamentos[currentIndex + 1];
-            setCurrentIndex(currentIndex + 1);
-            setOrcamentoID(next.orcamentoID);
-            setMovimento(next.movimento);
-            setMovimentoDate(formatarDataParaInput(next.movimento));
-            setIdPrestador(next.idPrestador);
-            setEmpresaID(next.empresaID);
-            setDescricao(next.descricao);
-            setValor(next.valor);
+            selecionarOrcamento(next, currentIndex + 1);
         }
     };
 
     const handlePrevious = () => {
+        if (modo !== 'visualizacao') return;
         if (currentIndex > 0) {
             const prev = orcamentos[currentIndex - 1];
-            setCurrentIndex(currentIndex - 1);
-            setOrcamentoID(prev.orcamentoID);
-            setMovimento(prev.movimento);
-            setMovimentoDate(formatarDataParaInput(prev.movimento));
-            setIdPrestador(prev.idPrestador);
-            setEmpresaID(prev.empresaID);
-            setDescricao(prev.descricao);
-            setValor(prev.valor);
+            selecionarOrcamento(prev, currentIndex - 1);
         }
     };
+
+    const camposDesabilitados = modo === 'visualizacao' || loading;
 
     const formatarValor = (value) => {
         const numero = parseFloat(value);
@@ -271,17 +310,34 @@ function OrcamentoCadastro() {
                     <span>💰</span>
                     <h2>Orçamentos</h2>
                 </div>
-                {orcamentos.length > 0 && (
+                {orcamentos.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
-                        <button className={styles.navButton} onClick={handlePrevious} disabled={currentIndex <= 0 || loading}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handlePrevious}
+                            disabled={currentIndex <= 0 || loading}
+                        >
                             ◀
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
                         </span>
-                        <button className={styles.navButton} onClick={handleNext} disabled={currentIndex >= orcamentos.length - 1 || loading}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleNext}
+                            disabled={currentIndex >= orcamentos.length - 1 || loading}
+                        >
                             ▶
                         </button>
+                    </div>
+                )}
+                {(modo === 'edicao' || modo === 'criacao') && (
+                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                        <button className={styles.navButton} disabled>◀</button>
+                        <span className={styles.positionIndicator}>
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
+                        </span>
+                        <button className={styles.navButton} disabled>▶</button>
                     </div>
                 )}
             </div>
@@ -295,13 +351,17 @@ function OrcamentoCadastro() {
                         value={searchTerm || ''}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading}
+                        disabled={loading || modo !== 'visualizacao'}
                     />
-                    <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
+                    <button
+                        className={styles.searchButton}
+                        onClick={handleSearch}
+                        disabled={loading || modo !== 'visualizacao'}
+                    >
                         <span>🔍</span> Pesquisar
                     </button>
                 </div>
-                {searchResults.length > 0 && (
+                {searchResults.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.resultsList}>
                         {searchResults.map(orc => (
                             <div key={orc.orcamentoID} className={styles.resultItem} onClick={() => selectOrcamento(orc)}>
@@ -342,7 +402,7 @@ function OrcamentoCadastro() {
                                         setMovimento('');
                                     }
                                 }}
-                                disabled={loading}
+                                disabled={camposDesabilitados}
                             />
                             {movimento && (
                                 <span className={styles.dateDisplay}>
@@ -360,12 +420,12 @@ function OrcamentoCadastro() {
                                 value={idPrestador || ''}
                                 onChange={(e) => setIdPrestador(e.target.value)}
                                 placeholder="Código do prestador"
-                                disabled={loading}
+                                disabled={camposDesabilitados}
                             />
                             <button
                                 className={styles.searchIconButton}
                                 onClick={() => setModalPrestadorAberto(true)}
-                                disabled={loading}
+                                disabled={loading || camposDesabilitados}
                                 type="button"
                                 title="Pesquisar prestador"
                             >
@@ -382,12 +442,12 @@ function OrcamentoCadastro() {
                                 value={empresaID || ''}
                                 onChange={(e) => setEmpresaID(e.target.value)}
                                 placeholder="Código da empresa"
-                                disabled={loading}
+                                disabled={camposDesabilitados}
                             />
                             <button
                                 className={styles.searchIconButton}
                                 onClick={() => setModalEmpresaAberto(true)}
-                                disabled={loading}
+                                disabled={loading || camposDesabilitados}
                                 type="button"
                                 title="Pesquisar empresa"
                             >
@@ -402,7 +462,7 @@ function OrcamentoCadastro() {
                             value={descricao || ''}
                             onChange={(e) => setDescricao(e.target.value)}
                             placeholder="Descrição do orçamento"
-                            disabled={loading}
+                            disabled={camposDesabilitados}
                             rows={4}
                         />
                     </div>
@@ -415,21 +475,73 @@ function OrcamentoCadastro() {
                             value={valor || ''}
                             onChange={(e) => setValor(e.target.value)}
                             placeholder="0,00"
-                            disabled={loading}
+                            disabled={camposDesabilitados}
                         />
                     </div>
                 </div>
 
                 <div className={styles.buttonGroup}>
-                    <button className={`${styles.btn} ${styles.btnSave}`} onClick={handleSave} disabled={loading}>
-                        <span>💾</span> {orcamentoID ? 'Atualizar' : 'Salvar'}
-                    </button>
-                    <button className={`${styles.btn} ${styles.btnDelete}`} onClick={handleDelete} disabled={loading}>
-                        <span>🗑️</span> Excluir
-                    </button>
-                    <button className={`${styles.btn} ${styles.btnClear}`} onClick={clearForm} disabled={loading}>
-                        <span>🔄</span> Novo
-                    </button>
+                    {modo === 'visualizacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnEdit}`}
+                                onClick={handleEditar}
+                                disabled={loading || !orcamentoID}
+                            >
+                                <span>✏️</span> Editar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnNew}`}
+                                onClick={handleNovo}
+                                disabled={loading}
+                            >
+                                <span>➕</span> Novo
+                            </button>
+                        </>
+                    )}
+                    {modo === 'edicao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                            >
+                                <span>💾</span> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnDelete}`}
+                                onClick={handleDelete}
+                                disabled={loading || !orcamentoID}
+                            >
+                                <span>🗑️</span> Excluir
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                            >
+                                <span>❌</span> Cancelar
+                            </button>
+                        </>
+                    )}
+                    {modo === 'criacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                            >
+                                <span>💾</span> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                            >
+                                <span>❌</span> Cancelar
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {message.text && (

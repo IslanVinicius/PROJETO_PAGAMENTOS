@@ -13,6 +13,8 @@ function PrestadorCadastro() {
     const [searchResults, setSearchResults] = useState([]);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
+    const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
+    const [originalData, setOriginalData] = useState({});
 
     useEffect(() => {
         carregarPrestadores();
@@ -29,11 +31,23 @@ function PrestadorCadastro() {
                 cpf: item.cpf
             }));
             setPrestadores(prestadoresFormatados);
+            if (prestadoresFormatados.length > 0) {
+                selecionarPrestador(prestadoresFormatados[0], 0);
+            }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
             setLoading(false);
         }
+    };
+
+    const selecionarPrestador = (prestador, index) => {
+        setCurrentIndex(index);
+        setCodPrestador(prestador.id);
+        setNome(prestador.nome);
+        setCpf(prestador.cpf);
+        setOriginalData({ ...prestador });
+        setModo('visualizacao');
     };
 
     const handleSearch = () => {
@@ -54,12 +68,41 @@ function PrestadorCadastro() {
 
     const selectPrestador = (prestador) => {
         const index = prestadores.findIndex(p => p.id === prestador.id);
-        setCurrentIndex(index);
-        setCodPrestador(prestador.id);
-        setNome(prestador.nome);
-        setCpf(prestador.cpf);
+        selecionarPrestador(prestador, index);
         setSearchResults([]);
         setSearchTerm('');
+        setMessage({ type: '', text: '' });
+    };
+
+    const handleEditar = () => {
+        setOriginalData({ id: codPrestador, nome, cpf });
+        setModo('edicao');
+    };
+
+    const handleNovo = () => {
+        setOriginalData({});
+        setCodPrestador('');
+        setNome('');
+        setCpf('');
+        setModo('criacao');
+    };
+
+    const handleCancelar = () => {
+        if (modo === 'edicao' && originalData.id) {
+            setCodPrestador(originalData.id);
+            setNome(originalData.nome);
+            setCpf(originalData.cpf);
+        } else if (modo === 'criacao' && prestadores.length > 0 && currentIndex >= 0) {
+            const atual = prestadores[currentIndex];
+            setCodPrestador(atual.id);
+            setNome(atual.nome);
+            setCpf(atual.cpf);
+        } else if (modo === 'criacao' && prestadores.length === 0) {
+            setCodPrestador('');
+            setNome('');
+            setCpf('');
+        }
+        setModo('visualizacao');
         setMessage({ type: '', text: '' });
     };
 
@@ -69,14 +112,11 @@ function PrestadorCadastro() {
             return;
         }
 
-        const dados = {
-            nome: nome,
-            cpf: cpf
-        };
+        const dados = { nome, cpf };
 
         setLoading(true);
         try {
-            if (codPrestador) {
+            if (modo === 'edicao' && codPrestador) {
                 const atualizado = await prestadorService.atualizar(codPrestador, dados);
                 const prestadorMapeado = {
                     id: atualizado.cod_prestador,
@@ -84,8 +124,9 @@ function PrestadorCadastro() {
                     cpf: atualizado.cpf
                 };
                 setPrestadores(prev => prev.map(p => p.id === codPrestador ? prestadorMapeado : p));
+                setOriginalData(prestadorMapeado);
                 setMessage({ type: 'success', text: 'Prestador atualizado!' });
-            } else {
+            } else if (modo === 'criacao') {
                 const novo = await prestadorService.criar(dados);
                 const novoMapeado = {
                     id: novo.cod_prestador,
@@ -94,14 +135,14 @@ function PrestadorCadastro() {
                 };
                 setPrestadores(prev => {
                     const updated = [...prev, novoMapeado];
-                    setCurrentIndex(updated.length - 1);
+                    setTimeout(() => {
+                        selecionarPrestador(novoMapeado, updated.length - 1);
+                    }, 0);
                     return updated;
                 });
-                setCodPrestador(novoMapeado.id);
-                setNome(novoMapeado.nome);
-                setCpf(novoMapeado.cpf);
                 setMessage({ type: 'success', text: 'Prestador cadastrado!' });
             }
+            setModo('visualizacao');
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
@@ -122,7 +163,11 @@ function PrestadorCadastro() {
             const filtered = prestadores.filter(p => p.id !== codPrestador);
             setPrestadores(filtered);
             if (filtered.length === 0) {
-                clearForm();
+                setCodPrestador('');
+                setNome('');
+                setCpf('');
+                setCurrentIndex(-1);
+                setOriginalData({});
             } else {
                 let newIndex = currentIndex;
                 if (newIndex >= filtered.length) {
@@ -133,7 +178,9 @@ function PrestadorCadastro() {
                 setCodPrestador(current.id);
                 setNome(current.nome);
                 setCpf(current.cpf);
+                setOriginalData({ ...current });
             }
+            setModo('visualizacao');
             setMessage({ type: 'success', text: 'Prestador excluído!' });
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
@@ -142,33 +189,23 @@ function PrestadorCadastro() {
         }
     };
 
-    const clearForm = () => {
-        setCodPrestador('');
-        setNome('');
-        setCpf('');
-        setCurrentIndex(-1);
-        setMessage({ type: '', text: '' });
-    };
-
     const handleNext = () => {
+        if (modo !== 'visualizacao') return;
         if (currentIndex < prestadores.length - 1) {
             const next = prestadores[currentIndex + 1];
-            setCurrentIndex(currentIndex + 1);
-            setCodPrestador(next.id);
-            setNome(next.nome);
-            setCpf(next.cpf);
+            selecionarPrestador(next, currentIndex + 1);
         }
     };
 
     const handlePrevious = () => {
+        if (modo !== 'visualizacao') return;
         if (currentIndex > 0) {
             const prev = prestadores[currentIndex - 1];
-            setCurrentIndex(currentIndex - 1);
-            setCodPrestador(prev.id);
-            setNome(prev.nome);
-            setCpf(prev.cpf);
+            selecionarPrestador(prev, currentIndex - 1);
         }
     };
+
+    const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
         <div className={styles.container}>
@@ -177,50 +214,70 @@ function PrestadorCadastro() {
                     <span>👤</span>
                     <h2>Cadastro de Prestador</h2>
                 </div>
-                {prestadores.length > 0 && (
+                {prestadores.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
-                        <button className={styles.navButton} onClick={handlePrevious} disabled={currentIndex <= 0 || loading}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handlePrevious}
+                            disabled={currentIndex <= 0 || loading}
+                        >
                             ◀
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${prestadores.length}` : `0/${prestadores.length}`}
                         </span>
-                        <button className={styles.navButton} onClick={handleNext} disabled={currentIndex >= prestadores.length - 1 || loading}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleNext}
+                            disabled={currentIndex >= prestadores.length - 1 || loading}
+                        >
                             ▶
                         </button>
                     </div>
                 )}
-            </div>
-
-            <div className={styles.searchSection}>
-                <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Pesquisar por nome ou CPF..."
-                        value={searchTerm || ''}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading}
-                    />
-                    <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
-                        <span>🔍</span> Pesquisar
-                    </button>
-                </div>
-                {searchResults.length > 0 && (
-                    <div className={styles.resultsList}>
-                        {searchResults.map(prest => (
-                            <div key={prest.id} className={styles.resultItem} onClick={() => selectPrestador(prest)}>
-                                <div className={styles.resultItemInfo}>
-                                    <span className={styles.resultItemName}>{prest.nome}</span>
-                                    <span className={styles.resultItemDoc}>CPF: {prest.cpf}</span>
-                                </div>
-                                <span>👉</span>
-                            </div>
-                        ))}
+                {(modo === 'edicao' || modo === 'criacao') && (
+                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                        <button className={styles.navButton} disabled>◀</button>
+                        <span className={styles.positionIndicator}>
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${prestadores.length}` : `0/${prestadores.length}`}
+                        </span>
+                        <button className={styles.navButton} disabled>▶</button>
                     </div>
                 )}
             </div>
+
+            {/* Pesquisa visível apenas no modo visualização */}
+            {modo === 'visualizacao' && (
+                <div className={styles.searchSection}>
+                    <div className={styles.searchContainer}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="Pesquisar por nome ou CPF..."
+                            value={searchTerm || ''}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            disabled={loading}
+                        />
+                        <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
+                            <span>🔍</span> Pesquisar
+                        </button>
+                    </div>
+                    {searchResults.length > 0 && (
+                        <div className={styles.resultsList}>
+                            {searchResults.map(prest => (
+                                <div key={prest.id} className={styles.resultItem} onClick={() => selectPrestador(prest)}>
+                                    <div className={styles.resultItemInfo}>
+                                        <span className={styles.resultItemName}>{prest.nome}</span>
+                                        <span className={styles.resultItemDoc}>CPF: {prest.cpf}</span>
+                                    </div>
+                                    <span>👉</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>
@@ -235,7 +292,7 @@ function PrestadorCadastro() {
                             value={nome || ''}
                             onChange={(e) => setNome(e.target.value)}
                             placeholder="Digite o nome do prestador"
-                            disabled={loading}
+                            disabled={camposDesabilitados}
                         />
                     </div>
                     <div className={styles.formGroup}>
@@ -245,21 +302,73 @@ function PrestadorCadastro() {
                             value={cpf || ''}
                             onChange={(e) => setCpf(e.target.value)}
                             placeholder="000.000.000-00"
-                            disabled={loading}
+                            disabled={camposDesabilitados}
                         />
                     </div>
                 </div>
 
                 <div className={styles.buttonGroup}>
-                    <button className={`${styles.btn} ${styles.btnSave}`} onClick={handleSave} disabled={loading}>
-                        <span>💾</span> {codPrestador ? 'Atualizar' : 'Salvar'}
-                    </button>
-                    <button className={`${styles.btn} ${styles.btnDelete}`} onClick={handleDelete} disabled={loading}>
-                        <span>🗑️</span> Excluir
-                    </button>
-                    <button className={`${styles.btn} ${styles.btnClear}`} onClick={clearForm} disabled={loading}>
-                        <span>🔄</span> Novo
-                    </button>
+                    {modo === 'visualizacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnEdit}`}
+                                onClick={handleEditar}
+                                disabled={loading || !codPrestador}
+                            >
+                                <span>✏️</span> Editar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnNew}`}
+                                onClick={handleNovo}
+                                disabled={loading}
+                            >
+                                <span>➕</span> Novo
+                            </button>
+                        </>
+                    )}
+                    {modo === 'edicao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                            >
+                                <span>💾</span> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnDelete}`}
+                                onClick={handleDelete}
+                                disabled={loading || !codPrestador}
+                            >
+                                <span>🗑️</span> Excluir
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                            >
+                                <span>❌</span> Cancelar
+                            </button>
+                        </>
+                    )}
+                    {modo === 'criacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                            >
+                                <span>💾</span> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                            >
+                                <span>❌</span> Cancelar
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {message.text && (

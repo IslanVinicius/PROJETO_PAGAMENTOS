@@ -8,7 +8,7 @@ function SolicitacaoAprovacaoCadastro() {
     const [movimento, setMovimento] = useState('');
     const [movimentoDate, setMovimentoDate] = useState('');
     const [orcamentoId, setOrcamentoId] = useState('');
-    const [statusSolicitacao, setStatusSolicitacao] = useState(''); // Novo estado para status
+    const [statusSolicitacao, setStatusSolicitacao] = useState('');
 
     const [solicitacoes, setSolicitacoes] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
@@ -16,6 +16,8 @@ function SolicitacaoAprovacaoCadastro() {
     const [searchResults, setSearchResults] = useState([]);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
+    const [modo, setModo] = useState('visualizacao');
+    const [originalData, setOriginalData] = useState({});
 
     const [modalOrcamentoAberto, setModalOrcamentoAberto] = useState(false);
 
@@ -23,7 +25,6 @@ function SolicitacaoAprovacaoCadastro() {
     const formatarDataParaInput = (dataBR) => {
         if (!dataBR) return '';
         if (dataBR.includes('-') && dataBR.split('-')[0].length === 4) return dataBR;
-
         const partes = dataBR.split('/');
         if (partes.length === 3) {
             const [dia, mes, ano] = partes;
@@ -32,17 +33,12 @@ function SolicitacaoAprovacaoCadastro() {
         return '';
     };
 
-    // Função para definir a cor do status
     const getStatusColor = (status) => {
         switch(status?.toUpperCase()) {
-            case 'APROVADO':
-                return '#28a745'; // verde
-            case 'REJEITADO':
-                return '#dc3545'; // vermelho
-            case 'PENDENTE':
-                return '#ffc107'; // amarelo
-            default:
-                return '#6c757d'; // cinza
+            case 'APROVADO': return '#28a745';
+            case 'REJEITADO': return '#dc3545';
+            case 'PENDENTE': return '#ffc107';
+            default: return '#6c757d';
         }
     };
 
@@ -54,19 +50,32 @@ function SolicitacaoAprovacaoCadastro() {
         setLoading(true);
         try {
             const data = await solicitacaoAprovacaoService.listar();
-            console.log('Solicitações recebidas:', data);
             const solicitacoesFormatadas = data.map(item => ({
                 solicitacaoAprovacaoId: item.solicitacaoAprovacaold || item.solicitacaoAprovacaoId,
                 movimento: item.movimento,
                 orcamentoId: item.orcamentold || item.orcamentoId,
-                statusSolicitacao: item.statusSolicitacao || 'PENDENTE' // Valor padrão se não vier
+                statusSolicitacao: item.statusSolicitacao || 'PENDENTE'
             }));
             setSolicitacoes(solicitacoesFormatadas);
+            if (solicitacoesFormatadas.length > 0) {
+                selecionarSolicitacao(solicitacoesFormatadas[0], 0);
+            }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
             setLoading(false);
         }
+    };
+
+    const selecionarSolicitacao = (solicitacao, index) => {
+        setCurrentIndex(index);
+        setSolicitacaoAprovacaoId(solicitacao.solicitacaoAprovacaoId);
+        setMovimento(solicitacao.movimento);
+        setMovimentoDate(formatarDataParaInput(solicitacao.movimento));
+        setOrcamentoId(solicitacao.orcamentoId);
+        setStatusSolicitacao(solicitacao.statusSolicitacao);
+        setOriginalData({ ...solicitacao });
+        setModo('visualizacao');
     };
 
     const handleSearch = () => {
@@ -88,12 +97,7 @@ function SolicitacaoAprovacaoCadastro() {
 
     const selectSolicitacao = (solicitacao) => {
         const index = solicitacoes.findIndex(s => s.solicitacaoAprovacaoId === solicitacao.solicitacaoAprovacaoId);
-        setCurrentIndex(index);
-        setSolicitacaoAprovacaoId(solicitacao.solicitacaoAprovacaoId);
-        setMovimento(solicitacao.movimento);
-        setMovimentoDate(formatarDataParaInput(solicitacao.movimento));
-        setOrcamentoId(solicitacao.orcamentoId);
-        setStatusSolicitacao(solicitacao.statusSolicitacao); // Preenche o status
+        selecionarSolicitacao(solicitacao, index);
         setSearchResults([]);
         setSearchTerm('');
         setMessage({ type: '', text: '' });
@@ -103,23 +107,70 @@ function SolicitacaoAprovacaoCadastro() {
         setOrcamentoId(orcamentoId);
     };
 
+    const handleEditar = () => {
+        setOriginalData({
+            solicitacaoAprovacaoId,
+            movimento,
+            orcamentoId,
+            statusSolicitacao
+        });
+        setModo('edicao');
+    };
+
+    const handleNovo = () => {
+        setOriginalData({});
+        setSolicitacaoAprovacaoId('');
+        setMovimento('');
+        setMovimentoDate('');
+        setOrcamentoId('');
+        setStatusSolicitacao('');
+        setModo('criacao');
+    };
+
+    const handleCancelar = () => {
+        if (modo === 'edicao' && originalData.solicitacaoAprovacaoId) {
+            setSolicitacaoAprovacaoId(originalData.solicitacaoAprovacaoId);
+            setMovimento(originalData.movimento);
+            setMovimentoDate(formatarDataParaInput(originalData.movimento));
+            setOrcamentoId(originalData.orcamentoId);
+            setStatusSolicitacao(originalData.statusSolicitacao);
+        } else if (modo === 'criacao' && solicitacoes.length > 0 && currentIndex >= 0) {
+            const atual = solicitacoes[currentIndex];
+            setSolicitacaoAprovacaoId(atual.solicitacaoAprovacaoId);
+            setMovimento(atual.movimento);
+            setMovimentoDate(formatarDataParaInput(atual.movimento));
+            setOrcamentoId(atual.orcamentoId);
+            setStatusSolicitacao(atual.statusSolicitacao);
+        } else if (modo === 'criacao' && solicitacoes.length === 0) {
+            setSolicitacaoAprovacaoId('');
+            setMovimento('');
+            setMovimentoDate('');
+            setOrcamentoId('');
+            setStatusSolicitacao('');
+        }
+        setModo('visualizacao');
+        setMessage({ type: '', text: '' });
+    };
+
     const handleSave = async () => {
         if (!movimento || !orcamentoId) {
             setMessage({ type: 'error', text: 'Preencha todos os campos obrigatórios!' });
             return;
         }
 
-        // APENAS OS CAMPOS NECESSÁRIOS PARA O POST
         const dados = {
             movimento,
             orcamentoId: parseInt(orcamentoId, 10)
         };
 
-        console.log('Enviando dados:', dados);
+        // Inclui status apenas em modo edição
+        if (modo === 'edicao') {
+            dados.statusSolicitacao = statusSolicitacao;
+        }
 
         setLoading(true);
         try {
-            if (solicitacaoAprovacaoId) {
+            if (modo === 'edicao' && solicitacaoAprovacaoId) {
                 const atualizado = await solicitacaoAprovacaoService.atualizar(solicitacaoAprovacaoId, dados);
                 const solicitacaoMapeada = {
                     solicitacaoAprovacaoId: atualizado.solicitacaoAprovacaold || atualizado.solicitacaoAprovacaoId,
@@ -128,9 +179,9 @@ function SolicitacaoAprovacaoCadastro() {
                     statusSolicitacao: atualizado.statusSolicitacao || 'PENDENTE'
                 };
                 setSolicitacoes(prev => prev.map(s => s.solicitacaoAprovacaoId === solicitacaoAprovacaoId ? solicitacaoMapeada : s));
-                setStatusSolicitacao(solicitacaoMapeada.statusSolicitacao); // Atualiza o status exibido
+                setOriginalData(solicitacaoMapeada);
                 setMessage({ type: 'success', text: 'Solicitação atualizada!' });
-            } else {
+            } else if (modo === 'criacao') {
                 const novo = await solicitacaoAprovacaoService.criar(dados);
                 const novoMapeado = {
                     solicitacaoAprovacaoId: novo.solicitacaoAprovacaold || novo.solicitacaoAprovacaoId,
@@ -140,16 +191,14 @@ function SolicitacaoAprovacaoCadastro() {
                 };
                 setSolicitacoes(prev => {
                     const updated = [...prev, novoMapeado];
-                    setCurrentIndex(updated.length - 1);
+                    setTimeout(() => {
+                        selecionarSolicitacao(novoMapeado, updated.length - 1);
+                    }, 0);
                     return updated;
                 });
-                setSolicitacaoAprovacaoId(novoMapeado.solicitacaoAprovacaoId);
-                setMovimento(novoMapeado.movimento);
-                setMovimentoDate(formatarDataParaInput(novoMapeado.movimento));
-                setOrcamentoId(novoMapeado.orcamentoId);
-                setStatusSolicitacao(novoMapeado.statusSolicitacao);
                 setMessage({ type: 'success', text: 'Solicitação cadastrada!' });
             }
+            setModo('visualizacao');
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
@@ -170,12 +219,16 @@ function SolicitacaoAprovacaoCadastro() {
             const filtered = solicitacoes.filter(s => s.solicitacaoAprovacaoId !== solicitacaoAprovacaoId);
             setSolicitacoes(filtered);
             if (filtered.length === 0) {
-                clearForm();
+                setSolicitacaoAprovacaoId('');
+                setMovimento('');
+                setMovimentoDate('');
+                setOrcamentoId('');
+                setStatusSolicitacao('');
+                setCurrentIndex(-1);
+                setOriginalData({});
             } else {
                 let newIndex = currentIndex;
-                if (newIndex >= filtered.length) {
-                    newIndex = filtered.length - 1;
-                }
+                if (newIndex >= filtered.length) newIndex = filtered.length - 1;
                 const current = filtered[newIndex];
                 setCurrentIndex(newIndex);
                 setSolicitacaoAprovacaoId(current.solicitacaoAprovacaoId);
@@ -183,7 +236,9 @@ function SolicitacaoAprovacaoCadastro() {
                 setMovimentoDate(formatarDataParaInput(current.movimento));
                 setOrcamentoId(current.orcamentoId);
                 setStatusSolicitacao(current.statusSolicitacao);
+                setOriginalData({ ...current });
             }
+            setModo('visualizacao');
             setMessage({ type: 'success', text: 'Solicitação excluída!' });
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
@@ -192,43 +247,26 @@ function SolicitacaoAprovacaoCadastro() {
         }
     };
 
-    const clearForm = () => {
-        setSolicitacaoAprovacaoId('');
-        setMovimento('');
-        setMovimentoDate('');
-        setOrcamentoId('');
-        setStatusSolicitacao('');
-        setCurrentIndex(-1);
-        setMessage({ type: '', text: '' });
-    };
-
     const handleNext = () => {
+        if (modo !== 'visualizacao') return;
         if (currentIndex < solicitacoes.length - 1) {
             const next = solicitacoes[currentIndex + 1];
-            setCurrentIndex(currentIndex + 1);
-            setSolicitacaoAprovacaoId(next.solicitacaoAprovacaoId);
-            setMovimento(next.movimento);
-            setMovimentoDate(formatarDataParaInput(next.movimento));
-            setOrcamentoId(next.orcamentoId);
-            setStatusSolicitacao(next.statusSolicitacao);
+            selecionarSolicitacao(next, currentIndex + 1);
         }
     };
 
     const handlePrevious = () => {
+        if (modo !== 'visualizacao') return;
         if (currentIndex > 0) {
             const prev = solicitacoes[currentIndex - 1];
-            setCurrentIndex(currentIndex - 1);
-            setSolicitacaoAprovacaoId(prev.solicitacaoAprovacaoId);
-            setMovimento(prev.movimento);
-            setMovimentoDate(formatarDataParaInput(prev.movimento));
-            setOrcamentoId(prev.orcamentoId);
-            setStatusSolicitacao(prev.statusSolicitacao);
+            selecionarSolicitacao(prev, currentIndex - 1);
         }
     };
 
+    const camposDesabilitados = modo === 'visualizacao' || loading;
+
     return (
         <div className={styles.container}>
-            {/* Modal de pesquisa de orçamentos */}
             <ModalPesquisaOrcamento
                 isOpen={modalOrcamentoAberto}
                 onClose={() => setModalOrcamentoAberto(false)}
@@ -240,7 +278,7 @@ function SolicitacaoAprovacaoCadastro() {
                     <span>📋</span>
                     <h2>Solicitação de Aprovação</h2>
                 </div>
-                {solicitacoes.length > 0 && (
+                {solicitacoes.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
                         <button className={styles.navButton} onClick={handlePrevious} disabled={currentIndex <= 0 || loading}>
                             ◀
@@ -251,6 +289,15 @@ function SolicitacaoAprovacaoCadastro() {
                         <button className={styles.navButton} onClick={handleNext} disabled={currentIndex >= solicitacoes.length - 1 || loading}>
                             ▶
                         </button>
+                    </div>
+                )}
+                {(modo === 'edicao' || modo === 'criacao') && (
+                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                        <button className={styles.navButton} disabled>◀</button>
+                        <span className={styles.positionIndicator}>
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
+                        </span>
+                        <button className={styles.navButton} disabled>▶</button>
                     </div>
                 )}
             </div>
@@ -264,13 +311,17 @@ function SolicitacaoAprovacaoCadastro() {
                         value={searchTerm || ''}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading}
+                        disabled={loading || modo !== 'visualizacao'}
                     />
-                    <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
+                    <button
+                        className={styles.searchButton}
+                        onClick={handleSearch}
+                        disabled={loading || modo !== 'visualizacao'}
+                    >
                         <span>🔍</span> Pesquisar
                     </button>
                 </div>
-                {searchResults.length > 0 && (
+                {searchResults.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.resultsList}>
                         {searchResults.map(sol => (
                             <div key={sol.solicitacaoAprovacaoId} className={styles.resultItem} onClick={() => selectSolicitacao(sol)}>
@@ -311,7 +362,7 @@ function SolicitacaoAprovacaoCadastro() {
                                         setMovimento('');
                                     }
                                 }}
-                                disabled={loading}
+                                disabled={camposDesabilitados}
                             />
                             {movimento && (
                                 <span className={styles.dateDisplay}>
@@ -321,7 +372,6 @@ function SolicitacaoAprovacaoCadastro() {
                         </div>
                     </div>
 
-                    {/* Campo ORÇAMENTO ID com lupa */}
                     <div className={styles.formGroup}>
                         <label>ID ORÇAMENTO *</label>
                         <div className={styles.inputGroup}>
@@ -330,12 +380,12 @@ function SolicitacaoAprovacaoCadastro() {
                                 value={orcamentoId || ''}
                                 onChange={(e) => setOrcamentoId(e.target.value)}
                                 placeholder="Código do orçamento"
-                                disabled={loading}
+                                disabled={camposDesabilitados}
                             />
                             <button
                                 className={styles.searchIconButton}
                                 onClick={() => setModalOrcamentoAberto(true)}
-                                disabled={loading}
+                                disabled={loading || camposDesabilitados}
                                 type="button"
                                 title="Pesquisar orçamento"
                             >
@@ -344,39 +394,104 @@ function SolicitacaoAprovacaoCadastro() {
                         </div>
                     </div>
 
-                    {/* Campo STATUS - SOMENTE LEITURA */}
+                    {/* Campo STATUS condicional */}
                     <div className={styles.formGroup}>
                         <label>STATUS</label>
-                        <div
-                            className={styles.statusDisplay}
-                            style={{
-                                backgroundColor: getStatusColor(statusSolicitacao),
-                                color: 'white',
-                                padding: '10px var(--spacing-md)',
-                                borderRadius: 'var(--border-radius-sm)',
-                                fontWeight: 'bold',
-                                textAlign: 'center',
-                                height: '45px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            {statusSolicitacao || '---'}
-                        </div>
+                        {modo === 'edicao' ? (
+                            <select
+                                className={styles.statusSelect}
+                                value={statusSolicitacao}
+                                onChange={(e) => setStatusSolicitacao(e.target.value)}
+                                disabled={loading}
+                            >
+                                <option value="PENDENTE">PENDENTE</option>
+                                <option value="APROVADO">APROVADO</option>
+                                <option value="REJEITADO">REJEITADO</option>
+                            </select>
+                        ) : (
+                            <div
+                                className={styles.statusDisplay}
+                                style={{
+                                    backgroundColor: getStatusColor(statusSolicitacao),
+                                    color: 'white',
+                                    padding: '10px var(--spacing-md)',
+                                    borderRadius: 'var(--border-radius-sm)',
+                                    fontWeight: 'bold',
+                                    textAlign: 'center',
+                                    height: '45px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                {statusSolicitacao || '---'}
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className={styles.buttonGroup}>
-                    <button className={`${styles.btn} ${styles.btnSave}`} onClick={handleSave} disabled={loading}>
-                        <span>💾</span> {solicitacaoAprovacaoId ? 'Atualizar' : 'Salvar'}
-                    </button>
-                    <button className={`${styles.btn} ${styles.btnDelete}`} onClick={handleDelete} disabled={loading}>
-                        <span>🗑️</span> Excluir
-                    </button>
-                    <button className={`${styles.btn} ${styles.btnClear}`} onClick={clearForm} disabled={loading}>
-                        <span>🔄</span> Novo
-                    </button>
+                    {modo === 'visualizacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnEdit}`}
+                                onClick={handleEditar}
+                                disabled={loading || !solicitacaoAprovacaoId}
+                            >
+                                <span>✏️</span> Editar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnNew}`}
+                                onClick={handleNovo}
+                                disabled={loading}
+                            >
+                                <span>➕</span> Novo
+                            </button>
+                        </>
+                    )}
+                    {modo === 'edicao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                            >
+                                <span>💾</span> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnDelete}`}
+                                onClick={handleDelete}
+                                disabled={loading || !solicitacaoAprovacaoId}
+                            >
+                                <span>🗑️</span> Excluir
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                            >
+                                <span>❌</span> Cancelar
+                            </button>
+                        </>
+                    )}
+                    {modo === 'criacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                            >
+                                <span>💾</span> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                            >
+                                <span>❌</span> Cancelar
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {message.text && (

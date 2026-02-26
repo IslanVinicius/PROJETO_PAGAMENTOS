@@ -273,3 +273,30 @@
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
+.btnEdit {
+    background-color: var(--primary-button);
+    color: white;
+}
+
+.btnEdit:hover {
+    background-color: var(--primary-button-hover);
+}
+
+.btnNew {
+    background-color: var(--success);
+    color: white;
+}
+
+.btnNew:hover {
+    background-color: #218838;
+}
+
+.btnCancel {
+    background-color: var(--text-secondary);
+    color: white;
+}
+
+.btnCancel:hover {
+    background-color: #5a6268;
+}

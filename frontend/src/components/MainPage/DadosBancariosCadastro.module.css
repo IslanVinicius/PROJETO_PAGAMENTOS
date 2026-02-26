@@ -337,3 +337,30 @@ input[type=number] {
     cursor: not-allowed;
     opacity: 0.5;
 }
+
+.btnEdit {
+    background-color: var(--primary-button);
+    color: white;
+}
+
+.btnEdit:hover {
+    background-color: var(--primary-button-hover);
+}
+
+.btnNew {
+    background-color: var(--success);
+    color: white;
+}
+
+.btnNew:hover {
+    background-color: #218838;
+}
+
+.btnCancel {
+    background-color: var(--text-secondary);
+    color: white;
+}
+
+.btnCancel:hover {
+    background-color: #5a6268;
+}
