@@ -1,8 +1,8 @@
 .container {
-    background-color: var(--primary-card);
+    background-color: #ffffff;
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-xl);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 8px 20px rgba(149, 82, 81, 0.15);
     max-width: 1000px;
     margin: 0 auto;
 }
@@ -18,7 +18,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: var(--text-primary);
+    color: #4a2c2c; /* marsala escuro */
     font-size: 24px;
     font-weight: bold;
 }
@@ -34,7 +34,7 @@
     height: 40px;
     border: none;
     border-radius: var(--border-radius-md);
-    background-color: var(--primary-button);
+    background-color: #955251; /* marsala principal */
     color: white;
     font-size: 18px;
     cursor: pointer;
@@ -45,11 +45,11 @@
 }
 
 .navButton:hover:not(:disabled) {
-    background-color: var(--primary-button-hover);
+    background-color: #6d3b3a; /* marsala mais escuro */
 }
 
 .navButton:disabled {
-    background-color: var(--text-secondary);
+    background-color: #cccccc;
     cursor: not-allowed;
     opacity: 0.5;
 }
@@ -59,16 +59,16 @@
     height: 40px;
     display: flex;
     align-items: center;
-    background-color: var(--primary-input);
+    background-color: #f5f0f0; /* off-white com tom marsala */
     border-radius: var(--border-radius-md);
-    color: var(--text-primary);
+    color: #4a2c2c;
     font-weight: 600;
 }
 
 .searchSection {
     margin-bottom: var(--spacing-xl);
     padding: var(--spacing-lg);
-    background-color: var(--primary-input);
+    background-color: #faf7f7;
     border-radius: var(--border-radius-md);
 }
 
@@ -81,22 +81,22 @@
     flex: 1;
     height: 45px;
     padding: 0 var(--spacing-md);
-    border: none;
+    border: 1px solid #e0d6d6;
     border-radius: var(--border-radius-sm);
     background-color: white;
-    color: var(--text-primary);
+    color: #333;
     font-size: 14px;
     outline: none;
 }
 
 .searchInput:focus {
-    border: 2px solid var(--primary-button);
+    border: 2px solid #955251;
 }
 
 .searchButton {
     height: 45px;
     padding: 0 var(--spacing-xl);
-    background-color: var(--primary-button);
+    background-color: #955251;
     color: white;
     border: none;
     border-radius: var(--border-radius-sm);
@@ -109,7 +109,7 @@
 }
 
 .searchButton:hover {
-    background-color: var(--primary-button-hover);
+    background-color: #6d3b3a;
 }
 
 .resultsList {
@@ -119,6 +119,7 @@
     background-color: white;
     border-radius: var(--border-radius-sm);
     padding: var(--spacing-sm);
+    border: 1px solid #e0d6d6;
 }
 
 .resultItem {
@@ -132,7 +133,7 @@
 }
 
 .resultItem:hover {
-    background-color: var(--primary-input);
+    background-color: #f5f0f0;
 }
 
 .resultItemInfo {
@@ -143,12 +144,12 @@
 
 .resultItemName {
     font-weight: bold;
-    color: var(--text-primary);
+    color: #4a2c2c;
 }
 
 .resultItemDoc {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: #777;
 }
 
 .form {
@@ -171,7 +172,7 @@
 
 .formGroup label {
     font-weight: 600;
-    color: var(--text-primary);
+    color: #4a2c2c;
     font-size: 14px;
     text-transform: uppercase;
 }
@@ -180,10 +181,10 @@
 .formGroup select {
     height: 45px;
     padding: 0 var(--spacing-md);
-    border: 2px solid var(--primary-input);
+    border: 1px solid #e0d6d6;
     border-radius: var(--border-radius-sm);
     background-color: white;
-    color: var(--text-primary);
+    color: #333;
     font-size: 14px;
     outline: none;
     transition: 0.3s;
@@ -191,19 +192,20 @@
 
 .formGroup input:focus,
 .formGroup select:focus {
-    border-color: var(--primary-button);
+    border-color: #955251;
+    box-shadow: 0 0 0 3px rgba(149, 82, 81, 0.2);
 }
 
 .formGroup input:disabled,
 .formGroup select:disabled {
-    background-color: var(--primary-input);
-    color: var(--text-secondary);
+    background-color: #f5f5f5;
+    color: #aaa;
     cursor: not-allowed;
 }
 
 .idField input {
-    background-color: var(--primary-input);
-    color: var(--text-secondary);
+    background-color: #f5f0f0;
+    color: #4a2c2c;
     font-weight: 600;
 }
 
@@ -212,7 +214,7 @@
     gap: var(--spacing-md);
     margin-top: var(--spacing-xl);
     padding-top: var(--spacing-xl);
-    border-top: 2px solid var(--primary-input);
+    border-top: 2px solid #e0d6d6;
 }
 
 .btn {
@@ -228,33 +230,65 @@
     gap: 8px;
     justify-content: center;
     flex: 1;
+    font-size: 14px;
 }
 
 .btnSave {
-    background-color: var(--success);
+    background-color: #955251;
     color: white;
 }
 
 .btnSave:hover {
-    background-color: #218838;
+    background-color: #6d3b3a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(149, 82, 81, 0.3);
 }
 
 .btnDelete {
-    background-color: var(--danger);
+    background-color: #b33c3c;
     color: white;
 }
 
 .btnDelete:hover {
-    background-color: #dc3545;
+    background-color: #942c2c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(180, 60, 60, 0.3);
 }
 
 .btnClear {
-    background-color: var(--text-secondary);
+    background-color: #7a7a7a;
     color: white;
 }
 
 .btnClear:hover {
-    background-color: #5a6268;
+    background-color: #5e5e5e;
+}
+
+.btnEdit {
+    background-color: #955251;
+    color: white;
+}
+
+.btnEdit:hover {
+    background-color: #6d3b3a;
+}
+
+.btnNew {
+    background-color: #955251;
+    color: white;
+}
+
+.btnNew:hover {
+    background-color: #6d3b3a;
+}
+
+.btnCancel {
+    background-color: #7a7a7a;
+    color: white;
+}
+
+.btnCancel:hover {
+    background-color: #5e5e5e;
 }
 
 .message {
@@ -266,15 +300,15 @@
 }
 
 .success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    background-color: #d9f0e1;
+    color: #2d6a4f;
+    border: 1px solid #a8e0bb;
 }
 
 .error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: #ffe6e6;
+    color: #b33c3c;
+    border: 1px solid #ffb3b3;
 }
 
 /* Ajuste para campos de número */
@@ -288,21 +322,6 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
-/* Grid responsivo */
-@media (max-width: 768px) {
-    .formGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .buttonGroup {
-        flex-direction: column;
-    }
-
-    .header {
-        flex-direction: column;
-        gap: var(--spacing-md);
-    }
-}
 .inputGroup {
     display: flex;
     gap: var(--spacing-sm);
@@ -318,7 +337,7 @@ input[type=number] {
     height: 45px;
     border: none;
     border-radius: var(--border-radius-sm);
-    background-color: var(--primary-button);
+    background-color: #955251;
     color: white;
     font-size: 20px;
     cursor: pointer;
@@ -329,38 +348,27 @@ input[type=number] {
 }
 
 .searchIconButton:hover {
-    background-color: var(--primary-button-hover);
+    background-color: #6d3b3a;
 }
 
 .searchIconButton:disabled {
-    background-color: var(--text-secondary);
+    background-color: #cccccc;
     cursor: not-allowed;
     opacity: 0.5;
 }
 
-.btnEdit {
-    background-color: var(--primary-button);
-    color: white;
-}
+/* Responsividade */
+@media (max-width: 768px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
 
-.btnEdit:hover {
-    background-color: var(--primary-button-hover);
-}
+    .buttonGroup {
+        flex-direction: column;
+    }
 
-.btnNew {
-    background-color: var(--success);
-    color: white;
-}
-
-.btnNew:hover {
-    background-color: #218838;
-}
-
-.btnCancel {
-    background-color: var(--text-secondary);
-    color: white;
-}
-
-.btnCancel:hover {
-    background-color: #5a6268;
+    .header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
 }

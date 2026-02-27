@@ -1,5 +1,8 @@
 package org.example.pagamentos.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,49 +33,43 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String authHeader =
-                request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null
-                || !authHeader.startsWith("Bearer ")) {
-
+        // Se não tiver header Authorization ou não começar com "Bearer ", continua sem autenticação
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = authHeader.substring(7);
-        String username =
-                jwtService.extractUsername(token);
+        String username = null;
 
-        if (username != null &&
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication() == null) {
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (ExpiredJwtException e) {
+            // Token expirado - apenas log e segue sem autenticar
+            logger.warn("Token JWT expirado: " + e.getMessage());
+        } catch (MalformedJwtException | SignatureException e) {
+            // Token malformado ou assinatura inválida
+            logger.warn("Token JWT inválido: " + e.getMessage());
+        } catch (Exception e) {
+            // Outros erros
+            logger.error("Erro ao processar token JWT: " + e.getMessage());
+        }
 
-            UserDetails user =
-                    userDetailsService
-                            .loadUserByUsername(username);
+        // Se conseguiu extrair o username e não há autenticação no contexto, tenta validar
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails user = userDetailsService.loadUserByUsername(username);
 
             if (jwtService.isValid(token, user)) {
-
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                user,
-                                null,
-                                user.getAuthorities()
-                        );
-
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
-
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authToken);
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
+        // Continua a cadeia de filtros, mesmo se não autenticou
         filterChain.doFilter(request, response);
     }
 }

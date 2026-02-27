@@ -7,6 +7,7 @@ import DadosBancariosCadastro from "./DadosBancariosCadastro";
 import OrcamentoCadastro from "./OrcamentoCadastro";
 import SolicitacaoAprovacaoCadastro from "./SolicitacaoAprovacaoCadastro";
 import AprovacaoCadastro from "./AprovacaoCadastro";
+import UserCadastro from "./UserCadastro.jsx"
 import styles from "./MainPage.module.css";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -23,7 +24,8 @@ function MainPage() {
             "dadosBancarios",
             "orcamento",
             "pedidoAprovacao",
-            "aprovacao"
+            "aprovacao",
+            "usuario"
         ],
         ROLE_SOLICITANTE: ["prestador", "orcamento"],
         ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao"],
@@ -75,6 +77,8 @@ function MainPage() {
 
             case "aprovacao":
                 return <AprovacaoCadastro />;
+            case "usuario":
+                return <UserCadastro />;
 
             default:
                 return (

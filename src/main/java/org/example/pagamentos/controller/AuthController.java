@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -61,6 +62,35 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUsuario(@PathVariable Long id) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(()-> new RuntimeException("Usuário não encontrado"));
+        return ResponseEntity.ok().body(usuario);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<?>>  getUsuarios() {
+        return ResponseEntity.ok().body(usuarioRepository.findAll());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUsuario(@PathVariable Long id) {
+        usuarioRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUsuario(@PathVariable Long id, @RequestBody RegisterRequest registerRequest) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(()-> new RuntimeException("Usuário não encontrado"));
+
+        usuario.setUsername(registerRequest.getUsername());
+        usuario.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        usuario.setRole(registerRequest.getRole());
+        usuarioRepository.save(usuario);
+
+        return ResponseEntity.ok().body(usuario);
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -87,7 +117,8 @@ public class AuthController {
 
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok("Usuário cadastrado com sucesso");
+       return ResponseEntity.ok(
+                Map.of("mensagem", "Usuário cadastrado com sucesso"));
     }
 
 

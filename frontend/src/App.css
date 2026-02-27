@@ -1,4 +1,4 @@
-/* Adicione no início do seu arquivo CSS */
+/* App.css */
 
 * {
   margin: 0;
@@ -13,10 +13,9 @@ html, body, #root {
   padding: 0;
 }
 
-/* Fundo geral */
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #0D0D5C;
+  background-color: var(--primary-bg);
 }
 
 /* Centralização total */
@@ -31,10 +30,10 @@ body {
 /* Card */
 .card {
   width: 420px;
-  background-color: #EAEAEA;
+  background-color: var(--primary-card);
   padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
   text-align: center;
 }
 
@@ -50,8 +49,8 @@ body {
   gap: 8px;
 }
 
-.logotext{
-  color: #6B6B6B;
+.logotext {
+  color: var(--text-secondary);
 }
 
 /* Inputs */
@@ -60,33 +59,38 @@ body {
   height: 45px;
   margin-bottom: 20px;
   border: none;
-  border-radius: 10px;
-  background-color: #DCDCDC;
+  border-radius: var(--border-radius-md);
+  background-color: var(--primary-input);
   text-align: center;
   font-weight: 600;
   outline: none;
+  color: var(--text-primary);
+}
+
+.card input:focus {
+  border: 2px solid var(--primary-button); /* destaque ao focar */
 }
 
 /* Botão */
 .card button {
   width: 100%;
   height: 45px;
-  background-color: #4B4BFF;
+  background-color: var(--primary-button);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--border-radius-md);
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
 }
 
 .card button:hover {
-  background-color: #3F3FD6;
+  background-color: var(--primary-button-hover);
 }
 
 /* Footer */
 .footer {
   margin-top: 20px;
   font-size: 12px;
-  color: #6B6B6B;
+  color: var(--text-secondary);
 }

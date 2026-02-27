@@ -8,7 +8,7 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
   return (
     <div className={styles.sidebar}>
       <div className={styles.header}>
-        <div className={styles.logo}>Sistema Financeiro</div>
+        <div className={styles.logo}>Barra de pesquisa</div>
       </div>
 
       <div className={styles.menu}>
@@ -66,6 +66,14 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
               onClick={() => onPageChange("aprovacao")}
             >
               Aprovar Orçamento
+            </div>
+            <div
+              className={`${styles.menuItem} ${
+                  activePage === "usuario" ? styles.active : ""
+               }`}
+                onClick={() => onPageChange("usuario")}
+              >
+               Cadastro Usuário
             </div>
           </>
         )}

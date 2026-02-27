@@ -2,7 +2,7 @@
     display: flex;
     width: 100%;
     min-height: 100vh;
-    background-color: var(--primary-bg);
+    background-color: #4a2c2c; /* fundo marsala escuro para contraste com sidebar */
 }
 
 .content {
@@ -13,10 +13,10 @@
 }
 
 .card {
-    background-color: var(--primary-card);
+    background-color: #ffffff;
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-xl);
-    box-shadow: var(--box-shadow);
+    box-shadow: 0 8px 20px rgba(149, 82, 81, 0.15);
     max-width: 800px;
     margin: 0 auto;
 }
@@ -26,19 +26,17 @@
     align-items: center;
     gap: 12px;
     margin-bottom: var(--spacing-xl);
-    color: var(--text-primary);
+    color: #4a2c2c;
     font-size: 24px;
     font-weight: bold;
 }
-
-/* ... estilos existentes ... */
 
 .contentBody {
     margin-top: var(--spacing-lg);
 }
 
 .contentBody p {
-    color: var(--text-secondary);
+    color: #666;
     line-height: 1.6;
 }
 
@@ -57,7 +55,7 @@
 
 .formGroup label {
     font-weight: 600;
-    color: var(--text-primary);
+    color: #4a2c2c;
     font-size: 14px;
 }
 
@@ -65,14 +63,17 @@
 .formGroup select,
 .formGroup textarea {
     padding: var(--spacing-sm);
-    border: 1px solid var(--primary-input);
+    border: 1px solid #e0d6d6;
     border-radius: var(--border-radius-sm);
     font-size: 14px;
+    background-color: white;
+    color: #333;
 }
 
 .formGroup input:focus,
 .formGroup select:focus,
 .formGroup textarea:focus {
     outline: none;
-    border-color: var(--primary-button);
+    border-color: #955251;
+    box-shadow: 0 0 0 3px rgba(149, 82, 81, 0.2);
 }

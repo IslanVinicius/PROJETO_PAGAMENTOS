@@ -1,31 +1,29 @@
 :root {
-    /* Cores principais (já existentes) */
-    --primary-bg: #0D0D5C;
-    --primary-card: #EAEAEA;
-    --primary-input: #DCDCDC;
-    --primary-button: #4B4BFF;
-    --primary-button-hover: #3F3FD6;
-    --text-primary: #0D0D5C;
-    --text-secondary: #6B6B6B;
-    --danger: #FF4B4B;
+    /* Cores principais - Marsala e Branco */
+    --primary-bg: #F8F5F2;        /* Fundo geral suave, quase branco com tom quente */
+    --primary-card: #FFFFFF;       /* Cards brancos */
+    --primary-input: #F0F0F0;      /* Inputs com fundo levemente cinza */
+    --primary-button: #8B4C4C;     /* Marsala principal */
+    --primary-button-hover: #6A3A3A; /* Marsala mais escuro */
+    --text-primary: #4A4A4A;       /* Texto principal cinza escuro */
+    --text-secondary: #6C6C6C;     /* Texto secundário */
+    --danger: #D9534F;             /* Vermelho (mantido) */
+    --success: #5CB85C;            /* Verde (mantido) */
+    --warning: #F0AD4E;            /* Laranja (mantido) */
+    --info: #5BC0DE;               /* Azul claro (mantido) */
 
-    /* Novas cores para categorias */
-    --success: #28a745;
-    --warning: #ffc107;
-    --info: #17a2b8;
-
-    /* Espaçamentos (já existem) */
+    /* Espaçamentos */
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 15px;
     --spacing-lg: 20px;
     --spacing-xl: 30px;
 
-    /* Bordas (já existem) */
-    --border-radius-sm: 10px;
+    /* Bordas */
+    --border-radius-sm: 8px;       /* Ajustei para um pouco menor, mais moderno */
     --border-radius-md: 12px;
     --border-radius-lg: 20px;
 
-    /* Sombras (já existem) */
-    --box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+    /* Sombras */
+    --box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
 }
