@@ -1,0 +1,385 @@
+/* Layout Simples e Fácil de Visualizar */
+
+.container {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 100px);
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+/* SIDEBAR - LISTA */
+.sidebar {
+    width: 350px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.sidebarHeader h3 {
+    margin: 0;
+    color: #955251;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.btnNewSmall {
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btnNewSmall:hover {
+    background: #229954;
+    transform: scale(1.1);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #955251;
+    box-shadow: 0 0 0 3px rgba(149, 82, 81, 0.1);
+}
+
+.tableContainer {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table thead {
+    background: #955251;
+    color: white;
+    position: sticky;
+    top: 0;
+}
+
+.table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #6d3b3a;
+}
+
+.tableRow {
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: all 0.2s ease;
+}
+
+.tableRow:hover {
+    background: #f9f9f9;
+}
+
+.tableRow.active {
+    background: #955251;
+    color: white;
+}
+
+.tableRow.active:hover {
+    background: #6d3b3a;
+}
+
+.tableRow td {
+    padding: 12px;
+}
+
+.nameCel {
+    font-weight: 600;
+}
+
+.cnpjCell {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.emptyMessage {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+}
+
+/* MAIN CONTENT */
+.mainContent {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.detailsCard {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    background: linear-gradient(135deg, #955251 0%, #6d3b3a 100%);
+    color: white;
+    padding: 20px;
+    border-bottom: 3px solid #6d3b3a;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.message {
+    padding: 12px 20px;
+    margin: 0;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border-bottom-color: #28a745;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border-bottom-color: #dc3545;
+}
+
+.content {
+    padding: 30px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.formGroup input {
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #955251;
+    box-shadow: 0 0 0 3px rgba(149, 82, 81, 0.1);
+}
+
+.formGroup input:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.actions {
+    padding: 20px 30px;
+    background: #f9f9f9;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #eee;
+    justify-content: flex-end;
+}
+
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btnEdit {
+    background: #3498db;
+    color: white;
+}
+
+.btnEdit:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.btnDelete {
+    background: #e74c3c;
+    color: white;
+}
+
+.btnDelete:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btnNew {
+    background: #27ae60;
+    color: white;
+}
+
+.btnNew:hover {
+    background: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btnSave {
+    background: #955251;
+    color: white;
+}
+
+.btnSave:hover:not(:disabled) {
+    background: #6d3b3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(149, 82, 81, 0.3);
+}
+
+.btnSave:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnCancel {
+    background: #95a5a6;
+    color: white;
+}
+
+.btnCancel:hover {
+    background: #7f8c8d;
+}
+
+.emptyCard {
+    background: white;
+    border-radius: 12px;
+    padding: 60px 30px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.emptyCard h3 {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* RESPONSIVO */
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar {
+        width: 100%;
+        max-height: 250px;
+    }
+
+    .content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .sidebar {
+        padding: 15px;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .actions {
+        padding: 15px 20px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+}
+
+/* Scrollbar customizado */
+.tableContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+    background: #955251;
+    border-radius: 10px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb:hover {
+    background: #6d3b3a;
+}
+
