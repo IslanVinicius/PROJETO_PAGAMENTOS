@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +27,9 @@ public class OrcamentoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrcamentoDTO>> listarTodos() {
+    public ResponseEntity<List<OrcamentoDTO>> listarTodos(@AuthenticationPrincipal UserDetails userDetails) {
+        System.out.println(userDetails.getUsername());
+
         return ResponseEntity.ok().body(orcamentoService.listarTodos());
     }
 

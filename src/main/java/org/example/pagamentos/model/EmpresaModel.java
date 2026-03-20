@@ -24,4 +24,9 @@ public class EmpresaModel {
 
     @Column(name = "RAZAO") @Getter @Setter
     String razao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criador_id", nullable = false)
+    @Getter @Setter
+    Usuario usuarioCriador;
 }

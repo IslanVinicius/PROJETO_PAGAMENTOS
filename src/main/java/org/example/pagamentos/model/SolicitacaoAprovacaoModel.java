@@ -33,6 +33,10 @@ public class SolicitacaoAprovacaoModel {
     @OneToOne(mappedBy = "solicitacaoAprovacao")
     private PagamentoModel  pagamento;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criador_id", nullable = false)
+    private Usuario usuarioCriador;
+
     @PrePersist
     public void definirStatusPadrao() {
         if (statusSolicitacao == null) {

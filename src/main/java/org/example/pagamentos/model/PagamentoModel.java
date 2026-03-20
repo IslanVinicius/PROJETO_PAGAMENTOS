@@ -32,4 +32,8 @@ public class PagamentoModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "DADOS_BANCARIO_ID", nullable = false)
     private Dados_BancariosModel dadosBancarios;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criador_id", nullable = false)
+    private Usuario usuarioCriador;
 }

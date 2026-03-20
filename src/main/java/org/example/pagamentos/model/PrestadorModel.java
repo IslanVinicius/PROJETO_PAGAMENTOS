@@ -27,4 +27,8 @@ public class PrestadorModel {
     @OneToOne(mappedBy = "prestadorModel", cascade = CascadeType.ALL)
     private Dados_BancariosModel dados_bancarios_model;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criador_id", nullable = false)
+    @Getter @Setter
+    private Usuario usuarioCriador;
 }

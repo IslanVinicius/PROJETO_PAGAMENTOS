@@ -1,8 +1,11 @@
 package org.example.pagamentos.service;
 
 import org.example.pagamentos.DTO.PrestadorDTO;
+import org.example.pagamentos.exception.AccessDeniedException;
 import org.example.pagamentos.model.PrestadorModel;
+import org.example.pagamentos.model.Usuario;
 import org.example.pagamentos.repository.PrestadorRepository;
+import org.example.pagamentos.security.AuthenticationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,42 +15,70 @@ import java.util.List;
 public class PrestadorService {
 
     private final PrestadorRepository prestadorRepository;
+    private final AuthenticationUtil authenticationUtil;
 
-    public PrestadorService(PrestadorRepository prestadorRepository) {
+    public PrestadorService(PrestadorRepository prestadorRepository, AuthenticationUtil authenticationUtil) {
         this.prestadorRepository = prestadorRepository;
+        this.authenticationUtil = authenticationUtil;
     }
 
     public List<PrestadorDTO> procurarTodos(){
-        List<PrestadorModel>  listaPrestaodr = prestadorRepository.findAll();
+        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
-        return prestadorRepository
-                .findAll()
-                .stream()
-                .map(this::toDTO)
-                .toList();
+        // ADMIN vê todos, SOLICITANTE vê apenas seus
+        if (authenticationUtil.isAdmin()) {
+            return prestadorRepository
+                    .findAll()
+                    .stream()
+                    .map(this::toDTO)
+                    .toList();
+        } else {
+            return prestadorRepository
+                    .findByUsuarioCriador(usuarioAutenticado)
+                    .stream()
+                    .map(this::toDTO)
+                    .toList();
+        }
     }
 
     public PrestadorDTO procurarPorID(Long id) {
+        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
+
         PrestadorModel prestadorModel = prestadorRepository
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Prestador nao encontrado"));
+
+        // Verifica se o usuário é ADMIN ou se criou o prestador
+        if (!authenticationUtil.isAdmin() && !prestadorModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+            throw new AccessDeniedException("Você não tem permissão para acessar este prestador");
+        }
 
         return toDTO(prestadorModel);
     }
 
     public PrestadorDTO CadastrarPrestador(PrestadorDTO prestadorDTO) {
+        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
+
         PrestadorModel prestadorModel = new PrestadorModel();
         prestadorModel.setNome(prestadorDTO.getNome());
         prestadorModel.setCpf(prestadorDTO.getCpf());
+        prestadorModel.setUsuarioCriador(usuarioAutenticado);
 
         return toDTO(prestadorRepository.save(prestadorModel));
     }
 
     public PrestadorDTO atualizarPrestador(Long id, PrestadorDTO dados) {
+        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
         PrestadorModel prestadorModel = prestadorRepository
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
+
+        // Verifica se o usuário é ADMIN ou se criou o prestador
+        if (!authenticationUtil.isAdmin() && !prestadorModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+            throw new AccessDeniedException("Você não tem permissão para alterar este prestador");
+        }
+
         prestadorModel.setNome(dados.getNome());
         prestadorModel.setCpf(dados.getCpf());
         prestadorRepository.save(prestadorModel);
@@ -56,9 +87,16 @@ public class PrestadorService {
     }
 
     public void deletarPrestador(Long id) {
+        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
+
         PrestadorModel prestador = prestadorRepository
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Prestador nao encontrado"));
+
+        // Verifica se o usuário é ADMIN ou se criou o prestador
+        if (!authenticationUtil.isAdmin() && !prestador.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+            throw new AccessDeniedException("Você não tem permissão para deletar este prestador");
+        }
 
         prestadorRepository.delete(prestador);
     }

@@ -38,5 +38,8 @@ public class Dados_BancariosModel {
     @Column(name = "CHAVE_PIX")
     private String chavePix;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criador_id", nullable = false)
+    private Usuario usuarioCriador;
 
 }

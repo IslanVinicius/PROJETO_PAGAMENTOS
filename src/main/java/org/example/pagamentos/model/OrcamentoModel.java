@@ -37,4 +37,9 @@ public class OrcamentoModel {
 
     @OneToOne(mappedBy = "orcamento")
     private SolicitacaoAprovacaoModel solicitacao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_criador_id", nullable = false)
+    @Getter @Setter
+    private Usuario usuarioCriador;
 }
