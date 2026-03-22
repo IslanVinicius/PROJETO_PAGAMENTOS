@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import styles from './OrcamentoCadastro.module.css';
+import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, FileText, Printer } from 'lucide-react';
+import styles from './OrcamentoCadastro-novo.module.css';
 import { orcamentoService } from '../../services/orcamentoService';
+import { empresaService } from '../../services/empresaService';
+import { prestadorService } from '../../services/prestadorService';
 import ModalPesquisa from './ModalPesquisa';
 import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
+import { jsPDF } from 'jspdf';
 
 function OrcamentoCadastro() {
     const [orcamentoID, setOrcamentoID] = useState('');
@@ -292,6 +296,131 @@ function OrcamentoCadastro() {
         return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
 
+    const handleGerarPDF = async () => {
+        if (!orcamentoID) {
+            setMessage({ type: 'error', text: 'Selecione um orçamento para gerar o PDF!' });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Buscar dados completos da empresa e prestador
+            const [empresaData, prestadorData] = await Promise.all([
+                empresaService.obter(empresaID),
+                prestadorService.obter(idPrestador)
+            ]);
+
+            // Criar o PDF
+            const doc = new jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 20;
+            let yPos = 20;
+
+            // Título
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.text('ORÇAMENTO', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 15;
+
+            // Linha divisória
+            doc.setDrawColor(0);
+            doc.line(margin, yPos, pageWidth - margin, yPos);
+            yPos += 15;
+
+            // Dados do Orçamento
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DADOS DO ORÇAMENTO', margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`ID do Orçamento: ${orcamentoID}`, margin, yPos);
+            yPos += 7;
+            doc.text(`Movimento: ${movimento}`, margin, yPos);
+            yPos += 15;
+
+            // Dados da Empresa
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DADOS DA EMPRESA', margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Razão Social: ${empresaData.razaoSocial || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`CNPJ: ${empresaData.cnpj || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`Endereço: ${empresaData.endereco || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`Cidade: ${empresaData.cidade || 'N/A'} - ${empresaData.estado || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`CEP: ${empresaData.cep || 'N/A'}`, margin, yPos);
+            yPos += 15;
+
+            // Dados do Prestador
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DADOS DO PRESTADOR', margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Nome: ${prestadorData.nome || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`CPF/CNPJ: ${prestadorData.cpfCnpj || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`Email: ${prestadorData.email || 'N/A'}`, margin, yPos);
+            yPos += 7;
+            doc.text(`Telefone: ${prestadorData.telefone || 'N/A'}`, margin, yPos);
+            yPos += 15;
+
+            // Descrição do Serviço
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'normal');
+            const descricaoLines = doc.splitTextToSize(descricao || 'N/A', pageWidth - (margin * 2));
+            doc.text(descricaoLines, margin, yPos);
+            yPos += (descricaoLines.length * 7) + 15;
+
+            // Valor
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('VALOR DO SERVIÇO', margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 100, 0);
+            doc.text(formatarValor(valor), margin, yPos);
+            doc.setTextColor(0, 0, 0);
+            yPos += 20;
+
+            // Linha divisória
+            doc.line(margin, yPos, pageWidth - margin, yPos);
+            yPos += 10;
+
+            // Data de emissão
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'italic');
+            const dataEmissao = new Date().toLocaleDateString('pt-BR');
+            doc.text(`Documento gerado em: ${dataEmissao}`, margin, yPos);
+
+            // Salvar o PDF
+            doc.save(`orcamento_${orcamentoID}_${movimento.replace(/\//g, '-')}.pdf`);
+            setMessage({ type: 'success', text: 'PDF gerado com sucesso!' });
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Erro ao gerar PDF: ' + error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className={styles.container}>
             <ModalPesquisa
@@ -316,8 +445,9 @@ function OrcamentoCadastro() {
                             className={styles.navButton}
                             onClick={handlePrevious}
                             disabled={currentIndex <= 0 || loading}
+                            title="Anterior"
                         >
-                            ◀
+                            <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
@@ -326,18 +456,23 @@ function OrcamentoCadastro() {
                             className={styles.navButton}
                             onClick={handleNext}
                             disabled={currentIndex >= orcamentos.length - 1 || loading}
+                            title="Próximo"
                         >
-                            ▶
+                            <ChevronRight size={20} />
                         </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>◀</button>
+                        <button className={styles.navButton} disabled>
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>▶</button>
+                        <button className={styles.navButton} disabled>
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 )}
             </div>
@@ -358,7 +493,7 @@ function OrcamentoCadastro() {
                         onClick={handleSearch}
                         disabled={loading || modo !== 'visualizacao'}
                     >
-                        <span>🔍</span> Pesquisar
+                        <Search size={18} /> Pesquisar
                     </button>
                 </div>
                 {searchResults.length > 0 && modo === 'visualizacao' && (
@@ -429,7 +564,7 @@ function OrcamentoCadastro() {
                                 type="button"
                                 title="Pesquisar prestador"
                             >
-                                🔍
+                                <Search size={16} />
                             </button>
                         </div>
                     </div>
@@ -451,7 +586,7 @@ function OrcamentoCadastro() {
                                 type="button"
                                 title="Pesquisar empresa"
                             >
-                                🔍
+                                <Search size={16} />
                             </button>
                         </div>
                     </div>
@@ -487,15 +622,25 @@ function OrcamentoCadastro() {
                                 className={`${styles.btn} ${styles.btnEdit}`}
                                 onClick={handleEditar}
                                 disabled={loading || !orcamentoID}
+                                title="Editar orçamento"
                             >
-                                <span>✏️</span> Editar
+                                <Edit2 size={18} /> Editar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnNew}`}
                                 onClick={handleNovo}
                                 disabled={loading}
+                                title="Criar novo orçamento"
                             >
-                                <span>➕</span> Novo
+                                <Plus size={18} /> Novo
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnPDF}`}
+                                onClick={handleGerarPDF}
+                                disabled={loading || !orcamentoID}
+                                title="Gerar PDF do orçamento"
+                            >
+                                <Printer size={18} /> Gerar PDF
                             </button>
                         </>
                     )}
@@ -505,22 +650,25 @@ function OrcamentoCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar alterações"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
                                 onClick={handleDelete}
                                 disabled={loading || !orcamentoID}
+                                title="Excluir orçamento"
                             >
-                                <span>🗑️</span> Excluir
+                                <Trash2 size={18} /> Excluir
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar edição"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}
@@ -530,15 +678,17 @@ function OrcamentoCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar novo orçamento"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar criação"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styles from './UserCadastro.module.css';
+import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, User } from 'lucide-react';
+import styles from './UserCadastro-novo.module.css';
 import { userService } from '../../services/userService';
 
 function UserCadastro() {
@@ -242,20 +243,38 @@ function UserCadastro() {
                 </div>
                 {users.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
-                        <button className={styles.navButton} onClick={handlePrevious} disabled={currentIndex <= 0 || loading}>◀</button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handlePrevious}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Anterior"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
                         </span>
-                        <button className={styles.navButton} onClick={handleNext} disabled={currentIndex >= users.length - 1 || loading}>▶</button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleNext}
+                            disabled={currentIndex >= users.length - 1 || loading}
+                            title="Próximo"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>◀</button>
+                        <button className={styles.navButton} disabled>
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>▶</button>
+                        <button className={styles.navButton} disabled>
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 )}
             </div>
@@ -272,7 +291,7 @@ function UserCadastro() {
                         disabled={loading || modo !== 'visualizacao'}
                     />
                     <button className={styles.searchButton} onClick={handleSearch} disabled={loading || modo !== 'visualizacao'}>
-                        <span>🔍</span> Pesquisar
+                        <Search size={18} /> Pesquisar
                     </button>
                 </div>
                 {searchResults.length > 0 && modo === 'visualizacao' && (
@@ -338,34 +357,69 @@ function UserCadastro() {
                 <div className={styles.buttonGroup}>
                     {modo === 'visualizacao' && (
                         <>
-                            <button className={`${styles.btn} ${styles.btnEdit}`} onClick={handleEditar} disabled={loading || !id}>
-                                <span>✏️</span> Editar
+                            <button
+                                className={`${styles.btn} ${styles.btnEdit}`}
+                                onClick={handleEditar}
+                                disabled={loading || !id}
+                                title="Editar usuário"
+                            >
+                                <Edit2 size={18} /> Editar
                             </button>
-                            <button className={`${styles.btn} ${styles.btnNew}`} onClick={handleNovo} disabled={loading}>
-                                <span>➕</span> Novo
+                            <button
+                                className={`${styles.btn} ${styles.btnNew}`}
+                                onClick={handleNovo}
+                                disabled={loading}
+                                title="Criar novo usuário"
+                            >
+                                <Plus size={18} /> Novo
                             </button>
                         </>
                     )}
                     {modo === 'edicao' && (
                         <>
-                            <button className={`${styles.btn} ${styles.btnSave}`} onClick={handleSave} disabled={loading}>
-                                <span>💾</span> Salvar
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                                title="Salvar alterações"
+                            >
+                                <Save size={18} /> Salvar
                             </button>
-                            <button className={`${styles.btn} ${styles.btnDelete}`} onClick={handleDelete} disabled={loading || !id}>
-                                <span>🗑️</span> Excluir
+                            <button
+                                className={`${styles.btn} ${styles.btnDelete}`}
+                                onClick={handleDelete}
+                                disabled={loading || !id}
+                                title="Excluir usuário"
+                            >
+                                <Trash2 size={18} /> Excluir
                             </button>
-                            <button className={`${styles.btn} ${styles.btnCancel}`} onClick={handleCancelar} disabled={loading}>
-                                <span>❌</span> Cancelar
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                                title="Cancelar edição"
+                            >
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}
                     {modo === 'criacao' && (
                         <>
-                            <button className={`${styles.btn} ${styles.btnSave}`} onClick={handleSave} disabled={loading}>
-                                <span>💾</span> Salvar
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                                title="Salvar novo usuário"
+                            >
+                                <Save size={18} /> Salvar
                             </button>
-                            <button className={`${styles.btn} ${styles.btnCancel}`} onClick={handleCancelar} disabled={loading}>
-                                <span>❌</span> Cancelar
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                                title="Cancelar criação"
+                            >
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}

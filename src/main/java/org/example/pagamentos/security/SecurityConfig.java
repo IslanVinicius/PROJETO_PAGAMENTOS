@@ -61,7 +61,6 @@ public class SecurityConfig {
 
         // ✅ Permite origens específicas
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-
         // ✅ Permite métodos HTTP
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"

@@ -3,6 +3,7 @@
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-xl);
     box-shadow: 0 8px 20px rgba(149, 82, 81, 0.15);
+    width: 100%;
     max-width: 900px;
     margin: 0 auto;
 }
@@ -306,4 +307,34 @@
     background-color: #ffe6e6;
     color: #b33c3c;
     border: 1px solid #ffb3b3;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .navigationGroup {
+        align-self: flex-end;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .buttonGroup {
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        flex: 1 1 45%;
+        min-width: 120px;
+    }
 }

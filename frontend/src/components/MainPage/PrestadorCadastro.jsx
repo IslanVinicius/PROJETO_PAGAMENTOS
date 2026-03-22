@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styles from './PrestadorCadastro.module.css';
+import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import styles from './PrestadorCadastro-novo.module.css';
 import { prestadorService } from '../../services/prestadorService';
 
 function PrestadorCadastro() {
@@ -211,7 +212,6 @@ function PrestadorCadastro() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.headerTitle}>
-                    <span>👤</span>
                     <h2>Cadastro de Prestador</h2>
                 </div>
                 {prestadores.length > 0 && modo === 'visualizacao' && (
@@ -220,8 +220,9 @@ function PrestadorCadastro() {
                             className={styles.navButton}
                             onClick={handlePrevious}
                             disabled={currentIndex <= 0 || loading}
+                            title="Anterior"
                         >
-                            ◀
+                            <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${prestadores.length}` : `0/${prestadores.length}`}
@@ -230,8 +231,9 @@ function PrestadorCadastro() {
                             className={styles.navButton}
                             onClick={handleNext}
                             disabled={currentIndex >= prestadores.length - 1 || loading}
+                            title="Próximo"
                         >
-                            ▶
+                            <ChevronRight size={20} />
                         </button>
                     </div>
                 )}
@@ -260,7 +262,7 @@ function PrestadorCadastro() {
                             disabled={loading}
                         />
                         <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
-                            <span>🔍</span> Pesquisar
+                            <Search size={18} /> Pesquisar
                         </button>
                     </div>
                     {searchResults.length > 0 && (
@@ -314,15 +316,17 @@ function PrestadorCadastro() {
                                 className={`${styles.btn} ${styles.btnEdit}`}
                                 onClick={handleEditar}
                                 disabled={loading || !codPrestador}
+                                title="Editar prestador"
                             >
-                                <span>✏️</span> Editar
+                                <Edit2 size={18} /> Editar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnNew}`}
                                 onClick={handleNovo}
                                 disabled={loading}
+                                title="Criar novo prestador"
                             >
-                                <span>➕</span> Novo
+                                <Plus size={18} /> Novo
                             </button>
                         </>
                     )}
@@ -332,22 +336,25 @@ function PrestadorCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar alterações"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
                                 onClick={handleDelete}
                                 disabled={loading || !codPrestador}
+                                title="Excluir prestador"
                             >
-                                <span>🗑️</span> Excluir
+                                <Trash2 size={18} /> Excluir
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar edição"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}
@@ -357,15 +364,17 @@ function PrestadorCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar novo prestador"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar criação"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styles from './EmpresaCadastro.module.css';
+import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import styles from './EmpresaCadastro-novo.module.css';
 import { empresaService } from '../../services/empresaService';
 
 function EmpresaCadastro() {
@@ -233,7 +234,6 @@ function EmpresaCadastro() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.headerTitle}>
-                    <span>🏢</span>
                     <h2>Cadastro de Empresa</h2>
                 </div>
                 {empresas.length > 0 && modo === 'visualizacao' && (
@@ -242,8 +242,9 @@ function EmpresaCadastro() {
                             className={styles.navButton}
                             onClick={handlePrevious}
                             disabled={currentIndex <= 0 || loading}
+                            title="Anterior"
                         >
-                            ◀
+                            <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${empresas.length}` : `0/${empresas.length}`}
@@ -252,8 +253,9 @@ function EmpresaCadastro() {
                             className={styles.navButton}
                             onClick={handleNext}
                             disabled={currentIndex >= empresas.length - 1 || loading}
+                            title="Próximo"
                         >
-                            ▶
+                            <ChevronRight size={20} />
                         </button>
                     </div>
                 )}
@@ -286,7 +288,7 @@ function EmpresaCadastro() {
                             onClick={handleSearch}
                             disabled={loading}
                         >
-                            <span>🔍</span> Pesquisar
+                            <Search size={18} /> Pesquisar
                         </button>
                     </div>
                     {searchResults.length > 0 && (
@@ -350,15 +352,17 @@ function EmpresaCadastro() {
                                 className={`${styles.btn} ${styles.btnEdit}`}
                                 onClick={handleEditar}
                                 disabled={loading || !idEmpresa}
+                                title="Editar empresa"
                             >
-                                <span>✏️</span> Editar
+                                <Edit2 size={18} /> Editar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnNew}`}
                                 onClick={handleNovo}
                                 disabled={loading}
+                                title="Criar nova empresa"
                             >
-                                <span>➕</span> Novo
+                                <Plus size={18} /> Novo
                             </button>
                         </>
                     )}
@@ -368,22 +372,25 @@ function EmpresaCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar alterações"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
                                 onClick={handleDelete}
                                 disabled={loading || !idEmpresa}
+                                title="Excluir empresa"
                             >
-                                <span>🗑️</span> Excluir
+                                <Trash2 size={18} /> Excluir
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar edição"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}
@@ -393,15 +400,17 @@ function EmpresaCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar nova empresa"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar criação"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}

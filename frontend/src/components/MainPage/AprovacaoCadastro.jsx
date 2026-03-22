@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styles from './AprovacaoCadastro.module.css';
+import { ChevronLeft, ChevronRight, Search, CheckCircle, XCircle, X } from 'lucide-react';
+import styles from './AprovacaoCadastro-novo.module.css';
 import { solicitacaoAprovacaoService } from '../../services/solicitacaoAprovacaoService';
 import { orcamentoService } from '../../services/orcamentoService';
 import { empresaService } from '../../services/empresaService';

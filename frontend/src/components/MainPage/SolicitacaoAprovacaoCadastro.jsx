@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styles from './SolicitacaoAprovacaoCadastro.module.css';
+import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, CheckCircle } from 'lucide-react';
+import styles from './SolicitacaoAprovacaoCadastro-novo.module.css';
 import { solicitacaoAprovacaoService } from '../../services/solicitacaoAprovacaoService';
 import ModalPesquisaOrcamento from './ModalPesquisaOrcamento';
 
@@ -280,24 +281,38 @@ function SolicitacaoAprovacaoCadastro() {
                 </div>
                 {solicitacoes.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
-                        <button className={styles.navButton} onClick={handlePrevious} disabled={currentIndex <= 0 || loading}>
-                            ◀
+                        <button
+                            className={styles.navButton}
+                            onClick={handlePrevious}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Anterior"
+                        >
+                            <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
                         </span>
-                        <button className={styles.navButton} onClick={handleNext} disabled={currentIndex >= solicitacoes.length - 1 || loading}>
-                            ▶
+                        <button
+                            className={styles.navButton}
+                            onClick={handleNext}
+                            disabled={currentIndex >= solicitacoes.length - 1 || loading}
+                            title="Próximo"
+                        >
+                            <ChevronRight size={20} />
                         </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>◀</button>
+                        <button className={styles.navButton} disabled>
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>▶</button>
+                        <button className={styles.navButton} disabled>
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 )}
             </div>
@@ -318,7 +333,7 @@ function SolicitacaoAprovacaoCadastro() {
                         onClick={handleSearch}
                         disabled={loading || modo !== 'visualizacao'}
                     >
-                        <span>🔍</span> Pesquisar
+                        <Search size={18} /> Pesquisar
                     </button>
                 </div>
                 {searchResults.length > 0 && modo === 'visualizacao' && (
@@ -389,7 +404,7 @@ function SolicitacaoAprovacaoCadastro() {
                                 type="button"
                                 title="Pesquisar orçamento"
                             >
-                                🔍
+                                <Search size={16} />
                             </button>
                         </div>
                     </div>
@@ -437,15 +452,17 @@ function SolicitacaoAprovacaoCadastro() {
                                 className={`${styles.btn} ${styles.btnEdit}`}
                                 onClick={handleEditar}
                                 disabled={loading || !solicitacaoAprovacaoId}
+                                title="Editar solicitação"
                             >
-                                <span>✏️</span> Editar
+                                <Edit2 size={18} /> Editar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnNew}`}
                                 onClick={handleNovo}
                                 disabled={loading}
+                                title="Criar nova solicitação"
                             >
-                                <span>➕</span> Novo
+                                <Plus size={18} /> Novo
                             </button>
                         </>
                     )}
@@ -455,22 +472,25 @@ function SolicitacaoAprovacaoCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar alterações"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
                                 onClick={handleDelete}
                                 disabled={loading || !solicitacaoAprovacaoId}
+                                title="Excluir solicitação"
                             >
-                                <span>🗑️</span> Excluir
+                                <Trash2 size={18} /> Excluir
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar edição"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}
@@ -480,15 +500,17 @@ function SolicitacaoAprovacaoCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
+                                title="Salvar nova solicitação"
                             >
-                                <span>💾</span> Salvar
+                                <Save size={18} /> Salvar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnCancel}`}
                                 onClick={handleCancelar}
                                 disabled={loading}
+                                title="Cancelar criação"
                             >
-                                <span>❌</span> Cancelar
+                                <X size={18} /> Cancelar
                             </button>
                         </>
                     )}

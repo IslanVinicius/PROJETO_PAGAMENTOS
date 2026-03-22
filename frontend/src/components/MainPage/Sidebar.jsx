@@ -1,4 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
+import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home } from 'lucide-react';
 import styles from "./Sidebar.module.css";
 
 function Sidebar({ activePage, onPageChange, onLogout }) {
@@ -8,7 +9,7 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
   return (
     <div className={styles.sidebar}>
       <div className={styles.header}>
-        <div className={styles.logo}>Barra de pesquisa</div>
+        <img src="/logo.png" alt="Logo" className={styles.logoImage} />
       </div>
 
       <div className={styles.menu}>
@@ -19,8 +20,10 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
                 activePage === "empresa" ? styles.active : ""
               }`}
               onClick={() => onPageChange("empresa")}
+              title="Gerenciar empresas"
             >
-              Cadastro Empresa
+              <Building2 size={20} />
+              <span>Empresas</span>
             </div>
 
             <div
@@ -28,8 +31,10 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
                 activePage === "prestador" ? styles.active : ""
               }`}
               onClick={() => onPageChange("prestador")}
+              title="Gerenciar prestadores"
             >
-              Cadastro Prestador
+              <Users size={20} />
+              <span>Prestadores</span>
             </div>
 
             <div
@@ -37,8 +42,10 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
                 activePage === "dadosBancarios" ? styles.active : ""
               }`}
               onClick={() => onPageChange("dadosBancarios")}
+              title="Dados bancários"
             >
-              Dados Bancários
+              <CreditCard size={20} />
+              <span>Dados Bancários</span>
             </div>
 
             <div
@@ -46,8 +53,10 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
                 activePage === "orcamento" ? styles.active : ""
               }`}
               onClick={() => onPageChange("orcamento")}
+              title="Gerar orçamentos"
             >
-              Gerar Orçamento
+              <FileText size={20} />
+              <span>Orçamentos</span>
             </div>
 
             <div
@@ -55,8 +64,10 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
                 activePage === "pedidoAprovacao" ? styles.active : ""
               }`}
               onClick={() => onPageChange("pedidoAprovacao")}
+              title="Solicitações de aprovação"
             >
-              Pedido Aprovação
+              <ClipboardCheck size={20} />
+              <span>Solicitações</span>
             </div>
 
             <div
@@ -64,16 +75,21 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
                 activePage === "aprovacao" ? styles.active : ""
               }`}
               onClick={() => onPageChange("aprovacao")}
+              title="Aprovar orçamentos"
             >
-              Aprovar Orçamento
+              <CheckSquare size={20} />
+              <span>Aprovações</span>
             </div>
+
             <div
               className={`${styles.menuItem} ${
-                  activePage === "usuario" ? styles.active : ""
-               }`}
-                onClick={() => onPageChange("usuario")}
-              >
-               Cadastro Usuário
+                activePage === "usuario" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("usuario")}
+              title="Gerenciar usuários"
+            >
+              <Users size={20} />
+              <span>Usuários</span>
             </div>
           </>
         )}
@@ -83,15 +99,19 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
             <div
               className={styles.menuItem}
               onClick={() => onPageChange("prestador")}
+              title="Cadastro de prestadores"
             >
-              Cadastro Prestador
+              <Users size={20} />
+              <span>Prestadores</span>
             </div>
 
             <div
               className={styles.menuItem}
               onClick={() => onPageChange("orcamento")}
+              title="Gerar orçamentos"
             >
-              Gerar Orçamento
+              <FileText size={20} />
+              <span>Orçamentos</span>
             </div>
           </>
         )}
@@ -101,15 +121,19 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
             <div
               className={styles.menuItem}
               onClick={() => onPageChange("orcamento")}
+              title="Gerar orçamentos"
             >
-              Gerar Orçamento
+              <FileText size={20} />
+              <span>Orçamentos</span>
             </div>
 
             <div
               className={styles.menuItem}
               onClick={() => onPageChange("pedidoAprovacao")}
+              title="Solicitações de aprovação"
             >
-              Pedido Aprovação
+              <ClipboardCheck size={20} />
+              <span>Solicitações</span>
             </div>
           </>
         )}
@@ -118,15 +142,18 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
           <div
             className={styles.menuItem}
             onClick={() => onPageChange("aprovacao")}
+            title="Aprovar orçamentos"
           >
-            Aprovar Orçamento
+            <CheckSquare size={20} />
+            <span>Aprovações</span>
           </div>
         )}
       </div>
 
       <div className={styles.footer}>
-        <div className={styles.logoutBtn} onClick={onLogout}>
-          Sair
+        <div className={styles.logoutBtn} onClick={onLogout} title="Fazer logout">
+          <LogOut size={20} />
+          <span>Sair</span>
         </div>
       </div>
     </div>
