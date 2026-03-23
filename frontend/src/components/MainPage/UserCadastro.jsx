@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, User } from 'lucide-react';
 import styles from './UserCadastro-novo.module.css';
 import { userService } from '../../services/userService';
+import ConfirmModal from '../Shared/ConfirmModal';
 
 function UserCadastro() {
     const [id, setId] = useState('');
@@ -17,6 +18,7 @@ function UserCadastro() {
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Lista de roles disponíveis
     const roles = ['ADMIN', 'SOLICITANTE', 'ESCRITORIO', 'APROVADOR'];
@@ -177,13 +179,16 @@ function UserCadastro() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!id) {
             setMessage({ type: 'error', text: 'Selecione um usuário!' });
             return;
         }
-        if (!window.confirm(`Excluir usuário ${username}?`)) return;
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         setLoading(true);
         try {
             await userService.deletar(id);
@@ -387,7 +392,7 @@ function UserCadastro() {
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading || !id}
                                 title="Excluir usuário"
                             >
@@ -431,6 +436,17 @@ function UserCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita."
+                itemName={username}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }

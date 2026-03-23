@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import styles from './PrestadorCadastro-novo.module.css';
 import { prestadorService } from '../../services/prestadorService';
+import ConfirmModal from '../Shared/ConfirmModal';
 
 function PrestadorCadastro() {
     const [codPrestador, setCodPrestador] = useState('');
@@ -16,6 +17,7 @@ function PrestadorCadastro() {
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         carregarPrestadores();
@@ -151,13 +153,16 @@ function PrestadorCadastro() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!codPrestador) {
             setMessage({ type: 'error', text: 'Selecione um prestador!' });
             return;
         }
-        if (!window.confirm(`Excluir ${nome}?`)) return;
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         setLoading(true);
         try {
             await prestadorService.deletar(codPrestador);
@@ -342,7 +347,7 @@ function PrestadorCadastro() {
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading || !codPrestador}
                                 title="Excluir prestador"
                             >
@@ -386,6 +391,17 @@ function PrestadorCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir este prestador? Esta ação não pode ser desfeita."
+                itemName={nome}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }

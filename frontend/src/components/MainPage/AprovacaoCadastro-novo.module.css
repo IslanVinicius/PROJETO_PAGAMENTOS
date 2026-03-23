@@ -125,7 +125,7 @@
 
 .listHeader {
     display: grid;
-    grid-template-columns: 60px 90px 1fr 80px;
+    grid-template-columns: 50px 120px 1fr 50px;
     padding: var(--spacing-md) var(--spacing-lg);
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     border-radius: var(--radius-md);
@@ -145,7 +145,7 @@
 
 .listItem {
     display: grid;
-    grid-template-columns: 60px 90px 1fr 80px;
+    grid-template-columns: 60px 50px 1fr 80px;
     padding: var(--spacing-md) var(--spacing-lg);
     background-color: var(--bg-primary);
     border: 2px solid var(--border-color);

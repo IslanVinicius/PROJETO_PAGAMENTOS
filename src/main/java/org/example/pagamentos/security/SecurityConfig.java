@@ -47,6 +47,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/orcamento/aprovar").hasRole("APROVADOR")
                         .requestMatchers("/api/prestador/**").hasAnyRole("ADMIN", "SOLICITANTE")
 
+                        // 🔐 Grupos de Itens e Itens - ADMIN e ESCRITORIO
+                        .requestMatchers("/api/grupo-itens/**").hasAnyRole("ADMIN", "ESCRITORIO")
+                        .requestMatchers("/api/itens/**").hasAnyRole("ADMIN", "ESCRITORIO")
+
                         // 🔐 todo resto precisa estar autenticado
                         .anyRequest().authenticated()
                 )

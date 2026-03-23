@@ -5,6 +5,7 @@ import { solicitacaoAprovacaoService } from '../../services/solicitacaoAprovacao
 import { orcamentoService } from '../../services/orcamentoService';
 import { empresaService } from '../../services/empresaService';
 import { prestadorService } from '../../services/prestadorService';
+import ConfirmModal from '../Shared/ConfirmModal';
 
 function AprovacaoCadastro() {
     const [solicitacoes, setSolicitacoes] = useState([]);
@@ -17,6 +18,8 @@ function AprovacaoCadastro() {
     const [message, setMessage] = useState({ type: '', text: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [showApproveModal, setShowApproveModal] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
 
     useEffect(() => {
         carregarSolicitacoesPendentes();
@@ -94,9 +97,13 @@ function AprovacaoCadastro() {
         setSearchResults([]);
     };
 
-    const handleAprovar = async () => {
+    const handleAprovarClick = () => {
         if (!solicitacaoSelecionada) return;
+        setShowApproveModal(true);
+    };
 
+    const handleAprovarConfirm = async () => {
+        setShowApproveModal(false);
         setLoading(true);
         try {
             const dados = {
@@ -119,9 +126,13 @@ function AprovacaoCadastro() {
         }
     };
 
-    const handleRejeitar = async () => {
+    const handleRejeitarClick = () => {
         if (!solicitacaoSelecionada) return;
+        setShowRejectModal(true);
+    };
 
+    const handleRejeitarConfirm = async () => {
+        setShowRejectModal(false);
         setLoading(true);
         try {
             const dados = {
@@ -197,7 +208,7 @@ function AprovacaoCadastro() {
                         <span>ID</span>
                         <span>Orçamento</span>
                         <span>Data</span>
-                        <span></span>
+                        <span>Status</span>
                     </div>
 
                     <div className={styles.listItems}>
@@ -298,14 +309,14 @@ function AprovacaoCadastro() {
                         <div className={styles.actionButtons}>
                             <button
                                 className={`${styles.btn} ${styles.btnApprove}`}
-                                onClick={handleAprovar}
+                                onClick={handleAprovarClick}
                                 disabled={loading}
                             >
                                 <span>✅</span> Aprovar
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnReject}`}
-                                onClick={handleRejeitar}
+                                onClick={handleRejeitarClick}
                                 disabled={loading}
                             >
                                 <span>❌</span> Rejeitar
@@ -329,6 +340,29 @@ function AprovacaoCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showApproveModal}
+                onClose={() => setShowApproveModal(false)}
+                onConfirm={handleAprovarConfirm}
+                title="Confirmar Aprovação"
+                message="Tem certeza que deseja aprovar esta solicitação?"
+                itemName={`Solicitação #${solicitacaoSelecionada?.id}`}
+                confirmText="Sim, Aprovar"
+                cancelText="Cancelar"
+                variant="success"
+            />
+
+            <ConfirmModal
+                isOpen={showRejectModal}
+                onClose={() => setShowRejectModal(false)}
+                onConfirm={handleRejeitarConfirm}
+                title="Confirmar Rejeição"
+                message="Tem certeza que deseja rejeitar esta solicitação?"
+                itemName={`Solicitação #${solicitacaoSelecionada?.id}`}
+                confirmText="Sim, Rejeitar"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }

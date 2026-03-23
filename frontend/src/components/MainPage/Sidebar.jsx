@@ -1,5 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home } from 'lucide-react';
+import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package } from 'lucide-react';
 import styles from "./Sidebar.module.css";
 
 function Sidebar({ activePage, onPageChange, onLogout }) {
@@ -91,6 +91,28 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
               <Users size={20} />
               <span>Usuários</span>
             </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "grupoItens" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("grupoItens")}
+              title="Gerenciar grupos de itens"
+            >
+              <FolderOpen size={20} />
+              <span>Grupos de Itens</span>
+            </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "itens" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("itens")}
+              title="Gerenciar itens"
+            >
+              <Package size={20} />
+              <span>Itens</span>
+            </div>
           </>
         )}
 
@@ -119,7 +141,9 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
         {role === "ROLE_ESCRITORIO" && (
           <>
             <div
-              className={styles.menuItem}
+              className={`${styles.menuItem} ${
+                activePage === "orcamento" ? styles.active : ""
+              }`}
               onClick={() => onPageChange("orcamento")}
               title="Gerar orçamentos"
             >
@@ -128,12 +152,36 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
             </div>
 
             <div
-              className={styles.menuItem}
+              className={`${styles.menuItem} ${
+                activePage === "pedidoAprovacao" ? styles.active : ""
+              }`}
               onClick={() => onPageChange("pedidoAprovacao")}
               title="Solicitações de aprovação"
             >
               <ClipboardCheck size={20} />
               <span>Solicitações</span>
+            </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "grupoItens" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("grupoItens")}
+              title="Gerenciar grupos de itens"
+            >
+              <FolderOpen size={20} />
+              <span>Grupos de Itens</span>
+            </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "itens" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("itens")}
+              title="Gerenciar itens"
+            >
+              <Package size={20} />
+              <span>Itens</span>
             </div>
           </>
         )}

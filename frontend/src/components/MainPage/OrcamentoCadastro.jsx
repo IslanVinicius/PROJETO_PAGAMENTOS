@@ -6,6 +6,7 @@ import { empresaService } from '../../services/empresaService';
 import { prestadorService } from '../../services/prestadorService';
 import ModalPesquisa from './ModalPesquisa';
 import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
+import ConfirmModal from '../Shared/ConfirmModal';
 import { jsPDF } from 'jspdf';
 
 function OrcamentoCadastro() {
@@ -25,6 +26,7 @@ function OrcamentoCadastro() {
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [modalPrestadorAberto, setModalPrestadorAberto] = useState(false);
     const [modalEmpresaAberto, setModalEmpresaAberto] = useState(false);
@@ -225,13 +227,16 @@ function OrcamentoCadastro() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!orcamentoID) {
             setMessage({ type: 'error', text: 'Selecione um orçamento!' });
             return;
         }
-        if (!window.confirm(`Excluir orçamento ${orcamentoID}?`)) return;
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         setLoading(true);
         try {
             await orcamentoService.deletar(orcamentoID);
@@ -656,7 +661,7 @@ function OrcamentoCadastro() {
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading || !orcamentoID}
                                 title="Excluir orçamento"
                             >
@@ -700,6 +705,17 @@ function OrcamentoCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita."
+                itemName={`Orçamento #${orcamentoID}`}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, MapPin
 import styles from './DadosBancariosCadastro-novo.module.css';
 import { dadosBancariosService } from '../../services/dadosBancariosService';
 import ModalPesquisa from './ModalPesquisa';
+import ConfirmModal from '../Shared/ConfirmModal';
 
 function DadosBancariosCadastro() {
     const [dadosId, setDadosId] = useState('');
@@ -21,6 +22,7 @@ function DadosBancariosCadastro() {
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Estado para o modal de pesquisa de prestadores
     const [modalAberto, setModalAberto] = useState(false);
@@ -205,13 +207,16 @@ function DadosBancariosCadastro() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!dadosId) {
             setMessage({ type: 'error', text: 'Selecione um registro!' });
             return;
         }
-        if (!window.confirm(`Excluir dados bancários do banco ${banco}?`)) return;
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         setLoading(true);
         try {
             await dadosBancariosService.deletar(dadosId);
@@ -470,7 +475,7 @@ function DadosBancariosCadastro() {
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading}
                                 title="Excluir dados bancários"
                             >
@@ -514,6 +519,17 @@ function DadosBancariosCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir estes dados bancários? Esta ação não pode ser desfeita."
+                itemName={banco}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }

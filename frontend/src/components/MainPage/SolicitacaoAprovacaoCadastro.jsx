@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, CheckC
 import styles from './SolicitacaoAprovacaoCadastro-novo.module.css';
 import { solicitacaoAprovacaoService } from '../../services/solicitacaoAprovacaoService';
 import ModalPesquisaOrcamento from './ModalPesquisaOrcamento';
+import ConfirmModal from '../Shared/ConfirmModal';
 
 function SolicitacaoAprovacaoCadastro() {
     const [solicitacaoAprovacaoId, setSolicitacaoAprovacaoId] = useState('');
@@ -19,6 +20,7 @@ function SolicitacaoAprovacaoCadastro() {
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao');
     const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [modalOrcamentoAberto, setModalOrcamentoAberto] = useState(false);
 
@@ -207,13 +209,16 @@ function SolicitacaoAprovacaoCadastro() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!solicitacaoAprovacaoId) {
             setMessage({ type: 'error', text: 'Selecione uma solicitação!' });
             return;
         }
-        if (!window.confirm(`Excluir solicitação ${solicitacaoAprovacaoId}?`)) return;
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         setLoading(true);
         try {
             await solicitacaoAprovacaoService.deletar(solicitacaoAprovacaoId);
@@ -478,7 +483,7 @@ function SolicitacaoAprovacaoCadastro() {
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading || !solicitacaoAprovacaoId}
                                 title="Excluir solicitação"
                             >
@@ -522,6 +527,17 @@ function SolicitacaoAprovacaoCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir esta solicitação de aprovação? Esta ação não pode ser desfeita."
+                itemName={`Solicitação #${solicitacaoAprovacaoId}`}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import styles from './EmpresaCadastro-novo.module.css';
 import { empresaService } from '../../services/empresaService';
+import ConfirmModal from '../Shared/ConfirmModal';
 
 function EmpresaCadastro() {
     // Estados dos campos
@@ -21,6 +22,7 @@ function EmpresaCadastro() {
 
     // Para armazenar dados originais durante edição (para cancelar)
     const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         carregarEmpresas();
@@ -170,13 +172,16 @@ function EmpresaCadastro() {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
         if (!idEmpresa) {
             setMessage({ type: 'error', text: 'Selecione uma empresa!' });
             return;
         }
-        if (!window.confirm(`Excluir ${nome}?`)) return;
+        setShowDeleteModal(true);
+    };
 
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
         setLoading(true);
         try {
             await empresaService.deletar(idEmpresa);
@@ -378,7 +383,7 @@ function EmpresaCadastro() {
                             </button>
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDelete}
+                                onClick={handleDeleteClick}
                                 disabled={loading || !idEmpresa}
                                 title="Excluir empresa"
                             >
@@ -422,6 +427,17 @@ function EmpresaCadastro() {
                     </div>
                 )}
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir esta empresa? Esta ação não pode ser desfeita."
+                itemName={nome}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
         </div>
     );
 }
