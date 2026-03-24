@@ -41,6 +41,9 @@ public class SecurityConfig {
                         // 🔓 libera login e cadastro
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // 🔓 libera visualização de imagens (GET)
+                        .requestMatchers(HttpMethod.GET, "/api/orcamento/*/imagens/*").permitAll()
+
                         // 🔐 somente ADMIN pode acessar
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/orcamento/gerar").hasAnyRole("ADMIN", "SOLICITANTE", "ESCRITORIO")

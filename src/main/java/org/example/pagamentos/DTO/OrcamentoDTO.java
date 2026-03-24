@@ -6,9 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.pagamentos.Enums.TipoPagamento;
 import org.example.pagamentos.model.EmpresaModel;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,5 +31,17 @@ public class OrcamentoDTO {
     private String descricao;
 
     private Float valor;
+
+    private Float valorTotalItens;
+
+    private Float desconto;
+
+    private Float valorFinal;
+
+    private TipoPagamento tipoPagamento;
+
+    private List<OrcamentoItemDTO> itens;
+
+    private List<OrcamentoImagemDTO> imagens;
 
 }
