@@ -1,0 +1,529 @@
+/* ============================================
+   FORMULÁRIO CADASTRO GRUPO DE ITENS - DESIGN MODERNO E TABULADO
+   ============================================ */
+
+.container {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    border: 1px solid var(--border-light);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 3px solid var(--primary-color);
+    background: linear-gradient(to right, var(--bg-secondary), transparent);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.headerTitle h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+/* Navegação com ícones do Lucide */
+.navigationGroup {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    background-color: var(--bg-secondary);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.navButton {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.navButton svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.navButton:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.navButton:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.navButton:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.positionIndicator {
+    padding: 0 var(--spacing-lg);
+    height: 42px;
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 14px;
+    min-width: 80px;
+    justify-content: center;
+    border: 2px solid var(--border-color);
+}
+
+/* Pesquisa */
+.searchSection {
+    margin-bottom: var(--spacing-2xl);
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.searchContainer {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.searchInput {
+    flex: 1;
+    height: 48px;
+    padding: 0 var(--spacing-lg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 15px;
+    outline: none;
+    transition: var(--transition-fast);
+    font-weight: 500;
+}
+
+.searchInput::placeholder {
+    color: var(--text-tertiary);
+}
+
+.searchInput:hover {
+    border-color: var(--primary-light);
+}
+
+.searchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+}
+
+.searchButton {
+    height: 48px;
+    padding: 0 var(--spacing-2xl);
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.searchButton svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.searchButton:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.searchButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.searchButton:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+/* Resultados da pesquisa */
+.resultsList {
+    margin-top: var(--spacing-lg);
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.resultItem {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid transparent;
+    margin-bottom: var(--spacing-xs);
+    background-color: var(--bg-secondary);
+}
+
+.resultItem:hover {
+    background-color: var(--bg-primary);
+    border-left-color: var(--primary-color);
+    transform: translateX(6px);
+    box-shadow: var(--shadow-sm);
+}
+
+.resultItemInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.resultItemName {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 15px;
+}
+
+.resultItemDoc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Formulário - Layout Tabulado */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xl);
+    background-color: var(--bg-secondary);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-light);
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    background-color: var(--bg-primary);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.formGroup label {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+    height: 48px;
+    padding: 0 var(--spacing-lg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+.formGroup textarea {
+    height: auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.formGroup input:hover:not(:disabled),
+.formGroup select:hover:not(:disabled),
+.formGroup textarea:hover:not(:disabled) {
+    border-color: var(--primary-light);
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
+    background-color: var(--bg-primary);
+}
+
+.formGroup input:disabled,
+.formGroup select:disabled,
+.formGroup textarea:disabled {
+    background-color: #f5f5f5;
+    color: var(--text-primary);
+    cursor: not-allowed;
+    border-color: var(--border-color);
+    opacity: 1;
+    font-weight: 500;
+}
+
+.idField input {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-secondary);
+    font-weight: 700;
+    border-color: var(--border-light);
+}
+
+/* Botões - Padronizados e Modernos */
+.buttonGroup {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xl);
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    border-top: 3px solid var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn {
+    height: 50px;
+    padding: 0 var(--spacing-2xl);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    flex: 1;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.btnSave {
+    background: linear-gradient(135deg, var(--success-color) 0%, #2d8645 100%);
+    color: white;
+}
+
+.btnSave:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2d8645 0%, var(--success-color) 100%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btnDelete {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #b82a20 100%);
+    color: white;
+}
+
+.btnDelete:hover:not(:disabled) {
+    background: linear-gradient(135deg, #b82a20 0%, var(--danger-color) 100%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btnEdit {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.btnEdit:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btnNew {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.btnNew:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btnCancel {
+    background: linear-gradient(135deg, var(--secondary-light) 0%, #7a8087 100%);
+    color: white;
+}
+
+.btnCancel:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7a8087 0%, var(--secondary-light) 100%);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    box-shadow: none;
+}
+
+/* Mensagens */
+.message {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 15px;
+    text-align: center;
+    border-left: 5px solid;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success {
+    background: linear-gradient(135deg, #d9f0e1 0%, #c3e6d0 100%);
+    color: #1e5a3a;
+    border-left-color: var(--success-color);
+}
+
+.success::before {
+    content: '✓';
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.error {
+    background: linear-gradient(135deg, #fde8e8 0%, #fdd5d5 100%);
+    color: #7a2020;
+    border-left-color: var(--danger-color);
+}
+
+.error::before {
+    content: '✕';
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-lg);
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .navigationGroup {
+        align-self: flex-end;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .buttonGroup {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .searchContainer {
+        flex-direction: column;
+    }
+
+    .searchButton {
+        width: 100%;
+        justify-content: center;
+    }
+}

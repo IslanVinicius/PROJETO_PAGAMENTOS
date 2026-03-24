@@ -1,0 +1,407 @@
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, FolderOpen } from 'lucide-react';
+import styles from './GrupoItemCadastro-novo.module.css';
+import { grupoItemService } from '../../services/grupoItemService';
+import ConfirmModal from '../Shared/ConfirmModal';
+
+function GrupoItemCadastro() {
+    const [idGrupo, setIdGrupo] = useState('');
+    const [nome, setNome] = useState('');
+    const [descricao, setDescricao] = useState('');
+
+    const [grupos, setGrupos] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(-1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [message, setMessage] = useState({ type: '', text: '' });
+    const [loading, setLoading] = useState(false);
+    const [modo, setModo] = useState('visualizacao');
+    const [originalData, setOriginalData] = useState({});
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    useEffect(() => {
+        carregarGrupos();
+    }, []);
+
+    const carregarGrupos = async () => {
+        setLoading(true);
+        try {
+            const data = await grupoItemService.listar();
+            const gruposFormatados = data.map(item => ({
+                id: item.idGrupo,
+                nome: item.nome,
+                descricao: item.descricao
+            }));
+            setGrupos(gruposFormatados);
+            if (gruposFormatados.length > 0) {
+                selecionarGrupo(gruposFormatados[0], 0);
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const selecionarGrupo = (grupo, index) => {
+        setCurrentIndex(index);
+        setIdGrupo(grupo.id);
+        setNome(grupo.nome);
+        setDescricao(grupo.descricao || '');
+        setOriginalData({ ...grupo });
+        setModo('visualizacao');
+    };
+
+    const handleSearch = () => {
+        if (!searchTerm.trim()) {
+            setMessage({ type: 'error', text: 'Digite um termo para pesquisa!' });
+            return;
+        }
+        const results = grupos.filter(grupo =>
+            grupo.nome.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setSearchResults(results);
+        setMessage({
+            type: results.length ? 'success' : 'error',
+            text: results.length ? `${results.length} encontrado(s)` : 'Nenhum grupo encontrado'
+        });
+    };
+
+    const selectGrupo = (grupo) => {
+        const index = grupos.findIndex(g => g.id === grupo.id);
+        selecionarGrupo(grupo, index);
+        setSearchResults([]);
+        setSearchTerm('');
+        setMessage({ type: '', text: '' });
+    };
+
+    const handleEditar = () => {
+        setOriginalData({ id: idGrupo, nome, descricao });
+        setModo('edicao');
+    };
+
+    const handleNovo = () => {
+        setOriginalData({});
+        setIdGrupo('');
+        setNome('');
+        setDescricao('');
+        setModo('criacao');
+    };
+
+    const handleCancelar = () => {
+        if (modo === 'edicao' && originalData.id) {
+            setIdGrupo(originalData.id);
+            setNome(originalData.nome);
+            setDescricao(originalData.descricao);
+        } else if (modo === 'criacao' && grupos.length > 0 && currentIndex >= 0) {
+            const atual = grupos[currentIndex];
+            setIdGrupo(atual.id);
+            setNome(atual.nome);
+            setDescricao(atual.descricao);
+        } else if (modo === 'criacao' && grupos.length === 0) {
+            setIdGrupo('');
+            setNome('');
+            setDescricao('');
+        }
+        setModo('visualizacao');
+        setMessage({ type: '', text: '' });
+    };
+
+    const handleSave = async () => {
+        if (!nome) {
+            setMessage({ type: 'error', text: 'Preencha o nome do grupo!' });
+            return;
+        }
+
+        const dados = { nome, descricao };
+
+        setLoading(true);
+        try {
+            if (modo === 'edicao' && idGrupo) {
+                const atualizado = await grupoItemService.atualizar(idGrupo, dados);
+                const grupoMapeado = {
+                    id: atualizado.idGrupo,
+                    nome: atualizado.nome,
+                    descricao: atualizado.descricao
+                };
+                setGrupos(prev => prev.map(g => g.id === idGrupo ? grupoMapeado : g));
+                setOriginalData(grupoMapeado);
+                setMessage({ type: 'success', text: 'Grupo atualizado!' });
+            } else if (modo === 'criacao') {
+                const novo = await grupoItemService.criar(dados);
+                const novoMapeado = {
+                    id: novo.idGrupo,
+                    nome: novo.nome,
+                    descricao: novo.descricao
+                };
+                setGrupos(prev => {
+                    const updated = [...prev, novoMapeado];
+                    setTimeout(() => {
+                        selecionarGrupo(novoMapeado, updated.length - 1);
+                    }, 0);
+                    return updated;
+                });
+                setMessage({ type: 'success', text: 'Grupo cadastrado!' });
+            }
+            setModo('visualizacao');
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteClick = () => {
+        if (!idGrupo) {
+            setMessage({ type: 'error', text: 'Selecione um grupo!' });
+            return;
+        }
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
+        setLoading(true);
+        try {
+            await grupoItemService.deletar(idGrupo);
+            const filtered = grupos.filter(g => g.id !== idGrupo);
+            setGrupos(filtered);
+            if (filtered.length === 0) {
+                setIdGrupo('');
+                setNome('');
+                setDescricao('');
+                setCurrentIndex(-1);
+                setOriginalData({});
+            } else {
+                let newIndex = currentIndex;
+                if (newIndex >= filtered.length) {
+                    newIndex = filtered.length - 1;
+                }
+                const current = filtered[newIndex];
+                setCurrentIndex(newIndex);
+                setIdGrupo(current.id);
+                setNome(current.nome);
+                setDescricao(current.descricao);
+                setOriginalData({ ...current });
+            }
+            setModo('visualizacao');
+            setMessage({ type: 'success', text: 'Grupo excluído!' });
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleNext = () => {
+        if (modo !== 'visualizacao') return;
+        if (currentIndex < grupos.length - 1) {
+            const next = grupos[currentIndex + 1];
+            selecionarGrupo(next, currentIndex + 1);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (modo !== 'visualizacao') return;
+        if (currentIndex > 0) {
+            const prev = grupos[currentIndex - 1];
+            selecionarGrupo(prev, currentIndex - 1);
+        }
+    };
+
+    const camposDesabilitados = modo === 'visualizacao' || loading;
+
+    return (
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.headerTitle}>
+                    <FolderOpen size={28} />
+                    <h2>Cadastro de Grupo de Itens</h2>
+                </div>
+                {grupos.length > 0 && modo === 'visualizacao' && (
+                    <div className={styles.navigationGroup}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handlePrevious}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Anterior"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        <span className={styles.positionIndicator}>
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${grupos.length}` : `0/${grupos.length}`}
+                        </span>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleNext}
+                            disabled={currentIndex >= grupos.length - 1 || loading}
+                            title="Próximo"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
+                )}
+                {(modo === 'edicao' || modo === 'criacao') && (
+                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                        <button className={styles.navButton} disabled>◀</button>
+                        <span className={styles.positionIndicator}>
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${grupos.length}` : `0/${grupos.length}`}
+                        </span>
+                        <button className={styles.navButton} disabled>▶</button>
+                    </div>
+                )}
+            </div>
+
+            {modo === 'visualizacao' && (
+                <div className={styles.searchSection}>
+                    <div className={styles.searchContainer}>
+                        <input
+                            type="text"
+                            className={styles.searchInput}
+                            placeholder="Pesquisar por nome..."
+                            value={searchTerm || ''}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            disabled={loading}
+                        />
+                        <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
+                            <Search size={18} /> Pesquisar
+                        </button>
+                    </div>
+                    {searchResults.length > 0 && (
+                        <div className={styles.resultsList}>
+                            {searchResults.map(grupo => (
+                                <div key={grupo.id} className={styles.resultItem} onClick={() => selectGrupo(grupo)}>
+                                    <div className={styles.resultItemInfo}>
+                                        <span className={styles.resultItemName}>{grupo.nome}</span>
+                                        <span className={styles.resultItemDoc}>{grupo.descricao || 'Sem descrição'}</span>
+                                    </div>
+                                    <span>👉</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className={styles.form}>
+                <div className={styles.formGrid}>
+                    <div className={`${styles.formGroup} ${styles.idField}`}>
+                        <label>CÓDIGO</label>
+                        <input type="text" value={idGrupo || ''} disabled placeholder="Automático" />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>NOME *</label>
+                        <input
+                            type="text"
+                            value={nome || ''}
+                            onChange={(e) => setNome(e.target.value)}
+                            placeholder="Digite o nome do grupo"
+                            disabled={camposDesabilitados}
+                        />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>DESCRIÇÃO</label>
+                        <input
+                            type="text"
+                            value={descricao || ''}
+                            onChange={(e) => setDescricao(e.target.value)}
+                            placeholder="Digite a descrição do grupo"
+                            disabled={camposDesabilitados}
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.buttonGroup}>
+                    {modo === 'visualizacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnEdit}`}
+                                onClick={handleEditar}
+                                disabled={loading || !idGrupo}
+                                title="Editar grupo"
+                            >
+                                <Edit2 size={18} /> Editar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnNew}`}
+                                onClick={handleNovo}
+                                disabled={loading}
+                                title="Criar novo grupo"
+                            >
+                                <Plus size={18} /> Novo
+                            </button>
+                        </>
+                    )}
+                    {modo === 'edicao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                                title="Salvar alterações"
+                            >
+                                <Save size={18} /> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnDelete}`}
+                                onClick={handleDeleteClick}
+                                disabled={loading || !idGrupo}
+                                title="Excluir grupo"
+                            >
+                                <Trash2 size={18} /> Excluir
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                                title="Cancelar edição"
+                            >
+                                <X size={18} /> Cancelar
+                            </button>
+                        </>
+                    )}
+                    {modo === 'criacao' && (
+                        <>
+                            <button
+                                className={`${styles.btn} ${styles.btnSave}`}
+                                onClick={handleSave}
+                                disabled={loading}
+                                title="Salvar novo grupo"
+                            >
+                                <Save size={18} /> Salvar
+                            </button>
+                            <button
+                                className={`${styles.btn} ${styles.btnCancel}`}
+                                onClick={handleCancelar}
+                                disabled={loading}
+                                title="Cancelar criação"
+                            >
+                                <X size={18} /> Cancelar
+                            </button>
+                        </>
+                    )}
+                </div>
+
+                {message.text && (
+                    <div className={`${styles.message} ${styles[message.type]}`}>
+                        {message.text}
+                    </div>
+                )}
+            </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteConfirm}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir este grupo de itens? Esta ação não pode ser desfeita."
+                itemName={nome}
+                confirmText="Sim, Excluir"
+                cancelText="Cancelar"
+            />
+        </div>
+    );
+}
+
+export default GrupoItemCadastro;

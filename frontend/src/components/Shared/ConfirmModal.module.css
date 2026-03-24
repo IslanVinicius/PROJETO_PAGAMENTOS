@@ -1,0 +1,221 @@
+/* ============================================
+   MODAL DE CONFIRMAÇÃO - DESIGN MODERNO
+   ============================================ */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal {
+    background-color: var(--bg-primary, #ffffff);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 420px;
+    margin: 20px;
+    animation: slideUp 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 24px 24px 0;
+}
+
+.iconWrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d97706;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(217, 119, 6, 0);
+    }
+}
+
+.closeButton {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background-color: transparent;
+    color: var(--text-secondary, #6b7280);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background-color: var(--bg-secondary, #f3f4f6);
+    color: var(--text-primary, #111827);
+}
+
+.content {
+    padding: 20px 24px 24px;
+    text-align: center;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary, #111827);
+    margin: 0 0 12px 0;
+}
+
+.message {
+    font-size: 15px;
+    color: var(--text-secondary, #6b7280);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.itemName {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-radius: 8px;
+    border-left: 4px solid #ef4444;
+}
+
+.itemName span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #991b1b;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    padding: 0 24px 24px;
+}
+
+.cancelButton {
+    flex: 1;
+    height: 48px;
+    padding: 0 20px;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    background-color: var(--bg-primary, #ffffff);
+    color: var(--text-secondary, #6b7280);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    border-color: var(--text-secondary, #6b7280);
+    color: var(--text-primary, #111827);
+    background-color: var(--bg-secondary, #f3f4f6);
+}
+
+.confirmButton {
+    flex: 1;
+    height: 48px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.confirmButton:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+}
+
+.confirmButton:active {
+    transform: translateY(0);
+}
+
+.confirmButtonSuccess {
+    flex: 1;
+    height: 48px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.confirmButtonSuccess:hover {
+    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+}
+
+.confirmButtonSuccess:active {
+    transform: translateY(0);
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+    .modal {
+        margin: 16px;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancelButton,
+    .confirmButton {
+        width: 100%;
+    }
+}
