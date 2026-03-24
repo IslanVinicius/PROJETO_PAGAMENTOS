@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import styles from './EmpresaCadastro-novo.module.css';
 import { empresaService } from '../../services/empresaService';
 import ConfirmModal from '../Shared/ConfirmModal';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function EmpresaCadastro() {
     // Estados dos campos
@@ -23,6 +25,27 @@ function EmpresaCadastro() {
     // Para armazenar dados originais durante edição (para cancelar)
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaEmpresa = [
+        { campo: 'nome', label: 'Nome Fantasia' },
+        { campo: 'razao', label: 'Razão Social' },
+        { campo: 'cnpj', label: 'CNPJ' },
+        { campo: 'id', label: 'ID' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(empresas, camposPesquisaEmpresa);
 
     useEffect(() => {
         carregarEmpresas();
@@ -232,6 +255,21 @@ function EmpresaCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (empresas.length > 0 && currentIndex !== 0) {
+            selecionarEmpresa(empresas[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (empresas.length > 0 && currentIndex !== empresas.length - 1) {
+            const lastIndex = empresas.length - 1;
+            selecionarEmpresa(empresas[lastIndex], lastIndex);
+        }
+    };
+
     // Verifica se os campos devem estar desabilitados
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
@@ -243,6 +281,14 @@ function EmpresaCadastro() {
                 </div>
                 {empresas.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
                         <button
                             className={styles.navButton}
                             onClick={handlePrevious}
@@ -262,55 +308,63 @@ function EmpresaCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= empresas.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>◀</button>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${empresas.length}` : `0/${empresas.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>▶</button>
+                        <button className={styles.navButton} disabled title="Próximo">
+                            <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
             </div>
 
-            {/* Barra de pesquisa só aparece no modo visualização */}
-            {modo === 'visualizacao' && (
-                <div className={styles.searchSection}>
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="Pesquisar por nome, CNPJ ou razão social..."
-                            value={searchTerm || ''}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            disabled={loading}
-                        />
-                        <button
-                            className={styles.searchButton}
-                            onClick={handleSearch}
-                            disabled={loading}
-                        >
-                            <Search size={18} /> Pesquisar
-                        </button>
-                    </div>
-                    {searchResults.length > 0 && (
-                        <div className={styles.resultsList}>
-                            {searchResults.map(emp => (
-                                <div key={emp.id} className={styles.resultItem} onClick={() => selectEmpresa(emp)}>
-                                    <div className={styles.resultItemInfo}>
-                                        <span className={styles.resultItemName}>{emp.nome}</span>
-                                        <span className={styles.resultItemDoc}>CNPJ: {emp.cnpj}</span>
-                                    </div>
-                                    <span>👉</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaEmpresa}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(empresa) => {
+                    const index = empresas.findIndex(e => e.id === empresa.id);
+                    selecionarEmpresa(empresa, index);
+                    handleSelecionarResultado(empresa);
+                }}
+                colunas={[
+                    { campo: 'id', label: 'ID' },
+                    { campo: 'nome', label: 'Nome' },
+                    { campo: 'cnpj', label: 'CNPJ' },
+                    { campo: 'razao', label: 'Razão Social' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>

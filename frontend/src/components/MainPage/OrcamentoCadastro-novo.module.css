@@ -5,7 +5,7 @@
 .container {
     background-color: var(--bg-primary);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-2xl);
+    padding: var(--spacing-md);
     box-shadow: var(--shadow-lg);
     width: 100%;
     max-width: 1200px;
@@ -17,11 +17,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--spacing-2xl);
-    padding-bottom: var(--spacing-lg);
-    border-bottom: 3px solid var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 2px solid var(--primary-color);
     background: linear-gradient(to right, var(--bg-secondary), transparent);
-    padding: var(--spacing-lg);
     border-radius: var(--radius-md);
 }
 
@@ -33,7 +32,7 @@
 }
 
 .headerTitle h2 {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 700;
     margin: 0;
     color: var(--primary-color);
@@ -51,8 +50,8 @@
 }
 
 .navButton {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border: none;
     border-radius: var(--radius-md);
     background-color: var(--primary-color);
@@ -91,27 +90,27 @@
 }
 
 .positionIndicator {
-    padding: 0 var(--spacing-lg);
-    height: 42px;
+    padding: 0 var(--spacing-md);
+    height: 36px;
     display: flex;
     align-items: center;
     background-color: var(--bg-primary);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-weight: 700;
-    font-size: 14px;
-    min-width: 80px;
+    font-size: 13px;
+    min-width: 70px;
     justify-content: center;
     border: 2px solid var(--border-color);
 }
 
 /* Pesquisa */
 .searchSection {
-    margin-bottom: var(--spacing-2xl);
-    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm);
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    border-radius: var(--radius-lg);
-    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
 }
 
@@ -122,13 +121,13 @@
 
 .searchInput {
     flex: 1;
-    height: 48px;
-    padding: 0 var(--spacing-lg);
-    border: 2px solid var(--border-color);
+    height: 38px;
+    padding: 0 var(--spacing-md);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-size: 15px;
+    font-size: 14px;
     outline: none;
     transition: var(--transition-fast);
     font-weight: 500;
@@ -148,19 +147,19 @@
 }
 
 .searchButton {
-    height: 48px;
-    padding: 0 var(--spacing-2xl);
+    height: 38px;
+    padding: 0 var(--spacing-lg);
     background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
     transition: var(--transition-fast);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     white-space: nowrap;
     box-shadow: var(--shadow-sm);
 }
@@ -253,10 +252,10 @@
 
 .formGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-xl);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
     background-color: var(--bg-primary);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
 }
@@ -264,31 +263,31 @@
 .formGroup {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 2px;
 }
 
 .formGroup label {
-    font-weight: 700;
+    font-weight: 600;
     color: var(--primary-color);
-    font-size: 12px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: var(--spacing-xs);
+    letter-spacing: 0.5px;
+    margin-bottom: 0;
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 2px;
 }
 
 .formGroup input,
 .formGroup select,
 .formGroup textarea {
-    height: 48px;
-    padding: 0 var(--spacing-lg);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
+    height: 36px;
+    padding: 0 var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     outline: none;
     transition: var(--transition-fast);
@@ -296,9 +295,9 @@
 
 .formGroup textarea {
     height: auto;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-xs) var(--spacing-sm);
     resize: vertical;
-    min-height: 100px;
+    min-height: 60px;
     font-family: inherit;
 }
 
@@ -337,26 +336,26 @@
 /* Botões - Padronizados e Modernos */
 .buttonGroup {
     display: flex;
-    gap: var(--spacing-md);
-    padding: var(--spacing-xl);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
     background-color: var(--bg-primary);
     border-radius: var(--radius-md);
-    border-top: 3px solid var(--primary-color);
+    border-top: 2px solid var(--primary-color);
     box-shadow: var(--shadow-sm);
 }
 
 .btn {
-    height: 50px;
-    padding: 0 var(--spacing-2xl);
+    height: 40px;
+    padding: 0 var(--spacing-lg);
     border: none;
     border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 13px;
     cursor: pointer;
     transition: var(--transition-fast);
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     justify-content: center;
     flex: 1;
     white-space: nowrap;
@@ -366,8 +365,8 @@
 }
 
 .btn svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     display: block;
     flex-shrink: 0;
 }
@@ -620,39 +619,39 @@
 /* Seção de Itens do Orçamento */
 .itensSection {
     background-color: var(--bg-primary);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    margin-top: var(--spacing-xl);
+    margin-top: var(--spacing-sm);
 }
 
 .itensHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 2px solid var(--border-light);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .itensHeader h3 {
     margin: 0;
     color: var(--primary-color);
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 700;
 }
 
 .btnAddItem {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
     background: linear-gradient(135deg, var(--success-color) 0%, #2d8645 100%);
     color: white;
     border: none;
-    border-radius: var(--radius-md);
-    font-weight: 700;
-    font-size: 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 12px;
     cursor: pointer;
     transition: var(--transition-fast);
     box-shadow: var(--shadow-sm);
@@ -677,7 +676,7 @@
 
 .itensTable th,
 .itensTable td {
-    padding: var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
     text-align: left;
     border-bottom: 1px solid var(--border-light);
 }
@@ -750,11 +749,11 @@
 /* Resumo Financeiro */
 .resumoSection {
     background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    margin-top: var(--spacing-xl);
-    border: 2px solid var(--border-light);
+    margin-top: var(--spacing-sm);
+    border: 1px solid var(--border-light);
 }
 
 .resumoGrid {
@@ -790,10 +789,10 @@
 /* Seção de Imagens */
 .imagensSection {
     background-color: var(--bg-primary);
-    padding: var(--spacing-xl);
+    padding: var(--spacing-md);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    margin-top: var(--spacing-xl);
+    margin-top: var(--spacing-sm);
 }
 
 .imagensHeader {

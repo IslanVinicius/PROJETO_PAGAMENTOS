@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, MapPin } from 'lucide-react';
 import styles from './DadosBancariosCadastro-novo.module.css';
 import { dadosBancariosService } from '../../services/dadosBancariosService';
 import ModalPesquisa from './ModalPesquisa';
 import ConfirmModal from '../Shared/ConfirmModal';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function DadosBancariosCadastro() {
     const [dadosId, setDadosId] = useState('');
@@ -26,6 +28,29 @@ function DadosBancariosCadastro() {
 
     // Estado para o modal de pesquisa de prestadores
     const [modalAberto, setModalAberto] = useState(false);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaDadosBancarios = [
+        { campo: 'banco', label: 'Banco' },
+        { campo: 'agencia', label: 'Agência' },
+        { campo: 'conta', label: 'Conta' },
+        { campo: 'chavePix', label: 'Chave PIX' },
+        { campo: 'codPrestador', label: 'Código Prestador' },
+        { campo: 'dadosId', label: 'ID' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(registros, camposPesquisaDadosBancarios);
 
     useEffect(() => {
         carregarRegistros();
@@ -273,6 +298,21 @@ function DadosBancariosCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (registros.length > 0 && currentIndex !== 0) {
+            selecionarRegistro(registros[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (registros.length > 0 && currentIndex !== registros.length - 1) {
+            const lastIndex = registros.length - 1;
+            selecionarRegistro(registros[lastIndex], lastIndex);
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
@@ -292,6 +332,14 @@ function DadosBancariosCadastro() {
                     <div className={styles.navigationGroup}>
                         <button
                             className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button
+                            className={styles.navButton}
                             onClick={handlePrevious}
                             disabled={currentIndex <= 0 || loading}
                             title="Anterior"
@@ -309,57 +357,64 @@ function DadosBancariosCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= registros.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${registros.length}` : `0/${registros.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Próximo">
                             <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
                         </button>
                     </div>
                 )}
             </div>
 
-            {/* Seção de pesquisa (só visível em modo visualização) */}
-            {modo === 'visualizacao' && (
-                <div className={styles.searchSection}>
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="Pesquisar por banco, código do prestador, agência, conta ou chave Pix..."
-                            value={searchTerm || ''}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            disabled={loading}
-                        />
-                        <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
-                            <Search size={18} /> Pesquisar
-                        </button>
-                    </div>
-                    {searchResults.length > 0 && (
-                        <div className={styles.resultsList}>
-                            {searchResults.map(reg => (
-                                <div key={reg.dadosId} className={styles.resultItem} onClick={() => selectRegistro(reg)}>
-                                    <div className={styles.resultItemInfo}>
-                                        <span className={styles.resultItemName}>{reg.banco}</span>
-                                        <span className={styles.resultItemDoc}>
-                                            Prestador: {reg.codPrestador} | Conta: {reg.conta}
-                                        </span>
-                                    </div>
-                                    <span>👉</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaDadosBancarios}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(registro) => {
+                    const index = registros.findIndex(r => r.dadosId === registro.dadosId);
+                    selecionarRegistro(registro, index);
+                    handleSelecionarResultado(registro);
+                }}
+                colunas={[
+                    { campo: 'dadosId', label: 'ID' },
+                    { campo: 'banco', label: 'Banco' },
+                    { campo: 'codPrestador', label: 'Prestador' },
+                    { campo: 'conta', label: 'Conta' },
+                    { campo: 'chavePix', label: 'Chave PIX' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>

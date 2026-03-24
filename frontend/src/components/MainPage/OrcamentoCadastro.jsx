@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, FileText, Printer, Trash, Image, Upload, ZoomIn } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, FileText, Printer, Trash, Image, Upload, ZoomIn } from 'lucide-react';
 import styles from './OrcamentoCadastro-novo.module.css';
 import { orcamentoService } from '../../services/orcamentoService';
 import { empresaService } from '../../services/empresaService';
@@ -9,6 +9,8 @@ import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
 import ModalPesquisaItens from './ModalPesquisaItens';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { jsPDF } from 'jspdf';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function OrcamentoCadastro() {
     const [orcamentoID, setOrcamentoID] = useState('');
@@ -42,6 +44,29 @@ function OrcamentoCadastro() {
     const [modalItensAberto, setModalItensAberto] = useState(false);
 
     const fileInputRef = useRef(null);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaOrcamento = [
+        { campo: 'descricao', label: 'Descrição' },
+        { campo: 'movimento', label: 'Data Movimento' },
+        { campo: 'idPrestador', label: 'ID Prestador' },
+        { campo: 'empresaID', label: 'ID Empresa' },
+        { campo: 'orcamentoID', label: 'ID Orçamento' },
+        { campo: 'tipoPagamento', label: 'Tipo Pagamento' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(orcamentos, camposPesquisaOrcamento);
 
     // Funções de formatação de data
     const formatarDataParaExibicao = (dataISO) => {
@@ -399,6 +424,21 @@ function OrcamentoCadastro() {
         if (currentIndex > 0) {
             const prev = orcamentos[currentIndex - 1];
             selecionarOrcamento(prev, currentIndex - 1);
+        }
+    };
+
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (orcamentos.length > 0 && currentIndex !== 0) {
+            selecionarOrcamento(orcamentos[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (orcamentos.length > 0 && currentIndex !== orcamentos.length - 1) {
+            const lastIndex = orcamentos.length - 1;
+            selecionarOrcamento(orcamentos[lastIndex], lastIndex);
         }
     };
 
@@ -776,6 +816,14 @@ function OrcamentoCadastro() {
                     <div className={styles.navigationGroup}>
                         <button
                             className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button
+                            className={styles.navButton}
                             onClick={handlePrevious}
                             disabled={currentIndex <= 0 || loading}
                             title="Anterior"
@@ -793,58 +841,63 @@ function OrcamentoCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= orcamentos.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Próximo">
                             <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
                         </button>
                     </div>
                 )}
             </div>
 
-            <div className={styles.searchSection}>
-                <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Pesquisar por descrição, movimento, prestador ou empresa..."
-                        value={searchTerm || ''}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading || modo !== 'visualizacao'}
-                    />
-                    <button
-                        className={styles.searchButton}
-                        onClick={handleSearch}
-                        disabled={loading || modo !== 'visualizacao'}
-                    >
-                        <Search size={18} /> Pesquisar
-                    </button>
-                </div>
-                {searchResults.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.resultsList}>
-                        {searchResults.map(orc => (
-                            <div key={orc.orcamentoID} className={styles.resultItem} onClick={() => selectOrcamento(orc)}>
-                                <div className={styles.resultItemInfo}>
-                                    <span className={styles.resultItemName}>{orc.descricao}</span>
-                                    <span className={styles.resultItemDoc}>
-                                        Data: {orc.movimento} | Valor: {formatarValor(orc.valor)}
-                                    </span>
-                                </div>
-                                <span>👉</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaOrcamento}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(orcamento) => {
+                    const index = orcamentos.findIndex(o => o.orcamentoID === orcamento.orcamentoID);
+                    selecionarOrcamento(orcamento, index);
+                    handleSelecionarResultado(orcamento);
+                }}
+                colunas={[
+                    { campo: 'orcamentoID', label: 'ID' },
+                    { campo: 'descricao', label: 'Descrição' },
+                    { campo: 'movimento', label: 'Data' },
+                    { campo: 'valorFinal', label: 'Valor Final', format: 'moeda' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>

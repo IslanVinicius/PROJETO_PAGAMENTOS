@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, Package } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, Package } from 'lucide-react';
 import styles from './ItemCadastro-novo.module.css';
 import { itemService } from '../../services/itemService';
 import { grupoItemService } from '../../services/grupoItemService';
 import ConfirmModal from '../Shared/ConfirmModal';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function ItemCadastro() {
     const [idItem, setIdItem] = useState('');
@@ -22,6 +24,26 @@ function ItemCadastro() {
     const [modo, setModo] = useState('visualizacao');
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaItem = [
+        { campo: 'nome', label: 'Nome' },
+        { campo: 'descricao', label: 'Descrição' },
+        { campo: 'id', label: 'ID' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(itens, camposPesquisaItem);
 
     useEffect(() => {
         carregarItens();
@@ -252,6 +274,21 @@ function ItemCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (itens.length > 0 && currentIndex !== 0) {
+            selecionarItem(itens[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (itens.length > 0 && currentIndex !== itens.length - 1) {
+            const lastIndex = itens.length - 1;
+            selecionarItem(itens[lastIndex], lastIndex);
+        }
+    };
+
     const getNomeGrupo = (id) => {
         const grupo = grupos.find(g => g.idGrupo === id);
         return grupo ? grupo.nome : 'Grupo não encontrado';
@@ -268,6 +305,14 @@ function ItemCadastro() {
                 </div>
                 {itens.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
                         <button
                             className={styles.navButton}
                             onClick={handlePrevious}
@@ -287,52 +332,63 @@ function ItemCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= itens.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>◀</button>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${itens.length}` : `0/${itens.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>▶</button>
+                        <button className={styles.navButton} disabled title="Próximo">
+                            <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
             </div>
 
-            {modo === 'visualizacao' && (
-                <div className={styles.searchSection}>
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="Pesquisar por nome..."
-                            value={searchTerm || ''}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            disabled={loading}
-                        />
-                        <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
-                            <Search size={18} /> Pesquisar
-                        </button>
-                    </div>
-                    {searchResults.length > 0 && (
-                        <div className={styles.resultsList}>
-                            {searchResults.map(item => (
-                                <div key={item.id} className={styles.resultItem} onClick={() => selectItem(item)}>
-                                    <div className={styles.resultItemInfo}>
-                                        <span className={styles.resultItemName}>{item.nome}</span>
-                                        <span className={styles.resultItemDoc}>
-                                            {item.valorUnitario ? `R$ ${parseFloat(item.valorUnitario).toFixed(2)}` : 'Sem valor'} | {getNomeGrupo(item.idGrupo)}
-                                        </span>
-                                    </div>
-                                    <span>👉</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaItem}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(item) => {
+                    const index = itens.findIndex(i => i.id === item.id);
+                    selecionarItem(item, index);
+                    handleSelecionarResultado(item);
+                }}
+                colunas={[
+                    { campo: 'id', label: 'Código' },
+                    { campo: 'nome', label: 'Nome' },
+                    { campo: 'descricao', label: 'Descrição' },
+                    { campo: 'valorUnitario', label: 'Valor Unitário', format: 'moeda' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>

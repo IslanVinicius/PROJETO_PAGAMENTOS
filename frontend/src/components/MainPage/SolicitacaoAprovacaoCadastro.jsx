@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, CheckCircle } from 'lucide-react';
 import styles from './SolicitacaoAprovacaoCadastro-novo.module.css';
 import { solicitacaoAprovacaoService } from '../../services/solicitacaoAprovacaoService';
 import ModalPesquisaOrcamento from './ModalPesquisaOrcamento';
 import ConfirmModal from '../Shared/ConfirmModal';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function SolicitacaoAprovacaoCadastro() {
     const [solicitacaoAprovacaoId, setSolicitacaoAprovacaoId] = useState('');
@@ -23,6 +25,27 @@ function SolicitacaoAprovacaoCadastro() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [modalOrcamentoAberto, setModalOrcamentoAberto] = useState(false);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaSolicitacao = [
+        { campo: 'movimento', label: 'Movimento' },
+        { campo: 'orcamentoId', label: 'ID Orçamento' },
+        { campo: 'statusSolicitacao', label: 'Status' },
+        { campo: 'solicitacaoAprovacaoId', label: 'ID' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(solicitacoes, camposPesquisaSolicitacao);
 
     // Funções de formatação de data
     const formatarDataParaInput = (dataBR) => {
@@ -269,6 +292,21 @@ function SolicitacaoAprovacaoCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (solicitacoes.length > 0 && currentIndex !== 0) {
+            selecionarSolicitacao(solicitacoes[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (solicitacoes.length > 0 && currentIndex !== solicitacoes.length - 1) {
+            const lastIndex = solicitacoes.length - 1;
+            selecionarSolicitacao(solicitacoes[lastIndex], lastIndex);
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
@@ -288,6 +326,14 @@ function SolicitacaoAprovacaoCadastro() {
                     <div className={styles.navigationGroup}>
                         <button
                             className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button
+                            className={styles.navButton}
                             onClick={handlePrevious}
                             disabled={currentIndex <= 0 || loading}
                             title="Anterior"
@@ -305,58 +351,63 @@ function SolicitacaoAprovacaoCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= solicitacoes.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Próximo">
                             <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
                         </button>
                     </div>
                 )}
             </div>
 
-            <div className={styles.searchSection}>
-                <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Pesquisar por movimento, ID do orçamento ou status..."
-                        value={searchTerm || ''}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading || modo !== 'visualizacao'}
-                    />
-                    <button
-                        className={styles.searchButton}
-                        onClick={handleSearch}
-                        disabled={loading || modo !== 'visualizacao'}
-                    >
-                        <Search size={18} /> Pesquisar
-                    </button>
-                </div>
-                {searchResults.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.resultsList}>
-                        {searchResults.map(sol => (
-                            <div key={sol.solicitacaoAprovacaoId} className={styles.resultItem} onClick={() => selectSolicitacao(sol)}>
-                                <div className={styles.resultItemInfo}>
-                                    <span className={styles.resultItemName}>Solicitação #{sol.solicitacaoAprovacaoId}</span>
-                                    <span className={styles.resultItemDoc}>
-                                        Orçamento: {sol.orcamentoId} | Data: {sol.movimento} | Status: {sol.statusSolicitacao}
-                                    </span>
-                                </div>
-                                <span>👉</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaSolicitacao}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(solicitacao) => {
+                    const index = solicitacoes.findIndex(s => s.solicitacaoAprovacaoId === solicitacao.solicitacaoAprovacaoId);
+                    selecionarSolicitacao(solicitacao, index);
+                    handleSelecionarResultado(solicitacao);
+                }}
+                colunas={[
+                    { campo: 'solicitacaoAprovacaoId', label: 'ID' },
+                    { campo: 'orcamentoId', label: 'Orçamento' },
+                    { campo: 'movimento', label: 'Data' },
+                    { campo: 'statusSolicitacao', label: 'Status' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>
