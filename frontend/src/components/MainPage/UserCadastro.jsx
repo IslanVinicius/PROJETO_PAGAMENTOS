@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, User } from 'lucide-react';
 import styles from './UserCadastro-novo.module.css';
 import { userService } from '../../services/userService';
 import ConfirmModal from '../Shared/ConfirmModal';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function UserCadastro() {
     const [id, setId] = useState('');
@@ -22,6 +24,26 @@ function UserCadastro() {
 
     // Lista de roles disponíveis
     const roles = ['ADMIN', 'SOLICITANTE', 'ESCRITORIO', 'APROVADOR'];
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaUsuario = [
+        { campo: 'username', label: 'Usuário' },
+        { campo: 'role', label: 'Permissão' },
+        { campo: 'id', label: 'ID' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(users, camposPesquisaUsuario);
 
     useEffect(() => {
         carregarUsuarios();
@@ -237,6 +259,21 @@ function UserCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (users.length > 0 && currentIndex !== 0) {
+            selecionarUsuario(users[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (users.length > 0 && currentIndex !== users.length - 1) {
+            const lastIndex = users.length - 1;
+            selecionarUsuario(users[lastIndex], lastIndex);
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
@@ -248,6 +285,14 @@ function UserCadastro() {
                 </div>
                 {users.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
                         <button
                             className={styles.navButton}
                             onClick={handlePrevious}
@@ -267,52 +312,62 @@ function UserCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= users.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Próximo">
                             <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
                         </button>
                     </div>
                 )}
             </div>
 
-            <div className={styles.searchSection}>
-                <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Pesquisar por nome de usuário ou permissão..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading || modo !== 'visualizacao'}
-                    />
-                    <button className={styles.searchButton} onClick={handleSearch} disabled={loading || modo !== 'visualizacao'}>
-                        <Search size={18} /> Pesquisar
-                    </button>
-                </div>
-                {searchResults.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.resultsList}>
-                        {searchResults.map(user => (
-                            <div key={user.id} className={styles.resultItem} onClick={() => selectUsuario(user)}>
-                                <div className={styles.resultItemInfo}>
-                                    <span className={styles.resultItemName}>{user.username}</span>
-                                    <span className={styles.resultItemDoc}>Permissão: {user.role}</span>
-                                </div>
-                                <span>👉</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaUsuario}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(user) => {
+                    const index = users.findIndex(u => u.id === user.id);
+                    selecionarUsuario(user, index);
+                    handleSelecionarResultado(user);
+                }}
+                colunas={[
+                    { campo: 'id', label: 'ID' },
+                    { campo: 'username', label: 'Usuário' },
+                    { campo: 'role', label: 'Permissão' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>

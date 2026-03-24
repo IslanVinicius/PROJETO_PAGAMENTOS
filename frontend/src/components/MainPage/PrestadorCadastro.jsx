@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import styles from './PrestadorCadastro-novo.module.css';
 import { prestadorService } from '../../services/prestadorService';
 import ConfirmModal from '../Shared/ConfirmModal';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function PrestadorCadastro() {
     const [codPrestador, setCodPrestador] = useState('');
@@ -18,6 +20,26 @@ function PrestadorCadastro() {
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaPrestador = [
+        { campo: 'nome', label: 'Nome' },
+        { campo: 'cpf', label: 'CPF' },
+        { campo: 'id', label: 'ID' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(prestadores, camposPesquisaPrestador);
 
     useEffect(() => {
         carregarPrestadores();
@@ -211,6 +233,21 @@ function PrestadorCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (prestadores.length > 0 && currentIndex !== 0) {
+            selecionarPrestador(prestadores[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (prestadores.length > 0 && currentIndex !== prestadores.length - 1) {
+            const lastIndex = prestadores.length - 1;
+            selecionarPrestador(prestadores[lastIndex], lastIndex);
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
@@ -221,6 +258,14 @@ function PrestadorCadastro() {
                 </div>
                 {prestadores.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
                         <button
                             className={styles.navButton}
                             onClick={handlePrevious}
@@ -240,51 +285,62 @@ function PrestadorCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= prestadores.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>◀</button>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
+                            <ChevronLeft size={20} />
+                        </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${prestadores.length}` : `0/${prestadores.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>▶</button>
+                        <button className={styles.navButton} disabled title="Próximo">
+                            <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
             </div>
 
-            {/* Pesquisa visível apenas no modo visualização */}
-            {modo === 'visualizacao' && (
-                <div className={styles.searchSection}>
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="Pesquisar por nome ou CPF..."
-                            value={searchTerm || ''}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                            disabled={loading}
-                        />
-                        <button className={styles.searchButton} onClick={handleSearch} disabled={loading}>
-                            <Search size={18} /> Pesquisar
-                        </button>
-                    </div>
-                    {searchResults.length > 0 && (
-                        <div className={styles.resultsList}>
-                            {searchResults.map(prest => (
-                                <div key={prest.id} className={styles.resultItem} onClick={() => selectPrestador(prest)}>
-                                    <div className={styles.resultItemInfo}>
-                                        <span className={styles.resultItemName}>{prest.nome}</span>
-                                        <span className={styles.resultItemDoc}>CPF: {prest.cpf}</span>
-                                    </div>
-                                    <span>👉</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaPrestador}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(prestador) => {
+                    const index = prestadores.findIndex(p => p.id === prestador.id);
+                    selecionarPrestador(prestador, index);
+                    handleSelecionarResultado(prestador);
+                }}
+                colunas={[
+                    { campo: 'id', label: 'Código' },
+                    { campo: 'nome', label: 'Nome' },
+                    { campo: 'cpf', label: 'CPF' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>

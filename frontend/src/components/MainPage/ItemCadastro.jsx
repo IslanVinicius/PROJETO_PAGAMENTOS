@@ -1,36 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
-import styles from './EmpresaCadastro-novo.module.css';
-import { empresaService } from '../../services/empresaService';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, Package } from 'lucide-react';
+import styles from './ItemCadastro-novo.module.css';
+import { itemService } from '../../services/itemService';
+import { grupoItemService } from '../../services/grupoItemService';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
 
-function EmpresaCadastro() {
-    // Estados dos campos
-    const [idEmpresa, setIdEmpresa] = useState('');
+function ItemCadastro() {
+    const [idItem, setIdItem] = useState('');
     const [nome, setNome] = useState('');
-    const [cnpj, setCnpj] = useState('');
-    const [razao, setRazao] = useState('');
+    const [descricao, setDescricao] = useState('');
+    const [valorUnitario, setValorUnitario] = useState('');
+    const [idGrupo, setIdGrupo] = useState('');
+    const [grupos, setGrupos] = useState([]);
 
-    // Estados de controle
-    const [empresas, setEmpresas] = useState([]);
+    const [itens, setItens] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
-    const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
-
-    // Para armazenar dados originais durante edição (para cancelar)
+    const [modo, setModo] = useState('visualizacao');
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Configuração dos campos de pesquisa
-    const camposPesquisaEmpresa = [
-        { campo: 'nome', label: 'Nome Fantasia' },
-        { campo: 'razao', label: 'Razão Social' },
-        { campo: 'cnpj', label: 'CNPJ' },
+    const camposPesquisaItem = [
+        { campo: 'nome', label: 'Nome' },
+        { campo: 'descricao', label: 'Descrição' },
         { campo: 'id', label: 'ID' }
     ];
 
@@ -45,26 +43,36 @@ function EmpresaCadastro() {
         handlePesquisar,
         handleLimparPesquisa,
         handleSelecionarResultado
-    } = usePesquisa(empresas, camposPesquisaEmpresa);
+    } = usePesquisa(itens, camposPesquisaItem);
 
     useEffect(() => {
-        carregarEmpresas();
+        carregarItens();
+        carregarGrupos();
     }, []);
 
-    const carregarEmpresas = async () => {
+    const carregarGrupos = async () => {
+        try {
+            const data = await grupoItemService.listar();
+            setGrupos(data);
+        } catch (error) {
+            console.error('Erro ao carregar grupos:', error);
+        }
+    };
+
+    const carregarItens = async () => {
         setLoading(true);
         try {
-            const data = await empresaService.listar();
-            const empresasFormatadas = data.map(item => ({
-                id: item.idEmpresa,
+            const data = await itemService.listar();
+            const itensFormatados = data.map(item => ({
+                id: item.idItem,
                 nome: item.nome,
-                cnpj: item.cnpj,
-                razao: item.razao || ''
+                descricao: item.descricao,
+                valorUnitario: item.valorUnitario,
+                idGrupo: item.idGrupo
             }));
-            setEmpresas(empresasFormatadas);
-            if (empresasFormatadas.length > 0) {
-                // Seleciona o primeiro registro ao carregar
-                selecionarEmpresa(empresasFormatadas[0], 0);
+            setItens(itensFormatados);
+            if (itensFormatados.length > 0) {
+                selecionarItem(itensFormatados[0], 0);
             }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
@@ -73,13 +81,14 @@ function EmpresaCadastro() {
         }
     };
 
-    const selecionarEmpresa = (empresa, index) => {
+    const selecionarItem = (item, index) => {
         setCurrentIndex(index);
-        setIdEmpresa(empresa.id);
-        setNome(empresa.nome);
-        setCnpj(empresa.cnpj);
-        setRazao(empresa.razao || '');
-        setOriginalData({ ...empresa }); // salva cópia para cancelar
+        setIdItem(item.id);
+        setNome(item.nome);
+        setDescricao(item.descricao || '');
+        setValorUnitario(item.valorUnitario || '');
+        setIdGrupo(item.idGrupo);
+        setOriginalData({ ...item });
         setModo('visualizacao');
     };
 
@@ -88,104 +97,112 @@ function EmpresaCadastro() {
             setMessage({ type: 'error', text: 'Digite um termo para pesquisa!' });
             return;
         }
-        const results = empresas.filter(emp =>
-            emp.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            emp.cnpj.includes(searchTerm) ||
-            (emp.razao && emp.razao.toLowerCase().includes(searchTerm.toLowerCase()))
+        const results = itens.filter(item =>
+            item.nome.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setSearchResults(results);
         setMessage({
             type: results.length ? 'success' : 'error',
-            text: results.length ? `${results.length} encontrada(s)` : 'Nenhuma empresa encontrada'
+            text: results.length ? `${results.length} encontrado(s)` : 'Nenhum item encontrado'
         });
     };
 
-    const selectEmpresa = (empresa) => {
-        const index = empresas.findIndex(e => e.id === empresa.id);
-        selecionarEmpresa(empresa, index);
+    const selectItem = (item) => {
+        const index = itens.findIndex(i => i.id === item.id);
+        selecionarItem(item, index);
         setSearchResults([]);
         setSearchTerm('');
         setMessage({ type: '', text: '' });
     };
 
     const handleEditar = () => {
-        setOriginalData({ id: idEmpresa, nome, cnpj, razao });
+        setOriginalData({ id: idItem, nome, descricao, valorUnitario, idGrupo });
         setModo('edicao');
     };
 
     const handleNovo = () => {
-        setOriginalData({}); // limpa referência
-        setIdEmpresa('');
+        setOriginalData({});
+        setIdItem('');
         setNome('');
-        setCnpj('');
-        setRazao('');
+        setDescricao('');
+        setValorUnitario('');
+        setIdGrupo('');
         setModo('criacao');
     };
 
     const handleCancelar = () => {
         if (modo === 'edicao' && originalData.id) {
-            // Restaura dados originais
-            setIdEmpresa(originalData.id);
+            setIdItem(originalData.id);
             setNome(originalData.nome);
-            setCnpj(originalData.cnpj);
-            setRazao(originalData.razao || '');
-        } else if (modo === 'criacao' && empresas.length > 0 && currentIndex >= 0) {
-            // Volta para o registro atual
-            const empresaAtual = empresas[currentIndex];
-            setIdEmpresa(empresaAtual.id);
-            setNome(empresaAtual.nome);
-            setCnpj(empresaAtual.cnpj);
-            setRazao(empresaAtual.razao || '');
-        } else if (modo === 'criacao' && empresas.length === 0) {
-            // Não há registros, apenas limpa
-            setIdEmpresa('');
+            setDescricao(originalData.descricao);
+            setValorUnitario(originalData.valorUnitario);
+            setIdGrupo(originalData.idGrupo);
+        } else if (modo === 'criacao' && itens.length > 0 && currentIndex >= 0) {
+            const atual = itens[currentIndex];
+            setIdItem(atual.id);
+            setNome(atual.nome);
+            setDescricao(atual.descricao);
+            setValorUnitario(atual.valorUnitario);
+            setIdGrupo(atual.idGrupo);
+        } else if (modo === 'criacao' && itens.length === 0) {
+            setIdItem('');
             setNome('');
-            setCnpj('');
-            setRazao('');
+            setDescricao('');
+            setValorUnitario('');
+            setIdGrupo('');
         }
         setModo('visualizacao');
         setMessage({ type: '', text: '' });
     };
 
     const handleSave = async () => {
-        if (!nome || !cnpj) {
-            setMessage({ type: 'error', text: 'Preencha os campos obrigatórios!' });
+        if (!nome) {
+            setMessage({ type: 'error', text: 'Preencha o nome do item!' });
+            return;
+        }
+        if (!idGrupo) {
+            setMessage({ type: 'error', text: 'Selecione um grupo!' });
             return;
         }
 
-        const dados = { nome, cnpj, razao: razao || null };
+        const dados = {
+            nome,
+            descricao,
+            valorUnitario: valorUnitario ? parseFloat(valorUnitario) : null,
+            idGrupo: parseInt(idGrupo)
+        };
 
         setLoading(true);
         try {
-            if (modo === 'edicao' && idEmpresa) {
-                const atualizada = await empresaService.atualizar(idEmpresa, dados);
-                const empresaMapeada = {
-                    id: atualizada.idEmpresa,
-                    nome: atualizada.nome,
-                    cnpj: atualizada.cnpj,
-                    razao: atualizada.razao || ''
+            if (modo === 'edicao' && idItem) {
+                const atualizado = await itemService.atualizar(idItem, dados);
+                const itemMapeado = {
+                    id: atualizado.idItem,
+                    nome: atualizado.nome,
+                    descricao: atualizado.descricao,
+                    valorUnitario: atualizado.valorUnitario,
+                    idGrupo: atualizado.idGrupo
                 };
-                setEmpresas(prev => prev.map(emp => emp.id === idEmpresa ? empresaMapeada : emp));
-                // Atualiza o originalData com os novos dados
-                setOriginalData(empresaMapeada);
-                setMessage({ type: 'success', text: 'Empresa atualizada!' });
+                setItens(prev => prev.map(i => i.id === idItem ? itemMapeado : i));
+                setOriginalData(itemMapeado);
+                setMessage({ type: 'success', text: 'Item atualizado!' });
             } else if (modo === 'criacao') {
-                const nova = await empresaService.criar(dados);
-                const novaMapeada = {
-                    id: nova.idEmpresa,
-                    nome: nova.nome,
-                    cnpj: nova.cnpj,
-                    razao: nova.razao || ''
+                const novo = await itemService.criar(dados);
+                const novoMapeado = {
+                    id: novo.idItem,
+                    nome: novo.nome,
+                    descricao: novo.descricao,
+                    valorUnitario: novo.valorUnitario,
+                    idGrupo: novo.idGrupo
                 };
-                setEmpresas(prev => {
-                    const updated = [...prev, novaMapeada];
-                    // Seleciona a nova empresa
+                setItens(prev => {
+                    const updated = [...prev, novoMapeado];
                     setTimeout(() => {
-                        selecionarEmpresa(novaMapeada, updated.length - 1);
+                        selecionarItem(novoMapeado, updated.length - 1);
                     }, 0);
                     return updated;
                 });
-                setMessage({ type: 'success', text: 'Empresa cadastrada!' });
+                setMessage({ type: 'success', text: 'Item cadastrado!' });
             }
             setModo('visualizacao');
         } catch (error) {
@@ -196,8 +213,8 @@ function EmpresaCadastro() {
     };
 
     const handleDeleteClick = () => {
-        if (!idEmpresa) {
-            setMessage({ type: 'error', text: 'Selecione uma empresa!' });
+        if (!idItem) {
+            setMessage({ type: 'error', text: 'Selecione um item!' });
             return;
         }
         setShowDeleteModal(true);
@@ -207,14 +224,15 @@ function EmpresaCadastro() {
         setShowDeleteModal(false);
         setLoading(true);
         try {
-            await empresaService.deletar(idEmpresa);
-            const filtered = empresas.filter(emp => emp.id !== idEmpresa);
-            setEmpresas(filtered);
+            await itemService.deletar(idItem);
+            const filtered = itens.filter(i => i.id !== idItem);
+            setItens(filtered);
             if (filtered.length === 0) {
-                setIdEmpresa('');
+                setIdItem('');
                 setNome('');
-                setCnpj('');
-                setRazao('');
+                setDescricao('');
+                setValorUnitario('');
+                setIdGrupo('');
                 setCurrentIndex(-1);
                 setOriginalData({});
             } else {
@@ -224,14 +242,15 @@ function EmpresaCadastro() {
                 }
                 const current = filtered[newIndex];
                 setCurrentIndex(newIndex);
-                setIdEmpresa(current.id);
+                setIdItem(current.id);
                 setNome(current.nome);
-                setCnpj(current.cnpj);
-                setRazao(current.razao);
+                setDescricao(current.descricao);
+                setValorUnitario(current.valorUnitario);
+                setIdGrupo(current.idGrupo);
                 setOriginalData({ ...current });
             }
             setModo('visualizacao');
-            setMessage({ type: 'success', text: 'Empresa excluída!' });
+            setMessage({ type: 'success', text: 'Item excluído!' });
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
@@ -241,45 +260,50 @@ function EmpresaCadastro() {
 
     const handleNext = () => {
         if (modo !== 'visualizacao') return;
-        if (currentIndex < empresas.length - 1) {
-            const next = empresas[currentIndex + 1];
-            selecionarEmpresa(next, currentIndex + 1);
+        if (currentIndex < itens.length - 1) {
+            const next = itens[currentIndex + 1];
+            selecionarItem(next, currentIndex + 1);
         }
     };
 
     const handlePrevious = () => {
         if (modo !== 'visualizacao') return;
         if (currentIndex > 0) {
-            const prev = empresas[currentIndex - 1];
-            selecionarEmpresa(prev, currentIndex - 1);
+            const prev = itens[currentIndex - 1];
+            selecionarItem(prev, currentIndex - 1);
         }
     };
 
     const handleFirst = () => {
         if (modo !== 'visualizacao') return;
-        if (empresas.length > 0 && currentIndex !== 0) {
-            selecionarEmpresa(empresas[0], 0);
+        if (itens.length > 0 && currentIndex !== 0) {
+            selecionarItem(itens[0], 0);
         }
     };
 
     const handleLast = () => {
         if (modo !== 'visualizacao') return;
-        if (empresas.length > 0 && currentIndex !== empresas.length - 1) {
-            const lastIndex = empresas.length - 1;
-            selecionarEmpresa(empresas[lastIndex], lastIndex);
+        if (itens.length > 0 && currentIndex !== itens.length - 1) {
+            const lastIndex = itens.length - 1;
+            selecionarItem(itens[lastIndex], lastIndex);
         }
     };
 
-    // Verifica se os campos devem estar desabilitados
+    const getNomeGrupo = (id) => {
+        const grupo = grupos.find(g => g.idGrupo === id);
+        return grupo ? grupo.nome : 'Grupo não encontrado';
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
                 <div className={styles.headerTitle}>
-                    <h2>Cadastro de Empresa</h2>
+                    <Package size={28} />
+                    <h2>Cadastro de Itens</h2>
                 </div>
-                {empresas.length > 0 && modo === 'visualizacao' && (
+                {itens.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
                         <button
                             className={styles.navButton}
@@ -298,12 +322,12 @@ function EmpresaCadastro() {
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${empresas.length}` : `0/${empresas.length}`}
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${itens.length}` : `0/${itens.length}`}
                         </span>
                         <button
                             className={styles.navButton}
                             onClick={handleNext}
-                            disabled={currentIndex >= empresas.length - 1 || loading}
+                            disabled={currentIndex >= itens.length - 1 || loading}
                             title="Próximo"
                         >
                             <ChevronRight size={20} />
@@ -311,7 +335,7 @@ function EmpresaCadastro() {
                         <button
                             className={styles.navButton}
                             onClick={handleLast}
-                            disabled={currentIndex >= empresas.length - 1 || loading}
+                            disabled={currentIndex >= itens.length - 1 || loading}
                             title="Último registro"
                         >
                             <ChevronLast size={20} />
@@ -327,7 +351,7 @@ function EmpresaCadastro() {
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${empresas.length}` : `0/${empresas.length}`}
+                            {currentIndex >= 0 ? `${currentIndex + 1}/${itens.length}` : `0/${itens.length}`}
                         </span>
                         <button className={styles.navButton} disabled title="Próximo">
                             <ChevronRight size={20} />
@@ -344,7 +368,7 @@ function EmpresaCadastro() {
                 onTermoChange={setTermoPesquisa}
                 campoSelecionado={campoSelecionado}
                 onCampoChange={setCampoSelecionado}
-                campos={camposPesquisaEmpresa}
+                campos={camposPesquisaItem}
                 onPesquisar={handlePesquisar}
                 onLimpar={handleLimparPesquisa}
                 desabilitado={loading || modo !== 'visualizacao'}
@@ -353,24 +377,24 @@ function EmpresaCadastro() {
             <ResultadosPesquisa
                 resultados={resultados}
                 mostrar={mostrarResultados && modo === 'visualizacao'}
-                onSelecionar={(empresa) => {
-                    const index = empresas.findIndex(e => e.id === empresa.id);
-                    selecionarEmpresa(empresa, index);
-                    handleSelecionarResultado(empresa);
+                onSelecionar={(item) => {
+                    const index = itens.findIndex(i => i.id === item.id);
+                    selecionarItem(item, index);
+                    handleSelecionarResultado(item);
                 }}
                 colunas={[
-                    { campo: 'id', label: 'ID' },
+                    { campo: 'id', label: 'Código' },
                     { campo: 'nome', label: 'Nome' },
-                    { campo: 'cnpj', label: 'CNPJ' },
-                    { campo: 'razao', label: 'Razão Social' }
+                    { campo: 'descricao', label: 'Descrição' },
+                    { campo: 'valorUnitario', label: 'Valor Unitário', format: 'moeda' }
                 ]}
             />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>
                     <div className={`${styles.formGroup} ${styles.idField}`}>
-                        <label>ID</label>
-                        <input type="text" value={idEmpresa || ''} disabled placeholder="Automático" />
+                        <label>CÓDIGO</label>
+                        <input type="text" value={idItem || ''} disabled placeholder="Automático" />
                     </div>
                     <div className={styles.formGroup}>
                         <label>NOME *</label>
@@ -378,29 +402,46 @@ function EmpresaCadastro() {
                             type="text"
                             value={nome || ''}
                             onChange={(e) => setNome(e.target.value)}
-                            placeholder="Digite o nome"
+                            placeholder="Digite o nome do item"
                             disabled={camposDesabilitados}
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label>CNPJ *</label>
+                        <label>DESCRIÇÃO</label>
                         <input
                             type="text"
-                            value={cnpj || ''}
-                            onChange={(e) => setCnpj(e.target.value)}
-                            placeholder="00.000.000/0000-00"
+                            value={descricao || ''}
+                            onChange={(e) => setDescricao(e.target.value)}
+                            placeholder="Digite a descrição do item"
                             disabled={camposDesabilitados}
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label>RAZÃO SOCIAL</label>
+                        <label>VALOR UNITÁRIO</label>
                         <input
-                            type="text"
-                            value={razao || ''}
-                            onChange={(e) => setRazao(e.target.value)}
-                            placeholder="Digite a razão social (opcional)"
+                            type="number"
+                            step="0.01"
+                            value={valorUnitario || ''}
+                            onChange={(e) => setValorUnitario(e.target.value)}
+                            placeholder="0,00"
                             disabled={camposDesabilitados}
                         />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>GRUPO *</label>
+                        <select
+                            value={idGrupo || ''}
+                            onChange={(e) => setIdGrupo(e.target.value)}
+                            disabled={camposDesabilitados}
+                            className={styles.select}
+                        >
+                            <option value="">Selecione um grupo</option>
+                            {grupos.map(grupo => (
+                                <option key={grupo.idGrupo} value={grupo.idGrupo}>
+                                    {grupo.nome}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
@@ -410,8 +451,8 @@ function EmpresaCadastro() {
                             <button
                                 className={`${styles.btn} ${styles.btnEdit}`}
                                 onClick={handleEditar}
-                                disabled={loading || !idEmpresa}
-                                title="Editar empresa"
+                                disabled={loading || !idItem}
+                                title="Editar item"
                             >
                                 <Edit2 size={18} /> Editar
                             </button>
@@ -419,7 +460,7 @@ function EmpresaCadastro() {
                                 className={`${styles.btn} ${styles.btnNew}`}
                                 onClick={handleNovo}
                                 disabled={loading}
-                                title="Criar nova empresa"
+                                title="Criar novo item"
                             >
                                 <Plus size={18} /> Novo
                             </button>
@@ -438,8 +479,8 @@ function EmpresaCadastro() {
                             <button
                                 className={`${styles.btn} ${styles.btnDelete}`}
                                 onClick={handleDeleteClick}
-                                disabled={loading || !idEmpresa}
-                                title="Excluir empresa"
+                                disabled={loading || !idItem}
+                                title="Excluir item"
                             >
                                 <Trash2 size={18} /> Excluir
                             </button>
@@ -459,7 +500,7 @@ function EmpresaCadastro() {
                                 className={`${styles.btn} ${styles.btnSave}`}
                                 onClick={handleSave}
                                 disabled={loading}
-                                title="Salvar nova empresa"
+                                title="Salvar novo item"
                             >
                                 <Save size={18} /> Salvar
                             </button>
@@ -487,7 +528,7 @@ function EmpresaCadastro() {
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDeleteConfirm}
                 title="Confirmar Exclusão"
-                message="Tem certeza que deseja excluir esta empresa? Esta ação não pode ser desfeita."
+                message="Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."
                 itemName={nome}
                 confirmText="Sim, Excluir"
                 cancelText="Cancelar"
@@ -496,4 +537,4 @@ function EmpresaCadastro() {
     );
 }
 
-export default EmpresaCadastro;
+export default ItemCadastro;

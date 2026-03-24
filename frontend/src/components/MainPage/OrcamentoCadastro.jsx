@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Search, Plus, Edit2, Trash2, Save, X, FileText, Printer } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, FileText, Printer, Trash, Image, Upload, ZoomIn } from 'lucide-react';
 import styles from './OrcamentoCadastro-novo.module.css';
 import { orcamentoService } from '../../services/orcamentoService';
 import { empresaService } from '../../services/empresaService';
 import { prestadorService } from '../../services/prestadorService';
 import ModalPesquisa from './ModalPesquisa';
 import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
+import ModalPesquisaItens from './ModalPesquisaItens';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { jsPDF } from 'jspdf';
+import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import { usePesquisa } from '../../hooks/usePesquisa';
 
 function OrcamentoCadastro() {
     const [orcamentoID, setOrcamentoID] = useState('');
@@ -17,6 +20,14 @@ function OrcamentoCadastro() {
     const [empresaID, setEmpresaID] = useState('');
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
+    const [valorTotalItens, setValorTotalItens] = useState('');
+    const [desconto, setDesconto] = useState('');
+    const [valorFinal, setValorFinal] = useState('');
+    const [tipoPagamento, setTipoPagamento] = useState('');
+    const [itensOrcamento, setItensOrcamento] = useState([]);
+    const [imagens, setImagens] = useState([]);
+    const [pendingImages, setPendingImages] = useState([]); // Imagens pendentes para upload
+    const [previewImage, setPreviewImage] = useState(null); // Imagem sendo visualizada
 
     const [orcamentos, setOrcamentos] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
@@ -30,6 +41,32 @@ function OrcamentoCadastro() {
 
     const [modalPrestadorAberto, setModalPrestadorAberto] = useState(false);
     const [modalEmpresaAberto, setModalEmpresaAberto] = useState(false);
+    const [modalItensAberto, setModalItensAberto] = useState(false);
+
+    const fileInputRef = useRef(null);
+
+    // Configuração dos campos de pesquisa
+    const camposPesquisaOrcamento = [
+        { campo: 'descricao', label: 'Descrição' },
+        { campo: 'movimento', label: 'Data Movimento' },
+        { campo: 'idPrestador', label: 'ID Prestador' },
+        { campo: 'empresaID', label: 'ID Empresa' },
+        { campo: 'orcamentoID', label: 'ID Orçamento' },
+        { campo: 'tipoPagamento', label: 'Tipo Pagamento' }
+    ];
+
+    // Hook de pesquisa
+    const {
+        termoPesquisa,
+        setTermoPesquisa,
+        campoSelecionado,
+        setCampoSelecionado,
+        resultados,
+        mostrarResultados,
+        handlePesquisar,
+        handleLimparPesquisa,
+        handleSelecionarResultado
+    } = usePesquisa(orcamentos, camposPesquisaOrcamento);
 
     // Funções de formatação de data
     const formatarDataParaExibicao = (dataISO) => {
@@ -63,7 +100,13 @@ function OrcamentoCadastro() {
                 idPrestador: item.idPrestador,
                 empresaID: item.empresaID,
                 descricao: item.descricao,
-                valor: item.valor
+                valor: item.valor,
+                valorTotalItens: item.valorTotalItens,
+                desconto: item.desconto,
+                valorFinal: item.valorFinal,
+                tipoPagamento: item.tipoPagamento,
+                itens: item.itens || [],
+                imagens: item.imagens || []
             }));
             setOrcamentos(orcamentosFormatados);
             if (orcamentosFormatados.length > 0) {
@@ -85,6 +128,12 @@ function OrcamentoCadastro() {
         setEmpresaID(orcamento.empresaID);
         setDescricao(orcamento.descricao);
         setValor(orcamento.valor);
+        setValorTotalItens(orcamento.valorTotalItens || '');
+        setDesconto(orcamento.desconto || '');
+        setValorFinal(orcamento.valorFinal || '');
+        setTipoPagamento(orcamento.tipoPagamento || '');
+        setItensOrcamento(orcamento.itens || []);
+        setImagens(orcamento.imagens || []);
         setOriginalData({ ...orcamento });
         setModo('visualizacao');
     };
@@ -124,7 +173,7 @@ function OrcamentoCadastro() {
     };
 
     const handleEditar = () => {
-        setOriginalData({ orcamentoID, movimento, movimentoDate, idPrestador, empresaID, descricao, valor });
+        setOriginalData({ orcamentoID, movimento, movimentoDate, idPrestador, empresaID, descricao, valor, valorTotalItens, desconto, valorFinal, tipoPagamento, itens: itensOrcamento, imagens });
         setModo('edicao');
     };
 
@@ -137,10 +186,18 @@ function OrcamentoCadastro() {
         setEmpresaID('');
         setDescricao('');
         setValor('');
+        setValorTotalItens('');
+        setDesconto('');
+        setValorFinal('');
+        setTipoPagamento('');
+        setItensOrcamento([]);
+        setImagens([]);
+        setPendingImages([]);
         setModo('criacao');
     };
 
     const handleCancelar = () => {
+        setPendingImages([]);
         if (modo === 'edicao' && originalData.orcamentoID) {
             setOrcamentoID(originalData.orcamentoID);
             setMovimento(originalData.movimento);
@@ -149,6 +206,12 @@ function OrcamentoCadastro() {
             setEmpresaID(originalData.empresaID);
             setDescricao(originalData.descricao);
             setValor(originalData.valor);
+            setValorTotalItens(originalData.valorTotalItens);
+            setDesconto(originalData.desconto);
+            setValorFinal(originalData.valorFinal);
+            setTipoPagamento(originalData.tipoPagamento);
+            setItensOrcamento(originalData.itens || []);
+            setImagens(originalData.imagens || []);
         } else if (modo === 'criacao' && orcamentos.length > 0 && currentIndex >= 0) {
             const atual = orcamentos[currentIndex];
             setOrcamentoID(atual.orcamentoID);
@@ -158,6 +221,12 @@ function OrcamentoCadastro() {
             setEmpresaID(atual.empresaID);
             setDescricao(atual.descricao);
             setValor(atual.valor);
+            setValorTotalItens(atual.valorTotalItens || '');
+            setDesconto(atual.desconto || '');
+            setValorFinal(atual.valorFinal || '');
+            setTipoPagamento(atual.tipoPagamento || '');
+            setItensOrcamento(atual.itens || []);
+            setImagens(atual.imagens || []);
         } else if (modo === 'criacao' && orcamentos.length === 0) {
             setOrcamentoID('');
             setMovimento('');
@@ -166,13 +235,19 @@ function OrcamentoCadastro() {
             setEmpresaID('');
             setDescricao('');
             setValor('');
+            setValorTotalItens('');
+            setDesconto('');
+            setValorFinal('');
+            setTipoPagamento('');
+            setItensOrcamento([]);
+            setImagens([]);
         }
         setModo('visualizacao');
         setMessage({ type: '', text: '' });
     };
 
     const handleSave = async () => {
-        if (!movimento || !idPrestador || !empresaID || !descricao || !valor) {
+        if (!movimento || !idPrestador || !empresaID) {
             setMessage({ type: 'error', text: 'Preencha todos os campos obrigatórios!' });
             return;
         }
@@ -182,7 +257,14 @@ function OrcamentoCadastro() {
             idPrestador: parseInt(idPrestador, 10),
             empresaID: parseInt(empresaID, 10),
             descricao,
-            valor: parseFloat(valor)
+            valor: parseFloat(valor) || 0,
+            desconto: parseFloat(desconto) || 0,
+            tipoPagamento: tipoPagamento || null,
+            itens: itensOrcamento.map(item => ({
+                itemId: item.itemId,
+                quantidade: parseInt(item.quantidade, 10),
+                valorUnitario: parseFloat(item.valorUnitario)
+            }))
         };
 
         setLoading(true);
@@ -195,10 +277,19 @@ function OrcamentoCadastro() {
                     idPrestador: atualizado.idPrestador,
                     empresaID: atualizado.empresaID,
                     descricao: atualizado.descricao,
-                    valor: atualizado.valor
+                    valor: atualizado.valor,
+                    valorTotalItens: atualizado.valorTotalItens,
+                    desconto: atualizado.desconto,
+                    valorFinal: atualizado.valorFinal,
+                    tipoPagamento: atualizado.tipoPagamento,
+                    itens: atualizado.itens || [],
+                    imagens: atualizado.imagens || []
                 };
                 setOrcamentos(prev => prev.map(o => o.orcamentoID === orcamentoID ? orcamentoMapeado : o));
                 setOriginalData(orcamentoMapeado);
+                setValorTotalItens(atualizado.valorTotalItens || '');
+                setValorFinal(atualizado.valorFinal || '');
+                setImagens(atualizado.imagens || []);
                 setMessage({ type: 'success', text: 'Orçamento atualizado!' });
             } else if (modo === 'criacao') {
                 const novo = await orcamentoService.criar(dados);
@@ -208,8 +299,31 @@ function OrcamentoCadastro() {
                     idPrestador: novo.idPrestador,
                     empresaID: novo.empresaID,
                     descricao: novo.descricao,
-                    valor: novo.valor
+                    valor: novo.valor,
+                    valorTotalItens: novo.valorTotalItens,
+                    desconto: novo.desconto,
+                    valorFinal: novo.valorFinal,
+                    tipoPagamento: novo.tipoPagamento,
+                    itens: novo.itens || [],
+                    imagens: novo.imagens || []
                 };
+                
+                // Fazer upload das imagens pendentes
+                let imagensSalvas = [];
+                if (pendingImages.length > 0) {
+                    for (const img of pendingImages) {
+                        try {
+                            const imagemSalva = await orcamentoService.uploadImagem(novo.orcamentoID, img.file);
+                            imagensSalvas.push(imagemSalva);
+                        } catch (uploadError) {
+                            console.error('Erro ao fazer upload de imagem:', uploadError);
+                        }
+                    }
+                }
+                
+                // Atualizar com as imagens salvas
+                novoMapeado.imagens = imagensSalvas;
+                
                 setOrcamentos(prev => {
                     const updated = [...prev, novoMapeado];
                     setTimeout(() => {
@@ -217,7 +331,15 @@ function OrcamentoCadastro() {
                     }, 0);
                     return updated;
                 });
-                setMessage({ type: 'success', text: 'Orçamento cadastrado!' });
+                setOrcamentoID(novo.orcamentoID);
+                setOriginalData(novoMapeado);
+                setImagens(imagensSalvas);
+                setPendingImages([]);
+                setModo('visualizacao');
+                setMessage({ type: 'success', text: pendingImages.length > 0 
+                    ? `Orçamento cadastrado com ${imagensSalvas.length} imagem(ns)!` 
+                    : 'Orçamento cadastrado!' });
+                return;
             }
             setModo('visualizacao');
         } catch (error) {
@@ -250,6 +372,12 @@ function OrcamentoCadastro() {
                 setEmpresaID('');
                 setDescricao('');
                 setValor('');
+                setValorTotalItens('');
+                setDesconto('');
+                setValorFinal('');
+                setTipoPagamento('');
+                setItensOrcamento([]);
+                setImagens([]);
                 setCurrentIndex(-1);
                 setOriginalData({});
             } else {
@@ -266,6 +394,12 @@ function OrcamentoCadastro() {
                 setEmpresaID(current.empresaID);
                 setDescricao(current.descricao);
                 setValor(current.valor);
+                setValorTotalItens(current.valorTotalItens || '');
+                setDesconto(current.desconto || '');
+                setValorFinal(current.valorFinal || '');
+                setTipoPagamento(current.tipoPagamento || '');
+                setItensOrcamento(current.itens || []);
+                setImagens(current.imagens || []);
                 setOriginalData({ ...current });
             }
             setModo('visualizacao');
@@ -293,12 +427,183 @@ function OrcamentoCadastro() {
         }
     };
 
+    const handleFirst = () => {
+        if (modo !== 'visualizacao') return;
+        if (orcamentos.length > 0 && currentIndex !== 0) {
+            selecionarOrcamento(orcamentos[0], 0);
+        }
+    };
+
+    const handleLast = () => {
+        if (modo !== 'visualizacao') return;
+        if (orcamentos.length > 0 && currentIndex !== orcamentos.length - 1) {
+            const lastIndex = orcamentos.length - 1;
+            selecionarOrcamento(orcamentos[lastIndex], lastIndex);
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     const formatarValor = (value) => {
         const numero = parseFloat(value);
         if (isNaN(numero)) return '';
         return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    };
+
+    // Funções para gerenciar itens do orçamento
+    const handleAdicionarItem = (item) => {
+        const novoItem = {
+            itemId: item.id,
+            itemNome: item.nome,
+            quantidade: 1,
+            valorUnitario: item.valorUnitario || 0,
+            valorTotal: item.valorUnitario || 0
+        };
+        const novosItens = [...itensOrcamento, novoItem];
+        setItensOrcamento(novosItens);
+        calcularTotais(novosItens, desconto);
+    };
+
+    const handleRemoverItem = (index) => {
+        const novosItens = itensOrcamento.filter((_, i) => i !== index);
+        setItensOrcamento(novosItens);
+        calcularTotais(novosItens, desconto);
+    };
+
+    const handleQuantidadeChange = (index, novaQuantidade) => {
+        const qtd = parseInt(novaQuantidade, 10) || 0;
+        const novosItens = itensOrcamento.map((item, i) => {
+            if (i === index) {
+                return {
+                    ...item,
+                    quantidade: qtd,
+                    valorTotal: qtd * item.valorUnitario
+                };
+            }
+            return item;
+        });
+        setItensOrcamento(novosItens);
+        calcularTotais(novosItens, desconto);
+    };
+
+    const handleDescontoChange = (novoDesconto) => {
+        const desc = parseFloat(novoDesconto) || 0;
+        setDesconto(novoDesconto);
+        calcularTotais(itensOrcamento, desc);
+    };
+
+    const calcularTotais = (itens, descontoValor) => {
+        const totalItens = itens.reduce((acc, item) => acc + (item.valorTotal || 0), 0);
+        const final = totalItens - descontoValor;
+        setValorTotalItens(totalItens);
+        setValorFinal(final > 0 ? final : 0);
+        setValor(totalItens);
+    };
+
+    // Funções para gerenciar imagens
+    const handleFileSelect = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validar tipo de arquivo
+        const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!tiposPermitidos.includes(file.type)) {
+            setMessage({ type: 'error', text: 'Apenas arquivos de imagem são permitidos (JPEG, PNG, GIF, WebP)' });
+            return;
+        }
+
+        // Validar tamanho (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setMessage({ type: 'error', text: 'O arquivo deve ter no máximo 5MB' });
+            return;
+        }
+
+        // Se está em modo de criação, armazena a imagem como pendente
+        if (modo === 'criacao') {
+            const preview = URL.createObjectURL(file);
+            setPendingImages(prev => [...prev, { file, preview, name: file.name, size: file.size }]);
+            setMessage({ type: 'success', text: 'Imagem adicionada! Ela será enviada ao salvar o orçamento.' });
+            // Limpar o input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+            return;
+        }
+
+        // Se não tem orçamento salvo, mostra mensagem
+        if (!orcamentoID) {
+            setMessage({ type: 'error', text: 'Salve o orçamento antes de adicionar imagens' });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const novaImagem = await orcamentoService.uploadImagem(orcamentoID, file);
+            setImagens(prevImagens => [...prevImagens, novaImagem]);
+            setMessage({ type: 'success', text: 'Imagem adicionada com sucesso!' });
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message || 'Erro ao fazer upload da imagem' });
+        } finally {
+            setLoading(false);
+            // Limpar o input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
+    const handleRemoverImagem = async (imagemId) => {
+        if (!orcamentoID) return;
+
+        setLoading(true);
+        try {
+            await orcamentoService.deletarImagem(orcamentoID, imagemId);
+            setImagens(prevImagens => prevImagens.filter(img => img.idImagem !== imagemId));
+            setMessage({ type: 'success', text: 'Imagem removida com sucesso!' });
+        } catch (error) {
+            setMessage({ type: 'error', text: error.message || 'Erro ao remover imagem' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoverPendingImage = (index) => {
+        setPendingImages(prev => {
+            const newList = prev.filter((_, i) => i !== index);
+            // Liberar URL do objeto removido
+            if (prev[index]?.preview) {
+                URL.revokeObjectURL(prev[index].preview);
+            }
+            return newList;
+        });
+        setMessage({ type: 'success', text: 'Imagem removida da lista!' });
+    };
+
+    const formatarTamanhoArquivo = (bytes) => {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
+
+    // Funções de preview de imagem
+    const handlePreviewImagem = (imagem) => {
+        setPreviewImage({
+            url: imagem.urlImagem,
+            nome: imagem.nomeArquivo,
+            tamanho: imagem.tamanhoArquivo
+        });
+    };
+
+    const handlePreviewPendingImage = (img) => {
+        setPreviewImage({
+            url: img.preview,
+            nome: img.name,
+            tamanho: img.size
+        });
+    };
+
+    const handleClosePreview = () => {
+        setPreviewImage(null);
     };
 
     const handleGerarPDF = async () => {
@@ -343,7 +648,17 @@ function OrcamentoCadastro() {
             doc.text(`ID do Orçamento: ${orcamentoID}`, margin, yPos);
             yPos += 7;
             doc.text(`Movimento: ${movimento}`, margin, yPos);
-            yPos += 15;
+            yPos += 7;
+            if (tipoPagamento) {
+                const tipoPagamentoText = {
+                    'A_VISTA': 'À Vista',
+                    'ANTECIPADO': 'Antecipado',
+                    'CINQUENTA_CINQUENTA': '50% - 50%'
+                }[tipoPagamento] || tipoPagamento;
+                doc.text(`Tipo de Pagamento: ${tipoPagamentoText}`, margin, yPos);
+                yPos += 7;
+            }
+            yPos += 8;
 
             // Dados da Empresa
             doc.setFontSize(14);
@@ -382,27 +697,75 @@ function OrcamentoCadastro() {
             yPos += 15;
 
             // Descrição do Serviço
+            if (descricao) {
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+                yPos += 10;
+
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'normal');
+                const descricaoLines = doc.splitTextToSize(descricao, pageWidth - (margin * 2));
+                doc.text(descricaoLines, margin, yPos);
+                yPos += (descricaoLines.length * 7) + 15;
+            }
+
+            // Itens do Orçamento
+            if (itensOrcamento.length > 0) {
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ITENS DO ORÇAMENTO', margin, yPos);
+                yPos += 10;
+
+                // Cabeçalho da tabela
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.setFillColor(230, 230, 230);
+                doc.rect(margin, yPos - 5, pageWidth - (margin * 2), 8, 'F');
+                doc.text('Item', margin + 2, yPos);
+                doc.text('Qtd', margin + 80, yPos);
+                doc.text('V. Unitário', margin + 100, yPos);
+                doc.text('V. Total', margin + 140, yPos);
+                yPos += 8;
+
+                // Linhas dos itens
+                doc.setFont('helvetica', 'normal');
+                itensOrcamento.forEach((item) => {
+                    doc.text(item.itemNome.substring(0, 35), margin + 2, yPos);
+                    doc.text(String(item.quantidade), margin + 80, yPos);
+                    doc.text(formatarValor(item.valorUnitario), margin + 100, yPos);
+                    doc.text(formatarValor(item.valorTotal), margin + 140, yPos);
+                    yPos += 7;
+                });
+
+                yPos += 10;
+            }
+
+            // Resumo Financeiro
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
-            doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
+            doc.text('RESUMO FINANCEIRO', margin, yPos);
             yPos += 10;
 
             doc.setFontSize(11);
             doc.setFont('helvetica', 'normal');
-            const descricaoLines = doc.splitTextToSize(descricao || 'N/A', pageWidth - (margin * 2));
-            doc.text(descricaoLines, margin, yPos);
-            yPos += (descricaoLines.length * 7) + 15;
+            doc.text(`Valor Total dos Itens: ${formatarValor(valorTotalItens)}`, margin, yPos);
+            yPos += 7;
+            
+            if (desconto && parseFloat(desconto) > 0) {
+                doc.text(`Desconto: - ${formatarValor(desconto)}`, margin, yPos);
+                yPos += 7;
+            }
 
-            // Valor
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('VALOR DO SERVIÇO', margin, yPos);
+            // Linha divisória
+            doc.line(margin, yPos, pageWidth - margin, yPos);
             yPos += 10;
 
+            // Valor Final
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(0, 100, 0);
-            doc.text(formatarValor(valor), margin, yPos);
+            doc.text(`VALOR FINAL: ${formatarValor(valorFinal)}`, margin, yPos);
             doc.setTextColor(0, 0, 0);
             yPos += 20;
 
@@ -438,6 +801,11 @@ function OrcamentoCadastro() {
                 onClose={() => setModalEmpresaAberto(false)}
                 onSelect={handleEmpresaSelecionada}
             />
+            <ModalPesquisaItens
+                isOpen={modalItensAberto}
+                onClose={() => setModalItensAberto(false)}
+                onSelect={handleAdicionarItem}
+            />
 
             <div className={styles.header}>
                 <div className={styles.headerTitle}>
@@ -446,6 +814,14 @@ function OrcamentoCadastro() {
                 </div>
                 {orcamentos.length > 0 && modo === 'visualizacao' && (
                     <div className={styles.navigationGroup}>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleFirst}
+                            disabled={currentIndex <= 0 || loading}
+                            title="Primeiro registro"
+                        >
+                            <ChevronFirst size={20} />
+                        </button>
                         <button
                             className={styles.navButton}
                             onClick={handlePrevious}
@@ -465,58 +841,63 @@ function OrcamentoCadastro() {
                         >
                             <ChevronRight size={20} />
                         </button>
+                        <button
+                            className={styles.navButton}
+                            onClick={handleLast}
+                            disabled={currentIndex >= orcamentos.length - 1 || loading}
+                            title="Último registro"
+                        >
+                            <ChevronLast size={20} />
+                        </button>
                     </div>
                 )}
                 {(modo === 'edicao' || modo === 'criacao') && (
                     <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Primeiro registro">
+                            <ChevronFirst size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Anterior">
                             <ChevronLeft size={20} />
                         </button>
                         <span className={styles.positionIndicator}>
                             {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
                         </span>
-                        <button className={styles.navButton} disabled>
+                        <button className={styles.navButton} disabled title="Próximo">
                             <ChevronRight size={20} />
+                        </button>
+                        <button className={styles.navButton} disabled title="Último registro">
+                            <ChevronLast size={20} />
                         </button>
                     </div>
                 )}
             </div>
 
-            <div className={styles.searchSection}>
-                <div className={styles.searchContainer}>
-                    <input
-                        type="text"
-                        className={styles.searchInput}
-                        placeholder="Pesquisar por descrição, movimento, prestador ou empresa..."
-                        value={searchTerm || ''}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        disabled={loading || modo !== 'visualizacao'}
-                    />
-                    <button
-                        className={styles.searchButton}
-                        onClick={handleSearch}
-                        disabled={loading || modo !== 'visualizacao'}
-                    >
-                        <Search size={18} /> Pesquisar
-                    </button>
-                </div>
-                {searchResults.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.resultsList}>
-                        {searchResults.map(orc => (
-                            <div key={orc.orcamentoID} className={styles.resultItem} onClick={() => selectOrcamento(orc)}>
-                                <div className={styles.resultItemInfo}>
-                                    <span className={styles.resultItemName}>{orc.descricao}</span>
-                                    <span className={styles.resultItemDoc}>
-                                        Data: {orc.movimento} | Valor: {formatarValor(orc.valor)}
-                                    </span>
-                                </div>
-                                <span>👉</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+            <BarraPesquisa
+                termo={termoPesquisa}
+                onTermoChange={setTermoPesquisa}
+                campoSelecionado={campoSelecionado}
+                onCampoChange={setCampoSelecionado}
+                campos={camposPesquisaOrcamento}
+                onPesquisar={handlePesquisar}
+                onLimpar={handleLimparPesquisa}
+                desabilitado={loading || modo !== 'visualizacao'}
+            />
+
+            <ResultadosPesquisa
+                resultados={resultados}
+                mostrar={mostrarResultados && modo === 'visualizacao'}
+                onSelecionar={(orcamento) => {
+                    const index = orcamentos.findIndex(o => o.orcamentoID === orcamento.orcamentoID);
+                    selecionarOrcamento(orcamento, index);
+                    handleSelecionarResultado(orcamento);
+                }}
+                colunas={[
+                    { campo: 'orcamentoID', label: 'ID' },
+                    { campo: 'descricao', label: 'Descrição' },
+                    { campo: 'movimento', label: 'Data' },
+                    { campo: 'valorFinal', label: 'Valor Final', format: 'moeda' }
+                ]}
+            />
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>
@@ -607,17 +988,264 @@ function OrcamentoCadastro() {
                         />
                     </div>
 
-                    <div className={`${styles.formGroup} ${styles.valorField}`}>
-                        <label>VALOR *</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            value={valor || ''}
-                            onChange={(e) => setValor(e.target.value)}
-                            placeholder="0,00"
+                    <div className={styles.formGroup}>
+                        <label>TIPO DE PAGAMENTO</label>
+                        <select
+                            value={tipoPagamento || ''}
+                            onChange={(e) => setTipoPagamento(e.target.value)}
                             disabled={camposDesabilitados}
-                        />
+                            className={styles.select}
+                        >
+                            <option value="">Selecione...</option>
+                            <option value="A_VISTA">À Vista</option>
+                            <option value="ANTECIPADO">Antecipado</option>
+                            <option value="CINQUENTA_CINQUENTA">50% - 50%</option>
+                        </select>
                     </div>
+                </div>
+
+                {/* Seção de Itens do Orçamento */}
+                <div className={styles.itensSection}>
+                    <div className={styles.itensHeader}>
+                        <h3>Itens do Orçamento</h3>
+                        {!camposDesabilitados && (
+                            <button
+                                className={styles.btnAddItem}
+                                onClick={() => setModalItensAberto(true)}
+                                disabled={loading}
+                                type="button"
+                            >
+                                <Plus size={16} /> Adicionar Item
+                            </button>
+                        )}
+                    </div>
+
+                    {itensOrcamento.length > 0 ? (
+                        <table className={styles.itensTable}>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor Unitário</th>
+                                    <th>Valor Total</th>
+                                    {!camposDesabilitados && <th>Ações</th>}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {itensOrcamento.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>{item.itemNome}</td>
+                                        <td>
+                                            {camposDesabilitados ? (
+                                                item.quantidade
+                                            ) : (
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantidade}
+                                                    onChange={(e) => handleQuantidadeChange(index, e.target.value)}
+                                                    className={styles.quantidadeInput}
+                                                />
+                                            )}
+                                        </td>
+                                        <td>{formatarValor(item.valorUnitario)}</td>
+                                        <td>{formatarValor(item.valorTotal)}</td>
+                                        {!camposDesabilitados && (
+                                            <td>
+                                                <button
+                                                    className={styles.btnRemoveItem}
+                                                    onClick={() => handleRemoverItem(index)}
+                                                    type="button"
+                                                    title="Remover item"
+                                                >
+                                                    <svg 
+                                                        xmlns="http://www.w3.org/2000/svg" 
+                                                        width="16" 
+                                                        height="16" 
+                                                        viewBox="0 0 24 24" 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        strokeWidth="2" 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p className={styles.noItens}>Nenhum item adicionado ao orçamento.</p>
+                    )}
+                </div>
+
+                {/* Resumo Financeiro */}
+                <div className={styles.resumoSection}>
+                    <div className={styles.resumoGrid}>
+                        <div className={styles.formGroup}>
+                            <label>VALOR TOTAL DOS ITENS</label>
+                            <input
+                                type="text"
+                                value={formatarValor(valorTotalItens)}
+                                disabled
+                                className={styles.valorDestaque}
+                            />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>DESCONTO</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={desconto || ''}
+                                onChange={(e) => handleDescontoChange(e.target.value)}
+                                placeholder="0,00"
+                                disabled={camposDesabilitados}
+                            />
+                        </div>
+                        <div className={`${styles.formGroup} ${styles.valorFinalGroup}`}>
+                            <label>VALOR FINAL</label>
+                            <input
+                                type="text"
+                                value={formatarValor(valorFinal)}
+                                disabled
+                                className={styles.valorFinal}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Seção de Imagens */}
+                <div className={styles.imagensSection}>
+                    <div className={styles.imagensHeader}>
+                        <h3><Image size={20} /> Imagens Anexadas</h3>
+                        {(modo === 'edicao' || modo === 'criacao') && (
+                            <div className={styles.uploadArea}>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    accept="image/jpeg,image/png,image/gif,image/webp"
+                                    style={{ display: 'none' }}
+                                    id="imagem-upload"
+                                />
+                                <label 
+                                    htmlFor="imagem-upload" 
+                                    className={`${styles.btnUpload} ${loading ? styles.disabled : ''}`}
+                                >
+                                    <Upload size={16} /> Anexar Imagem
+                                </label>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Imagens pendentes (modo criação) */}
+                    {modo === 'criacao' && pendingImages.length > 0 && (
+                        <div className={styles.imagensGrid}>
+                            {pendingImages.map((img, index) => (
+                                <div key={`pending-${index}`} className={styles.imagemCard}>
+                                    <div className={styles.imagemPreview}>
+                                        <img 
+                                            src={img.preview} 
+                                            alt={img.name}
+                                        />
+                                    </div>
+                                    <div className={styles.imagemInfo}>
+                                        <span className={styles.imagemNome} title={img.name}>
+                                            {img.name.length > 20 
+                                                ? img.name.substring(0, 17) + '...' 
+                                                : img.name}
+                                        </span>
+                                        <span className={styles.imagemTamanho}>
+                                            {formatarTamanhoArquivo(img.size)}
+                                        </span>
+                                    </div>
+                                    <button
+                                        className={styles.btnPreviewImagem}
+                                        onClick={() => handlePreviewPendingImage(img)}
+                                        type="button"
+                                        title="Visualizar imagem"
+                                    >
+                                        <ZoomIn size={16} color="white" strokeWidth={2.5} />
+                                    </button>
+                                    <button
+                                        className={styles.btnRemoveImagem}
+                                        onClick={() => handleRemoverPendingImage(index)}
+                                        type="button"
+                                        title="Remover imagem"
+                                    >
+                                        <X size={16} color="white" strokeWidth={2.5} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Imagens salvas (modo edição/visualização) */}
+                    {imagens.length > 0 ? (
+                        <div className={styles.imagensGrid}>
+                            {imagens.map((imagem) => (
+                                <div key={imagem.idImagem} className={styles.imagemCard}>
+                                    <div className={styles.imagemPreview}>
+                                        <img 
+                                            src={imagem.urlImagem} 
+                                            alt={imagem.nomeArquivo}
+                                            onError={(e) => {
+                                                e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+                                            }}
+                                        />
+                                    </div>
+                                    <div className={styles.imagemInfo}>
+                                        <span className={styles.imagemNome} title={imagem.nomeArquivo}>
+                                            {imagem.nomeArquivo.length > 20 
+                                                ? imagem.nomeArquivo.substring(0, 17) + '...' 
+                                                : imagem.nomeArquivo}
+                                        </span>
+                                        <span className={styles.imagemTamanho}>
+                                            {formatarTamanhoArquivo(imagem.tamanhoArquivo)}
+                                        </span>
+                                    </div>
+                                    <button
+                                        className={styles.btnPreviewImagem}
+                                        onClick={() => handlePreviewImagem(imagem)}
+                                        type="button"
+                                        title="Visualizar imagem"
+                                    >
+                                        <ZoomIn size={16} color="white" strokeWidth={2.5} />
+                                    </button>
+                                    {(modo === 'edicao' || modo === 'criacao') && (
+                                        <button
+                                            className={styles.btnRemoveImagem}
+                                            onClick={() => handleRemoverImagem(imagem.idImagem)}
+                                            type="button"
+                                            title="Remover imagem"
+                                        >
+                                            <X size={16} color="white" strokeWidth={2.5} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        modo !== 'criacao' && (
+                            <p className={styles.noImagens}>
+                                {modo === 'visualizacao' 
+                                    ? 'Clique em "Editar" para anexar imagens.' 
+                                    : 'Nenhuma imagem anexada ao orçamento. Clique em "Anexar Imagem" para adicionar.'}
+                            </p>
+                        )
+                    )}
+
+                    {/* Mensagem quando não há imagens em modo criação */}
+                    {modo === 'criacao' && pendingImages.length === 0 && (
+                        <p className={styles.noImagens}>
+                            Clique em "Anexar Imagem" para adicionar imagens ao orçamento.
+                        </p>
+                    )}
                 </div>
 
                 <div className={styles.buttonGroup}>
@@ -716,6 +1344,44 @@ function OrcamentoCadastro() {
                 confirmText="Sim, Excluir"
                 cancelText="Cancelar"
             />
+
+            {/* Modal de Preview de Imagem */}
+            {previewImage && (
+                <div className={styles.previewModal} onClick={handleClosePreview}>
+                    <div className={styles.previewModalContent} onClick={(e) => e.stopPropagation()}>
+                        <button
+                            className={styles.previewModalClose}
+                            onClick={handleClosePreview}
+                            type="button"
+                            title="Fechar"
+                        >
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="20" 
+                                height="20" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="#333" 
+                                strokeWidth="3" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <img 
+                            src={previewImage.url} 
+                            alt={previewImage.nome}
+                            className={styles.previewModalImage}
+                        />
+                        <div className={styles.previewModalInfo}>
+                            <strong>{previewImage.nome}</strong><br />
+                            {formatarTamanhoArquivo(previewImage.tamanho)}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
