@@ -48,6 +48,14 @@
     justify-content: space-between;
 }
 
+/* Top row: title on left + Edit/Novo buttons on right */
+.headerTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
 .quickSearchGroup {
     display: flex;
     gap: var(--spacing-sm);

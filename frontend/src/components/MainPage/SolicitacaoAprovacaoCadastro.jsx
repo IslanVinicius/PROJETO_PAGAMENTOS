@@ -6,6 +6,8 @@ import ModalPesquisaOrcamento from './ModalPesquisaOrcamento';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
+import headerStyles from './EmpresaCadastro-novo.module.css';
+import ModalPesquisaComum from './ModalPesquisaComum';
 
 function SolicitacaoAprovacaoCadastro() {
     const [solicitacaoAprovacaoId, setSolicitacaoAprovacaoId] = useState('');
@@ -23,6 +25,10 @@ function SolicitacaoAprovacaoCadastro() {
     const [modo, setModo] = useState('visualizacao');
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Controles de header/pesquisa
+    const [showFilters, setShowFilters] = useState(false);
+    const [quickSearchId, setQuickSearchId] = useState('');
 
     const [modalOrcamentoAberto, setModalOrcamentoAberto] = useState(false);
 
@@ -307,6 +313,26 @@ function SolicitacaoAprovacaoCadastro() {
         }
     };
 
+    // Busca rápida por ID no header
+    const handleQuickSearchById = (e) => {
+        if (e.key === 'Enter' && quickSearchId.trim()) {
+            const id = parseInt(quickSearchId.trim());
+            if (isNaN(id)) {
+                setMessage({ type: 'error', text: 'Digite um ID válido!' });
+                return;
+            }
+            const registro = solicitacoes.find(s => s.solicitacaoAprovacaoId === id);
+            if (registro) {
+                const index = solicitacoes.findIndex(s => s.solicitacaoAprovacaoId === id);
+                selecionarSolicitacao(registro, index);
+                setQuickSearchId('');
+                setMessage({ type: 'success', text: `Solicitação ID ${id} encontrada!` });
+            } else {
+                setMessage({ type: 'error', text: `Solicitação com ID ${id} não encontrada!` });
+            }
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
@@ -318,71 +344,170 @@ function SolicitacaoAprovacaoCadastro() {
             />
 
             <div className={styles.header}>
-                <div className={styles.headerTitle}>
-                    <span>📋</span>
-                    <h2>Solicitação de Aprovação</h2>
+                <div className={headerStyles.headerTop}>
+                    <div className={headerStyles.headerTitle}>
+                        <span>📋</span>
+                        <h2>Solicitação de Aprovação</h2>
+                    </div>
+                    <div className={headerStyles.headerActionButtons}>
+                        {modo === 'edicao' && (
+                            <>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar alterações"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading || !solicitacaoAprovacaoId}
+                                    title="Excluir solicitação"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </>
+                        )}
+                        {modo === 'criacao' && (
+                            <>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar nova solicitação"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
-                {solicitacoes.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.navigationGroup}>
+
+                <div className={headerStyles.headerControls}>
+                    <div className={headerStyles.quickSearchGroup}>
                         <button
-                            className={styles.navButton}
-                            onClick={handleFirst}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Primeiro registro"
+                            className={headerStyles.searchIconButton}
+                            onClick={() => setShowFilters(true)}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Abrir filtros de pesquisa"
                         >
-                            <ChevronFirst size={20} />
+                            <Search size={20} />
                         </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handlePrevious}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Anterior"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
-                        </span>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleNext}
-                            disabled={currentIndex >= solicitacoes.length - 1 || loading}
-                            title="Próximo"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleLast}
-                            disabled={currentIndex >= solicitacoes.length - 1 || loading}
-                            title="Último registro"
-                        >
-                            <ChevronLast size={20} />
-                        </button>
+                        <input
+                            type="text"
+                            className={headerStyles.quickSearchInput}
+                            placeholder="ID..."
+                            value={quickSearchId}
+                            onChange={(e) => setQuickSearchId(e.target.value)}
+                            onKeyPress={handleQuickSearchById}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Digite o ID e pressione Enter"
+                        />
+                        {modo === 'visualizacao' && (
+                            <div className={headerStyles.headerActionButtons}>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnEdit}`}
+                                    onClick={handleEditar}
+                                    disabled={loading || !solicitacaoAprovacaoId}
+                                    title="Editar solicitação"
+                                >
+                                    <Edit2 size={18} /> EDITAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnNew}`}
+                                    onClick={handleNovo}
+                                    disabled={loading}
+                                    title="Criar nova solicitação"
+                                >
+                                    <Plus size={18} /> NOVO
+                                </button>
+                            </div>
+                        )}
                     </div>
-                )}
-                {(modo === 'edicao' || modo === 'criacao') && (
-                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled title="Primeiro registro">
-                            <ChevronFirst size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Anterior">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
-                        </span>
-                        <button className={styles.navButton} disabled title="Próximo">
-                            <ChevronRight size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Último registro">
-                            <ChevronLast size={20} />
-                        </button>
-                    </div>
-                )}
+
+                    {solicitacoes.length > 0 && modo === 'visualizacao' && (
+                        <div className={styles.navigationGroup}>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleFirst}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Primeiro registro"
+                            >
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handlePrevious}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Anterior"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
+                            </span>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleNext}
+                                disabled={currentIndex >= solicitacoes.length - 1 || loading}
+                                title="Próximo"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleLast}
+                                disabled={currentIndex >= solicitacoes.length - 1 || loading}
+                                title="Último registro"
+                            >
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {(modo === 'edicao' || modo === 'criacao') && (
+                        <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                            <button className={styles.navButton} disabled title="Primeiro registro">
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Anterior">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${solicitacoes.length}` : `0/${solicitacoes.length}`}
+                            </span>
+                            <button className={styles.navButton} disabled title="Próximo">
+                                <ChevronRight size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Último registro">
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <BarraPesquisa
+            <ModalPesquisaComum
+                isOpen={showFilters && modo === 'visualizacao'}
+                onClose={() => setShowFilters(false)}
+                titulo="Pesquisa de Solicitações"
                 termo={termoPesquisa}
                 onTermoChange={setTermoPesquisa}
                 campoSelecionado={campoSelecionado}
@@ -390,16 +515,13 @@ function SolicitacaoAprovacaoCadastro() {
                 campos={camposPesquisaSolicitacao}
                 onPesquisar={handlePesquisar}
                 onLimpar={handleLimparPesquisa}
-                desabilitado={loading || modo !== 'visualizacao'}
-            />
-
-            <ResultadosPesquisa
                 resultados={resultados}
-                mostrar={mostrarResultados && modo === 'visualizacao'}
+                mostrarResultados={mostrarResultados && modo === 'visualizacao'}
                 onSelecionar={(solicitacao) => {
                     const index = solicitacoes.findIndex(s => s.solicitacaoAprovacaoId === solicitacao.solicitacaoAprovacaoId);
                     selecionarSolicitacao(solicitacao, index);
                     handleSelecionarResultado(solicitacao);
+                    setShowFilters(false);
                 }}
                 colunas={[
                     { campo: 'solicitacaoAprovacaoId', label: 'ID' },
@@ -407,6 +529,8 @@ function SolicitacaoAprovacaoCadastro() {
                     { campo: 'movimento', label: 'Data' },
                     { campo: 'statusSolicitacao', label: 'Status' }
                 ]}
+                multiFiltro={true}
+                dados={solicitacoes}
             />
 
             <div className={styles.form}>
@@ -499,77 +623,6 @@ function SolicitacaoAprovacaoCadastro() {
                             </div>
                         )}
                     </div>
-                </div>
-
-                <div className={styles.buttonGroup}>
-                    {modo === 'visualizacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnEdit}`}
-                                onClick={handleEditar}
-                                disabled={loading || !solicitacaoAprovacaoId}
-                                title="Editar solicitação"
-                            >
-                                <Edit2 size={18} /> Editar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnNew}`}
-                                onClick={handleNovo}
-                                disabled={loading}
-                                title="Criar nova solicitação"
-                            >
-                                <Plus size={18} /> Novo
-                            </button>
-                        </>
-                    )}
-                    {modo === 'edicao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar alterações"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDeleteClick}
-                                disabled={loading || !solicitacaoAprovacaoId}
-                                title="Excluir solicitação"
-                            >
-                                <Trash2 size={18} /> Excluir
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar edição"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
-                    {modo === 'criacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar nova solicitação"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar criação"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
                 </div>
 
                 {message.text && (

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, MapPin } from 'lucide-react';
-import styles from './DadosBancariosCadastro-novo.module.css';
+import styles from './EmpresaCadastro-novo.module.css';
 import { dadosBancariosService } from '../../services/dadosBancariosService';
 import ModalPesquisa from './ModalPesquisa';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import ModalPesquisaComum from './ModalPesquisaComum';
 import { usePesquisa } from '../../hooks/usePesquisa';
 
 function DadosBancariosCadastro() {
@@ -25,6 +26,10 @@ function DadosBancariosCadastro() {
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Controles de header/pesquisa
+    const [showFilters, setShowFilters] = useState(false);
+    const [quickSearchId, setQuickSearchId] = useState('');
 
     // Estado para o modal de pesquisa de prestadores
     const [modalAberto, setModalAberto] = useState(false);
@@ -313,6 +318,26 @@ function DadosBancariosCadastro() {
         }
     };
 
+    // Busca rápida por ID no header
+    const handleQuickSearchById = (e) => {
+        if (e.key === 'Enter' && quickSearchId.trim()) {
+            const id = parseInt(quickSearchId.trim());
+            if (isNaN(id)) {
+                setMessage({ type: 'error', text: 'Digite um ID válido!' });
+                return;
+            }
+            const registro = registros.find(r => r.dadosId === id);
+            if (registro) {
+                const index = registros.findIndex(r => r.dadosId === id);
+                selecionarRegistro(registro, index);
+                setQuickSearchId('');
+                setMessage({ type: 'success', text: `Registro ID ${id} encontrado!` });
+            } else {
+                setMessage({ type: 'error', text: `Registro com ID ${id} não encontrado!` });
+            }
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
@@ -324,71 +349,168 @@ function DadosBancariosCadastro() {
             />
 
             <div className={styles.header}>
-                <div className={styles.headerTitle}>
-                    <span>🏦</span>
-                    <h2>Dados Bancários</h2>
+                <div className={styles.headerTop}>
+                    <div className={styles.headerTitle}>
+                        <span></span>
+                        <h2>Dados Bancários</h2>
+                    </div>
                 </div>
-                {registros.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.navigationGroup}>
+
+                <div className={styles.headerControls}>
+                    <div className={styles.quickSearchGroup}>
                         <button
-                            className={styles.navButton}
-                            onClick={handleFirst}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Primeiro registro"
+                            className={styles.searchIconButton}
+                            onClick={() => setShowFilters(true)}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Abrir filtros de pesquisa"
                         >
-                            <ChevronFirst size={20} />
+                            <Search size={20} />
                         </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handlePrevious}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Anterior"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${registros.length}` : `0/${registros.length}`}
-                        </span>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleNext}
-                            disabled={currentIndex >= registros.length - 1 || loading}
-                            title="Próximo"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleLast}
-                            disabled={currentIndex >= registros.length - 1 || loading}
-                            title="Último registro"
-                        >
-                            <ChevronLast size={20} />
-                        </button>
+                        <input
+                            type="text"
+                            className={styles.quickSearchInput}
+                            placeholder="ID..."
+                            value={quickSearchId}
+                            onChange={(e) => setQuickSearchId(e.target.value)}
+                            onKeyPress={handleQuickSearchById}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Digite o ID e pressione Enter"
+                        />
+                        {modo === 'visualizacao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnEdit}`}
+                                    onClick={handleEditar}
+                                    disabled={loading || !dadosId}
+                                    title="Editar dados bancários"
+                                >
+                                    <Edit2 size={18} /> EDITAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnNew}`}
+                                    onClick={handleNovo}
+                                    disabled={loading}
+                                    title="Criar novos dados bancários"
+                                >
+                                    <Plus size={18} /> NOVO
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'edicao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar alterações"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading}
+                                    title="Excluir dados bancários"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'criacao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar novos dados bancários"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
                     </div>
-                )}
-                {(modo === 'edicao' || modo === 'criacao') && (
-                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled title="Primeiro registro">
-                            <ChevronFirst size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Anterior">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${registros.length}` : `0/${registros.length}`}
-                        </span>
-                        <button className={styles.navButton} disabled title="Próximo">
-                            <ChevronRight size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Último registro">
-                            <ChevronLast size={20} />
-                        </button>
-                    </div>
-                )}
+
+                    {registros.length > 0 && modo === 'visualizacao' && (
+                        <div className={styles.navigationGroup}>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleFirst}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Primeiro registro"
+                            >
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handlePrevious}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Anterior"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${registros.length}` : `0/${registros.length}`}
+                            </span>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleNext}
+                                disabled={currentIndex >= registros.length - 1 || loading}
+                                title="Próximo"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleLast}
+                                disabled={currentIndex >= registros.length - 1 || loading}
+                                title="Último registro"
+                            >
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {(modo === 'edicao' || modo === 'criacao') && (
+                        <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                            <button className={styles.navButton} disabled title="Primeiro registro">
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Anterior">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${registros.length}` : `0/${registros.length}`}
+                            </span>
+                            <button className={styles.navButton} disabled title="Próximo">
+                                <ChevronRight size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Último registro">
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <BarraPesquisa
+            <ModalPesquisaComum
+                isOpen={showFilters && modo === 'visualizacao'}
+                onClose={() => setShowFilters(false)}
+                titulo="Pesquisa de Dados Bancários"
                 termo={termoPesquisa}
                 onTermoChange={setTermoPesquisa}
                 campoSelecionado={campoSelecionado}
@@ -396,16 +518,13 @@ function DadosBancariosCadastro() {
                 campos={camposPesquisaDadosBancarios}
                 onPesquisar={handlePesquisar}
                 onLimpar={handleLimparPesquisa}
-                desabilitado={loading || modo !== 'visualizacao'}
-            />
-
-            <ResultadosPesquisa
                 resultados={resultados}
-                mostrar={mostrarResultados && modo === 'visualizacao'}
+                mostrarResultados={mostrarResultados && modo === 'visualizacao'}
                 onSelecionar={(registro) => {
                     const index = registros.findIndex(r => r.dadosId === registro.dadosId);
                     selecionarRegistro(registro, index);
                     handleSelecionarResultado(registro);
+                    setShowFilters(false);
                 }}
                 colunas={[
                     { campo: 'dadosId', label: 'ID' },
@@ -414,6 +533,8 @@ function DadosBancariosCadastro() {
                     { campo: 'conta', label: 'Conta' },
                     { campo: 'chavePix', label: 'Chave PIX' }
                 ]}
+                multiFiltro={true}
+                dados={registros}
             />
 
             <div className={styles.form}>
@@ -496,84 +617,13 @@ function DadosBancariosCadastro() {
                         />
                     </div>
                 </div>
-
-                <div className={styles.buttonGroup}>
-                    {modo === 'visualizacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnEdit}`}
-                                onClick={handleEditar}
-                                disabled={loading || !dadosId}
-                                title="Editar dados bancários"
-                            >
-                                <Edit2 size={18} /> Editar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnNew}`}
-                                onClick={handleNovo}
-                                disabled={loading}
-                                title="Criar novos dados bancários"
-                            >
-                                <Plus size={18} /> Novo
-                            </button>
-                        </>
-                    )}
-                    {modo === 'edicao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar alterações"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDeleteClick}
-                                disabled={loading}
-                                title="Excluir dados bancários"
-                            >
-                                <Trash2 size={18} /> Excluir
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar edição"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
-                    {modo === 'criacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar novos dados bancários"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar criação"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
-                </div>
-
-                {message.text && (
-                    <div className={`${styles.message} ${styles[message.type]}`}>
-                        {message.text}
-                    </div>
-                )}
             </div>
+
+            {message.text && (
+                <div className={`${styles.message} ${styles[message.type]}`}>
+                    {message.text}
+                </div>
+            )}
 
             <ConfirmModal
                 isOpen={showDeleteModal}

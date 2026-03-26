@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, User } from 'lucide-react';
-import styles from './UserCadastro-novo.module.css';
+import styles from './EmpresaCadastro-novo.module.css';
 import { userService } from '../../services/userService';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import ModalPesquisaComum from './ModalPesquisaComum';
 import { usePesquisa } from '../../hooks/usePesquisa';
 
 function UserCadastro() {
@@ -21,6 +22,10 @@ function UserCadastro() {
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Controles de header/pesquisa
+    const [showFilters, setShowFilters] = useState(false);
+    const [quickSearchId, setQuickSearchId] = useState('');
 
     // Lista de roles disponíveis
     const roles = ['ADMIN', 'SOLICITANTE', 'ESCRITORIO', 'APROVADOR'];
@@ -274,76 +279,195 @@ function UserCadastro() {
         }
     };
 
+    // Busca rápida por ID no header
+    const handleQuickSearchById = (e) => {
+        if (e.key === 'Enter' && quickSearchId.trim()) {
+            const id = parseInt(quickSearchId.trim());
+            if (isNaN(id)) {
+                setMessage({ type: 'error', text: 'Digite um ID válido!' });
+                return;
+            }
+            const usuario = users.find(u => u.id === id);
+            if (usuario) {
+                const index = users.findIndex(u => u.id === id);
+                selecionarUsuario(usuario, index);
+                setQuickSearchId('');
+                setMessage({ type: 'success', text: `Usuário ID ${id} encontrado!` });
+            } else {
+                setMessage({ type: 'error', text: `Usuário com ID ${id} não encontrado!` });
+            }
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.headerTitle}>
-                    <span>👤</span>
-                    <h2>Cadastro de Usuário</h2>
+                <div className={styles.headerTop}>
+                    <div className={styles.headerTitle}>
+                        <span>👤</span>
+                        <h2>Cadastro de Usuário</h2>
+                    </div>
+                    <div className={styles.headerActionButtons}>
+                        {modo === 'edicao' && (
+                            <>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar alterações"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading || !id}
+                                    title="Excluir usuário"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </>
+                        )}
+                        {modo === 'criacao' && (
+                            <>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar novo usuário"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
-                {users.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.navigationGroup}>
+
+                <div className={styles.headerControls}>
+                    <div className={styles.quickSearchGroup}>
                         <button
-                            className={styles.navButton}
-                            onClick={handleFirst}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Primeiro registro"
+                            className={styles.searchIconButton}
+                            onClick={() => setShowFilters(true)}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Abrir filtros de pesquisa"
                         >
-                            <ChevronFirst size={20} />
+                            <Search size={20} />
                         </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handlePrevious}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Anterior"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
-                        </span>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleNext}
-                            disabled={currentIndex >= users.length - 1 || loading}
-                            title="Próximo"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleLast}
-                            disabled={currentIndex >= users.length - 1 || loading}
-                            title="Último registro"
-                        >
-                            <ChevronLast size={20} />
-                        </button>
+                        <input
+                            type="text"
+                            className={styles.quickSearchInput}
+                            placeholder="ID..."
+                            value={quickSearchId}
+                            onChange={(e) => setQuickSearchId(e.target.value)}
+                            onKeyPress={handleQuickSearchById}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Digite o ID e pressione Enter"
+                        />
+                        {modo === 'visualizacao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnEdit}`}
+                                    onClick={handleEditar}
+                                    disabled={loading || !id}
+                                    title="Editar usuário"
+                                >
+                                    <Edit2 size={18} /> EDITAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnNew}`}
+                                    onClick={handleNovo}
+                                    disabled={loading}
+                                    title="Criar novo usuário"
+                                >
+                                    <Plus size={18} /> NOVO
+                                </button>
+                            </div>
+                        )}
                     </div>
-                )}
-                {(modo === 'edicao' || modo === 'criacao') && (
-                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled title="Primeiro registro">
-                            <ChevronFirst size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Anterior">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
-                        </span>
-                        <button className={styles.navButton} disabled title="Próximo">
-                            <ChevronRight size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Último registro">
-                            <ChevronLast size={20} />
-                        </button>
-                    </div>
-                )}
+
+                    {users.length > 0 && modo === 'visualizacao' && (
+                        <div className={styles.navigationGroup}>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleFirst}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Primeiro registro"
+                            >
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handlePrevious}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Anterior"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
+                            </span>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleNext}
+                                disabled={currentIndex >= users.length - 1 || loading}
+                                title="Próximo"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleLast}
+                                disabled={currentIndex >= users.length - 1 || loading}
+                                title="Último registro"
+                            >
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {(modo === 'edicao' || modo === 'criacao') && (
+                        <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                            <button className={styles.navButton} disabled title="Primeiro registro">
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Anterior">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${users.length}` : `0/${users.length}`}
+                            </span>
+                            <button className={styles.navButton} disabled title="Próximo">
+                                <ChevronRight size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Último registro">
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <BarraPesquisa
+            <ModalPesquisaComum
+                isOpen={showFilters && modo === 'visualizacao'}
+                onClose={() => setShowFilters(false)}
+                titulo="Pesquisa de Usuários"
                 termo={termoPesquisa}
                 onTermoChange={setTermoPesquisa}
                 campoSelecionado={campoSelecionado}
@@ -351,22 +475,21 @@ function UserCadastro() {
                 campos={camposPesquisaUsuario}
                 onPesquisar={handlePesquisar}
                 onLimpar={handleLimparPesquisa}
-                desabilitado={loading || modo !== 'visualizacao'}
-            />
-
-            <ResultadosPesquisa
                 resultados={resultados}
-                mostrar={mostrarResultados && modo === 'visualizacao'}
+                mostrarResultados={mostrarResultados && modo === 'visualizacao'}
                 onSelecionar={(user) => {
                     const index = users.findIndex(u => u.id === user.id);
                     selecionarUsuario(user, index);
                     handleSelecionarResultado(user);
+                    setShowFilters(false);
                 }}
                 colunas={[
                     { campo: 'id', label: 'ID' },
                     { campo: 'username', label: 'Usuário' },
                     { campo: 'role', label: 'Permissão' }
                 ]}
+                multiFiltro={true}
+                dados={users}
             />
 
             <div className={styles.form}>
@@ -413,84 +536,13 @@ function UserCadastro() {
                         </select>
                     </div>
                 </div>
-
-                <div className={styles.buttonGroup}>
-                    {modo === 'visualizacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnEdit}`}
-                                onClick={handleEditar}
-                                disabled={loading || !id}
-                                title="Editar usuário"
-                            >
-                                <Edit2 size={18} /> Editar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnNew}`}
-                                onClick={handleNovo}
-                                disabled={loading}
-                                title="Criar novo usuário"
-                            >
-                                <Plus size={18} /> Novo
-                            </button>
-                        </>
-                    )}
-                    {modo === 'edicao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar alterações"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDeleteClick}
-                                disabled={loading || !id}
-                                title="Excluir usuário"
-                            >
-                                <Trash2 size={18} /> Excluir
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar edição"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
-                    {modo === 'criacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar novo usuário"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar criação"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
-                </div>
-
-                {message.text && (
-                    <div className={`${styles.message} ${styles[message.type]}`}>
-                        {message.text}
-                    </div>
-                )}
             </div>
+
+            {message.text && (
+                <div className={`${styles.message} ${styles[message.type]}`}>
+                    {message.text}
+                </div>
+            )}
 
             <ConfirmModal
                 isOpen={showDeleteModal}

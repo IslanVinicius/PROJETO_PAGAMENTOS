@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, FolderOpen } from 'lucide-react';
-import styles from './GrupoItemCadastro-novo.module.css';
+import styles from './EmpresaCadastro-novo.module.css';
 import { grupoItemService } from '../../services/grupoItemService';
 import ConfirmModal from '../Shared/ConfirmModal';
-import { BarraPesquisa, ResultadosPesquisa } from '../common';
+import ModalPesquisaComum from './ModalPesquisaComum';
 import { usePesquisa } from '../../hooks/usePesquisa';
 
 function GrupoItemCadastro() {
@@ -20,6 +20,10 @@ function GrupoItemCadastro() {
     const [modo, setModo] = useState('visualizacao');
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Controles de header/pesquisa
+    const [showFilters, setShowFilters] = useState(false);
+    const [quickSearchId, setQuickSearchId] = useState('');
 
     // Configuração dos campos de pesquisa
     const camposPesquisaGrupo = [
@@ -251,71 +255,176 @@ function GrupoItemCadastro() {
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.headerTitle}>
-                    <FolderOpen size={28} />
-                    <h2>Cadastro de Grupo de Itens</h2>
+                <div className={styles.headerTop}>
+                    <div className={styles.headerTitle}>
+                        <h2>Cadastro de Grupo de Itens</h2>
+                    </div>
+                    <div className={styles.headerActionButtons}>
+                        {modo === 'edicao' && (
+                            <>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading || !idGrupo}
+                                    title="Excluir grupo"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </>
+                        )}
+                        {modo === 'criacao' && (
+                            <>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
-                {grupos.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.navigationGroup}>
+
+                <div className={styles.headerControls}>
+                    <div className={styles.quickSearchGroup}>
                         <button
-                            className={styles.navButton}
-                            onClick={handleFirst}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Primeiro registro"
+                            className={styles.searchIconButton}
+                            onClick={() => setShowFilters(true)}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Abrir filtros de pesquisa"
                         >
-                            <ChevronFirst size={20} />
+                            <Search size={20} />
                         </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handlePrevious}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Anterior"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${grupos.length}` : `0/${grupos.length}`}
-                        </span>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleNext}
-                            disabled={currentIndex >= grupos.length - 1 || loading}
-                            title="Próximo"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleLast}
-                            disabled={currentIndex >= grupos.length - 1 || loading}
-                            title="Último registro"
-                        >
-                            <ChevronLast size={20} />
-                        </button>
+                        <input
+                            type="text"
+                            className={styles.quickSearchInput}
+                            placeholder="ID..."
+                            value={quickSearchId}
+                            onChange={(e) => setQuickSearchId(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && quickSearchId.trim()) {
+                                    const id = parseInt(quickSearchId.trim());
+                                    if (isNaN(id)) {
+                                        setMessage({ type: 'error', text: 'Digite um ID válido!' });
+                                    } else {
+                                        const grupo = grupos.find(g => g.id === id);
+                                        if (grupo) {
+                                            const index = grupos.findIndex(g => g.id === id);
+                                            selecionarGrupo(grupo, index);
+                                            setQuickSearchId('');
+                                            setMessage({ type: 'success', text: `Grupo ID ${id} encontrado!` });
+                                        } else {
+                                            setMessage({ type: 'error', text: `Grupo com ID ${id} não encontrado!` });
+                                        }
+                                    }
+                                }
+                            }}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Digite o ID e pressione Enter"
+                        />
+
+                        {modo === 'visualizacao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnEdit}`}
+                                    onClick={handleEditar}
+                                    disabled={loading || !idGrupo}
+                                    title="Editar grupo"
+                                >
+                                    <Edit2 size={18} /> EDITAR
+                                </button>
+                            </div>
+                        )}
+
+                        {(modo === 'edicao' || modo === 'criacao') && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title={modo === 'edicao' ? 'Salvar alterações' : 'Salvar novo grupo'}
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                            </div>
+                        )}
                     </div>
-                )}
-                {(modo === 'edicao' || modo === 'criacao') && (
-                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled title="Primeiro registro">
-                            <ChevronFirst size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Anterior">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${grupos.length}` : `0/${grupos.length}`}
-                        </span>
-                        <button className={styles.navButton} disabled title="Próximo">
-                            <ChevronRight size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Último registro">
-                            <ChevronLast size={20} />
-                        </button>
-                    </div>
-                )}
+
+                    {grupos.length > 0 && modo === 'visualizacao' && (
+                        <div className={styles.navigationGroup}>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleFirst}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Primeiro registro"
+                            >
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handlePrevious}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Anterior"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${grupos.length}` : `0/${grupos.length}`}
+                            </span>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleNext}
+                                disabled={currentIndex >= grupos.length - 1 || loading}
+                                title="Próximo"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleLast}
+                                disabled={currentIndex >= grupos.length - 1 || loading}
+                                title="Último registro"
+                            >
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {(modo === 'edicao' || modo === 'criacao') && (
+                        <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                            <button className={styles.navButton} disabled title="Primeiro registro">
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Anterior">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${grupos.length}` : `0/${grupos.length}`}
+                            </span>
+                            <button className={styles.navButton} disabled title="Próximo">
+                                <ChevronRight size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Último registro">
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <BarraPesquisa
+            <ModalPesquisaComum
+                isOpen={showFilters && modo === 'visualizacao'}
+                onClose={() => setShowFilters(false)}
+                titulo="Pesquisa de Grupos de Itens"
                 termo={termoPesquisa}
                 onTermoChange={setTermoPesquisa}
                 campoSelecionado={campoSelecionado}
@@ -323,22 +432,21 @@ function GrupoItemCadastro() {
                 campos={camposPesquisaGrupo}
                 onPesquisar={handlePesquisar}
                 onLimpar={handleLimparPesquisa}
-                desabilitado={loading || modo !== 'visualizacao'}
-            />
-
-            <ResultadosPesquisa
                 resultados={resultados}
-                mostrar={mostrarResultados && modo === 'visualizacao'}
+                mostrarResultados={mostrarResultados && modo === 'visualizacao'}
                 onSelecionar={(grupo) => {
                     const index = grupos.findIndex(g => g.id === grupo.id);
                     selecionarGrupo(grupo, index);
                     handleSelecionarResultado(grupo);
+                    setShowFilters(false);
                 }}
                 colunas={[
                     { campo: 'id', label: 'Código' },
                     { campo: 'nome', label: 'Nome' },
                     { campo: 'descricao', label: 'Descrição' }
                 ]}
+                multiFiltro={true}
+                dados={grupos}
             />
 
             <div className={styles.form}>

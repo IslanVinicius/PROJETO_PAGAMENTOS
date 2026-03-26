@@ -317,12 +317,8 @@ function EmpresaCadastro() {
                             disabled={loading || modo !== 'visualizacao'}
                             title="Digite o ID e pressione Enter"
                         />
-                    </div>
-
-                    {/* Botões de Ação */}
-                    <div className={styles.headerActionButtons}>
                         {modo === 'visualizacao' && (
-                            <>
+                            <div className={styles.headerActionButtons}>
                                 <button
                                     className={`${styles.headerBtn} ${styles.headerBtnEdit}`}
                                     onClick={handleEditar}
@@ -339,8 +335,12 @@ function EmpresaCadastro() {
                                 >
                                     <Plus size={18} /> NOVO
                                 </button>
-                            </>
+                            </div>
                         )}
+                    </div>
+
+                    {/* Botões de Ação */}
+                    <div className={styles.headerActionButtons}>
                         {modo === 'edicao' && (
                             <>
                                 <button

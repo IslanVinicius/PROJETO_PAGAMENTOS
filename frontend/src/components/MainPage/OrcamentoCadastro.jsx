@@ -11,8 +11,12 @@ import ConfirmModal from '../Shared/ConfirmModal';
 import { jsPDF } from 'jspdf';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
+import headerStyles from './EmpresaCadastro-novo.module.css';
+import ModalPesquisaComum from './ModalPesquisaComum';
 
 function OrcamentoCadastro() {
+    const [showFilters, setShowFilters] = useState(false);
+    const [quickSearchId, setQuickSearchId] = useState('');
     const [orcamentoID, setOrcamentoID] = useState('');
     const [movimento, setMovimento] = useState('');
     const [movimentoDate, setMovimentoDate] = useState('');
@@ -442,6 +446,26 @@ function OrcamentoCadastro() {
         }
     };
 
+    // Busca rápida por ID no header
+    const handleQuickSearchById = (e) => {
+        if (e.key === 'Enter' && quickSearchId.trim()) {
+            const id = parseInt(quickSearchId.trim());
+            if (isNaN(id)) {
+                setMessage({ type: 'error', text: 'Digite um ID válido!' });
+                return;
+            }
+            const registro = orcamentos.find(o => o.orcamentoID === id);
+            if (registro) {
+                const index = orcamentos.findIndex(o => o.orcamentoID === id);
+                selecionarOrcamento(registro, index);
+                setQuickSearchId('');
+                setMessage({ type: 'success', text: `Orçamento ID ${id} encontrado!` });
+            } else {
+                setMessage({ type: 'error', text: `Orçamento com ID ${id} não encontrado!` });
+            }
+        }
+    };
+
     const camposDesabilitados = modo === 'visualizacao' || loading;
 
     const formatarValor = (value) => {
@@ -807,72 +831,177 @@ function OrcamentoCadastro() {
                 onSelect={handleAdicionarItem}
             />
 
-            <div className={styles.header}>
-                <div className={styles.headerTitle}>
-                    <span>💰</span>
-                    <h2>Orçamentos</h2>
+            <div className={headerStyles.header}>
+                <div className={headerStyles.headerTop}>
+                    <div className={headerStyles.headerTitle}>
+                        <span>💰</span>
+                        <h2>Orçamentos</h2>
+                    </div>
                 </div>
-                {orcamentos.length > 0 && modo === 'visualizacao' && (
-                    <div className={styles.navigationGroup}>
+
+                <div className={headerStyles.headerControls}>
+                    <div className={headerStyles.quickSearchGroup}>
                         <button
-                            className={styles.navButton}
-                            onClick={handleFirst}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Primeiro registro"
+                            className={headerStyles.searchIconButton}
+                            onClick={() => setShowFilters(true)}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Abrir filtros de pesquisa"
                         >
-                            <ChevronFirst size={20} />
+                            <Search size={20} />
                         </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handlePrevious}
-                            disabled={currentIndex <= 0 || loading}
-                            title="Anterior"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
-                        </span>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleNext}
-                            disabled={currentIndex >= orcamentos.length - 1 || loading}
-                            title="Próximo"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                        <button
-                            className={styles.navButton}
-                            onClick={handleLast}
-                            disabled={currentIndex >= orcamentos.length - 1 || loading}
-                            title="Último registro"
-                        >
-                            <ChevronLast size={20} />
-                        </button>
+                        <input
+                            type="text"
+                            className={headerStyles.quickSearchInput}
+                            placeholder="ID..."
+                            value={quickSearchId}
+                            onChange={(e) => setQuickSearchId(e.target.value)}
+                            onKeyPress={handleQuickSearchById}
+                            disabled={loading || modo !== 'visualizacao'}
+                            title="Digite o ID e pressione Enter"
+                        />
+                        {modo === 'visualizacao' && (
+                            <div className={headerStyles.headerActionButtons}>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnNew}`}
+                                    onClick={handleGerarPDF}
+                                    disabled={loading || !orcamentoID}
+                                    title="Gerar PDF do orçamento"
+                                >
+                                    <Printer size={18} /> PDF
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnEdit}`}
+                                    onClick={handleEditar}
+                                    disabled={loading || !orcamentoID}
+                                    title="Editar orçamento"
+                                >
+                                    <Edit2 size={18} /> EDITAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnNew}`}
+                                    onClick={handleNovo}
+                                    disabled={loading}
+                                    title="Criar novo orçamento"
+                                >
+                                    <Plus size={18} /> NOVO
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'edicao' && (
+                            <div className={headerStyles.headerActionButtons}>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar alterações"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading || !orcamentoID}
+                                    title="Excluir orçamento"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'criacao' && (
+                            <div className={headerStyles.headerActionButtons}>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar novo orçamento"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
                     </div>
-                )}
-                {(modo === 'edicao' || modo === 'criacao') && (
-                    <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
-                        <button className={styles.navButton} disabled title="Primeiro registro">
-                            <ChevronFirst size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Anterior">
-                            <ChevronLeft size={20} />
-                        </button>
-                        <span className={styles.positionIndicator}>
-                            {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
-                        </span>
-                        <button className={styles.navButton} disabled title="Próximo">
-                            <ChevronRight size={20} />
-                        </button>
-                        <button className={styles.navButton} disabled title="Último registro">
-                            <ChevronLast size={20} />
-                        </button>
-                    </div>
-                )}
+
+                    {orcamentos.length > 0 && modo === 'visualizacao' && (
+                        <div className={styles.navigationGroup}>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleFirst}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Primeiro registro"
+                            >
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handlePrevious}
+                                disabled={currentIndex <= 0 || loading}
+                                title="Anterior"
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
+                            </span>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleNext}
+                                disabled={currentIndex >= orcamentos.length - 1 || loading}
+                                title="Próximo"
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                            <button
+                                className={styles.navButton}
+                                onClick={handleLast}
+                                disabled={currentIndex >= orcamentos.length - 1 || loading}
+                                title="Último registro"
+                            >
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                    {(modo === 'edicao' || modo === 'criacao') && (
+                        <div className={styles.navigationGroup} style={{ opacity: 0.5 }}>
+                            <button className={styles.navButton} disabled title="Primeiro registro">
+                                <ChevronFirst size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Anterior">
+                                <ChevronLeft size={20} />
+                            </button>
+                            <span className={styles.positionIndicator}>
+                                {currentIndex >= 0 ? `${currentIndex + 1}/${orcamentos.length}` : `0/${orcamentos.length}`}
+                            </span>
+                            <button className={styles.navButton} disabled title="Próximo">
+                                <ChevronRight size={20} />
+                            </button>
+                            <button className={styles.navButton} disabled title="Último registro">
+                                <ChevronLast size={20} />
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <BarraPesquisa
+            <ModalPesquisaComum
+                isOpen={showFilters && modo === 'visualizacao'}
+                onClose={() => setShowFilters(false)}
+                titulo="Pesquisa de Orçamentos"
                 termo={termoPesquisa}
                 onTermoChange={setTermoPesquisa}
                 campoSelecionado={campoSelecionado}
@@ -880,24 +1009,25 @@ function OrcamentoCadastro() {
                 campos={camposPesquisaOrcamento}
                 onPesquisar={handlePesquisar}
                 onLimpar={handleLimparPesquisa}
-                desabilitado={loading || modo !== 'visualizacao'}
-            />
-
-            <ResultadosPesquisa
                 resultados={resultados}
-                mostrar={mostrarResultados && modo === 'visualizacao'}
+                mostrarResultados={mostrarResultados && modo === 'visualizacao'}
                 onSelecionar={(orcamento) => {
                     const index = orcamentos.findIndex(o => o.orcamentoID === orcamento.orcamentoID);
                     selecionarOrcamento(orcamento, index);
                     handleSelecionarResultado(orcamento);
+                    setShowFilters(false);
                 }}
                 colunas={[
                     { campo: 'orcamentoID', label: 'ID' },
                     { campo: 'descricao', label: 'Descrição' },
-                    { campo: 'movimento', label: 'Data' },
-                    { campo: 'valorFinal', label: 'Valor Final', format: 'moeda' }
+                    { campo: 'empresaID', label: 'Empresa' },
+                    { campo: 'idPrestador', label: 'Prestador' },
+                    { campo: 'tipoPagamento', label: 'Tipo Pgto' }
                 ]}
+                multiFiltro={true}
+                dados={orcamentos}
             />
+
 
             <div className={styles.form}>
                 <div className={styles.formGrid}>
@@ -1245,85 +1375,6 @@ function OrcamentoCadastro() {
                         <p className={styles.noImagens}>
                             Clique em "Anexar Imagem" para adicionar imagens ao orçamento.
                         </p>
-                    )}
-                </div>
-
-                <div className={styles.buttonGroup}>
-                    {modo === 'visualizacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnEdit}`}
-                                onClick={handleEditar}
-                                disabled={loading || !orcamentoID}
-                                title="Editar orçamento"
-                            >
-                                <Edit2 size={18} /> Editar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnNew}`}
-                                onClick={handleNovo}
-                                disabled={loading}
-                                title="Criar novo orçamento"
-                            >
-                                <Plus size={18} /> Novo
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnPDF}`}
-                                onClick={handleGerarPDF}
-                                disabled={loading || !orcamentoID}
-                                title="Gerar PDF do orçamento"
-                            >
-                                <Printer size={18} /> Gerar PDF
-                            </button>
-                        </>
-                    )}
-                    {modo === 'edicao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar alterações"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnDelete}`}
-                                onClick={handleDeleteClick}
-                                disabled={loading || !orcamentoID}
-                                title="Excluir orçamento"
-                            >
-                                <Trash2 size={18} /> Excluir
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar edição"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
-                    )}
-                    {modo === 'criacao' && (
-                        <>
-                            <button
-                                className={`${styles.btn} ${styles.btnSave}`}
-                                onClick={handleSave}
-                                disabled={loading}
-                                title="Salvar novo orçamento"
-                            >
-                                <Save size={18} /> Salvar
-                            </button>
-                            <button
-                                className={`${styles.btn} ${styles.btnCancel}`}
-                                onClick={handleCancelar}
-                                disabled={loading}
-                                title="Cancelar criação"
-                            >
-                                <X size={18} /> Cancelar
-                            </button>
-                        </>
                     )}
                 </div>
 
