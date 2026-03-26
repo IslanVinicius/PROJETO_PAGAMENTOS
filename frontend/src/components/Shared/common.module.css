@@ -1,0 +1,160 @@
+/* Barra de Pesquisa */
+.barraPesquisa {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.campoSelect {
+    min-width: 180px;
+}
+
+.select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.inputGroup {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+}
+
+.input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.btnPesquisar,
+.btnLimpar {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btnPesquisar {
+    background-color: #007bff;
+    color: white;
+}
+
+.btnPesquisar:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.btnLimpar {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btnLimpar:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.btnPesquisar:disabled,
+.btnLimpar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Resultados da Pesquisa */
+.resultadosContainer {
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+.tabela thead {
+    background-color: #f1f3f5;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.tabela th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabela td {
+    padding: 11px 15px;
+    border-bottom: 1px solid #e9ecef;
+    color: #212529;
+    font-size: 14px;
+}
+
+.linhaResultado {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.linhaResultado:hover {
+    background-color: #f8f9fa;
+}
+
+.linhaResultado:last-child td {
+    border-bottom: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .barraPesquisa {
+        flex-direction: column;
+    }
+
+    .campoSelect {
+        width: 100%;
+    }
+
+    .inputGroup {
+        width: 100%;
+    }
+
+    .tabela {
+        font-size: 13px;
+    }
+
+    .tabela th,
+    .tabela td {
+        padding: 8px 10px;
+    }
+}
