@@ -13,6 +13,7 @@ import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
 import headerStyles from './EmpresaCadastro-novo.module.css';
 import ModalPesquisaComum from './ModalPesquisaComum';
+import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 
 function OrcamentoCadastro() {
     const [showFilters, setShowFilters] = useState(false);
@@ -37,11 +38,13 @@ function OrcamentoCadastro() {
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Hook de mensagem temporária (3 segundos)
+    const [message, setMessage] = useMensagemTemporaria(3000);
 
     const [modalPrestadorAberto, setModalPrestadorAberto] = useState(false);
     const [modalEmpresaAberto, setModalEmpresaAberto] = useState(false);
@@ -834,7 +837,7 @@ function OrcamentoCadastro() {
             <div className={headerStyles.header}>
                 <div className={headerStyles.headerTop}>
                     <div className={headerStyles.headerTitle}>
-                        <span>💰</span>
+                        <span></span>
                         <h2>Orçamentos</h2>
                     </div>
                 </div>

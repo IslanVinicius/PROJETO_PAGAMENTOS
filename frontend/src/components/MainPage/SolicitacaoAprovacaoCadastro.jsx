@@ -8,6 +8,7 @@ import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
 import headerStyles from './EmpresaCadastro-novo.module.css';
 import ModalPesquisaComum from './ModalPesquisaComum';
+import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 
 function SolicitacaoAprovacaoCadastro() {
     const [solicitacaoAprovacaoId, setSolicitacaoAprovacaoId] = useState('');
@@ -20,11 +21,13 @@ function SolicitacaoAprovacaoCadastro() {
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao');
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Hook de mensagem temporária (3 segundos)
+    const [message, setMessage] = useMensagemTemporaria(3000);
 
     // Controles de header/pesquisa
     const [showFilters, setShowFilters] = useState(false);
@@ -343,61 +346,11 @@ function SolicitacaoAprovacaoCadastro() {
                 onSelect={handleOrcamentoSelecionado}
             />
 
-            <div className={styles.header}>
+            <div className={headerStyles.header}>
                 <div className={headerStyles.headerTop}>
                     <div className={headerStyles.headerTitle}>
-                        <span>📋</span>
+                        <span></span>
                         <h2>Solicitação de Aprovação</h2>
-                    </div>
-                    <div className={headerStyles.headerActionButtons}>
-                        {modo === 'edicao' && (
-                            <>
-                                <button
-                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
-                                    onClick={handleSave}
-                                    disabled={loading}
-                                    title="Salvar alterações"
-                                >
-                                    <Save size={18} /> SALVAR
-                                </button>
-                                <button
-                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnDelete}`}
-                                    onClick={handleDeleteClick}
-                                    disabled={loading || !solicitacaoAprovacaoId}
-                                    title="Excluir solicitação"
-                                >
-                                    <Trash2 size={18} /> EXCLUIR
-                                </button>
-                                <button
-                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
-                                    onClick={handleCancelar}
-                                    disabled={loading}
-                                    title="Cancelar edição"
-                                >
-                                    <X size={18} /> CANCELAR
-                                </button>
-                            </>
-                        )}
-                        {modo === 'criacao' && (
-                            <>
-                                <button
-                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
-                                    onClick={handleSave}
-                                    disabled={loading}
-                                    title="Salvar nova solicitação"
-                                >
-                                    <Save size={18} /> SALVAR
-                                </button>
-                                <button
-                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
-                                    onClick={handleCancelar}
-                                    disabled={loading}
-                                    title="Cancelar criação"
-                                >
-                                    <X size={18} /> CANCELAR
-                                </button>
-                            </>
-                        )}
                     </div>
                 </div>
 
@@ -438,6 +391,54 @@ function SolicitacaoAprovacaoCadastro() {
                                     title="Criar nova solicitação"
                                 >
                                     <Plus size={18} /> NOVO
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'edicao' && (
+                            <div className={headerStyles.headerActionButtons}>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar alterações"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading || !solicitacaoAprovacaoId}
+                                    title="Excluir solicitação"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'criacao' && (
+                            <div className={headerStyles.headerActionButtons}>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar nova solicitação"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${headerStyles.headerBtn} ${headerStyles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
                                 </button>
                             </div>
                         )}

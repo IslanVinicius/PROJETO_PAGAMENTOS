@@ -4,6 +4,7 @@ import styles from './EmpresaCadastro-novo.module.css';
 import { empresaService } from '../../services/empresaService';
 import ConfirmModal from '../Shared/ConfirmModal';
 import ModalPesquisaFiltroEmpresa from './ModalPesquisaFiltroEmpresa';
+import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 
 function EmpresaCadastro() {
     // Estados dos campos
@@ -17,7 +18,6 @@ function EmpresaCadastro() {
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
 
@@ -26,6 +26,9 @@ function EmpresaCadastro() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [quickSearchId, setQuickSearchId] = useState('');
+
+    // Hook de mensagem temporária (3 segundos)
+    const [message, setMessage] = useMensagemTemporaria(3000);
 
     useEffect(() => {
         carregarEmpresas();

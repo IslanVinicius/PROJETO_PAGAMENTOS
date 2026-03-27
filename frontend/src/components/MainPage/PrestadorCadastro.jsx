@@ -6,6 +6,7 @@ import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import ModalPesquisaComum from './ModalPesquisaComum';
 import { usePesquisa } from '../../hooks/usePesquisa';
+import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 
 function PrestadorCadastro() {
     const [codPrestador, setCodPrestador] = useState('');
@@ -16,11 +17,13 @@ function PrestadorCadastro() {
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Hook de mensagem temporária (3 segundos)
+    const [message, setMessage] = useMensagemTemporaria(3000);
 
     // Controles de header/pesquisa
     const [showFilters, setShowFilters] = useState(false);

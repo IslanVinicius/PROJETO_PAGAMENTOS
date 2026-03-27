@@ -6,6 +6,7 @@ import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import ModalPesquisaComum from './ModalPesquisaComum';
 import { usePesquisa } from '../../hooks/usePesquisa';
+import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 
 function UserCadastro() {
     const [id, setId] = useState('');
@@ -17,11 +18,13 @@ function UserCadastro() {
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // Hook de mensagem temporária (3 segundos)
+    const [message, setMessage] = useMensagemTemporaria(3000);
 
     // Controles de header/pesquisa
     const [showFilters, setShowFilters] = useState(false);
@@ -306,61 +309,11 @@ function UserCadastro() {
             <div className={styles.header}>
                 <div className={styles.headerTop}>
                     <div className={styles.headerTitle}>
-                        <span>👤</span>
+                        <span></span>
                         <h2>Cadastro de Usuário</h2>
                     </div>
-                    <div className={styles.headerActionButtons}>
-                        {modo === 'edicao' && (
-                            <>
-                                <button
-                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
-                                    onClick={handleSave}
-                                    disabled={loading}
-                                    title="Salvar alterações"
-                                >
-                                    <Save size={18} /> SALVAR
-                                </button>
-                                <button
-                                    className={`${styles.headerBtn} ${styles.headerBtnDelete}`}
-                                    onClick={handleDeleteClick}
-                                    disabled={loading || !id}
-                                    title="Excluir usuário"
-                                >
-                                    <Trash2 size={18} /> EXCLUIR
-                                </button>
-                                <button
-                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
-                                    onClick={handleCancelar}
-                                    disabled={loading}
-                                    title="Cancelar edição"
-                                >
-                                    <X size={18} /> CANCELAR
-                                </button>
-                            </>
-                        )}
-                        {modo === 'criacao' && (
-                            <>
-                                <button
-                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
-                                    onClick={handleSave}
-                                    disabled={loading}
-                                    title="Salvar novo usuário"
-                                >
-                                    <Save size={18} /> SALVAR
-                                </button>
-                                <button
-                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
-                                    onClick={handleCancelar}
-                                    disabled={loading}
-                                    title="Cancelar criação"
-                                >
-                                    <X size={18} /> CANCELAR
-                                </button>
-                            </>
-                        )}
-                    </div>
                 </div>
-
+            
                 <div className={styles.headerControls}>
                     <div className={styles.quickSearchGroup}>
                         <button
@@ -401,8 +354,56 @@ function UserCadastro() {
                                 </button>
                             </div>
                         )}
+                        {modo === 'edicao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar alterações"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnDelete}`}
+                                    onClick={handleDeleteClick}
+                                    disabled={loading || !id}
+                                    title="Excluir usuário"
+                                >
+                                    <Trash2 size={18} /> EXCLUIR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar edição"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
+                        {modo === 'criacao' && (
+                            <div className={styles.headerActionButtons}>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnSave}`}
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    title="Salvar novo usuário"
+                                >
+                                    <Save size={18} /> SALVAR
+                                </button>
+                                <button
+                                    className={`${styles.headerBtn} ${styles.headerBtnCancel}`}
+                                    onClick={handleCancelar}
+                                    disabled={loading}
+                                    title="Cancelar criação"
+                                >
+                                    <X size={18} /> CANCELAR
+                                </button>
+                            </div>
+                        )}
                     </div>
-
+            
                     {users.length > 0 && modo === 'visualizacao' && (
                         <div className={styles.navigationGroup}>
                             <button
