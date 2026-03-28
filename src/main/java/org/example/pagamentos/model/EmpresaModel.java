@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -29,4 +32,8 @@ public class EmpresaModel {
     @JoinColumn(name = "usuario_criador_id", nullable = false)
     @Getter @Setter
     Usuario usuarioCriador;
+
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Getter @Setter
+    List<EnderecoModel> enderecos = new ArrayList<>();
 }

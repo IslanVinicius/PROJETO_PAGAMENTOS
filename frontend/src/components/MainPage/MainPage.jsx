@@ -10,6 +10,7 @@ import AprovacaoCadastro from "./AprovacaoCadastro";
 import UserCadastro from "./UserCadastro.jsx"
 import GrupoItemCadastro from "./GrupoItemCadastro";
 import ItemCadastro from "./ItemCadastro";
+import EnderecoCadastro from "./EnderecoCadastro";
 import styles from "./MainPage.module.css";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -29,10 +30,11 @@ function MainPage() {
             "aprovacao",
             "usuario",
             "grupoItens",
-            "itens"
+            "itens",
+            "enderecos"
         ],
         ROLE_SOLICITANTE: ["prestador", "orcamento"],
-        ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao", "grupoItens", "itens"],
+        ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao", "grupoItens", "itens", "enderecos"],
         ROLE_APROVADOR: ["aprovacao"]
     };
 
@@ -89,6 +91,9 @@ function MainPage() {
 
             case "itens":
                 return <ItemCadastro />;
+
+            case "enderecos":
+                return <EnderecoCadastro />;
 
             default:
                 return (

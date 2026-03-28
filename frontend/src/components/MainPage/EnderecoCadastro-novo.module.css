@@ -1,0 +1,552 @@
+/* ============================================
+   FORMULÁRIO CADASTRO DE ENDEREÇO - DESIGN MODERNO
+   ============================================ */
+
+.container {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    border: 1px solid var(--border-light);
+}
+
+.accessDenied {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.accessDenied h2 {
+    color: var(--error-color);
+    margin-bottom: var(--spacing-md);
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+    padding: var(--spacing-lg);
+    border-bottom: 3px solid var(--primary-color);
+    background: linear-gradient(to right, var(--bg-secondary), transparent);
+    border-radius: var(--radius-md);
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.headerTitle h2 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.headerControls {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.quickSearchGroup {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.searchIconButton {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.searchIconButton svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.searchIconButton:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.searchIconButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.searchIconButton:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.quickSearchInput {
+    width: 100px;
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition-fast);
+    text-align: center;
+}
+
+.quickSearchInput::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.quickSearchInput:hover:not(:disabled) {
+    border-color: var(--primary-light);
+}
+
+.quickSearchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+.quickSearchInput:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.navigationGroup {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    background-color: var(--bg-secondary);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    margin-left: auto;
+}
+
+.navButton {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.navButton svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.navButton:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.navButton:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.navButton:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.currentIndex {
+    padding: 0 var(--spacing-lg);
+    height: 42px;
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.headerActionButtons {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.headerBtn {
+    height: 42px;
+    padding: 0 var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-sm);
+}
+
+.headerBtn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.headerBtnEdit {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.headerBtnEdit:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.headerBtnNew {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.headerBtnNew:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.headerBtnSave {
+    background: linear-gradient(135deg, var(--success-color) 0%, #2d8645 100%);
+    color: white;
+}
+
+.headerBtnSave:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2d8645 0%, var(--success-color) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.headerBtnDelete {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #b82a20 100%);
+    color: white;
+}
+
+.headerBtnDelete:hover:not(:disabled) {
+    background: linear-gradient(135deg, #b82a20 0%, var(--danger-color) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.headerBtnCancel {
+    background: linear-gradient(135deg, var(--secondary-light) 0%, #7a8087 100%);
+    color: white;
+}
+
+.headerBtnCancel:hover:not(:disabled) {
+    background: linear-gradient(135deg, #7a8087 0%, var(--secondary-light) 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.headerBtn:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+/* Mensagem de feedback */
+.messageContainer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+    font-weight: 600;
+    font-size: 14px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.messageContainer.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.messageContainer.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.messageContainer.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Container do Formulário */
+.formContainer {
+    background-color: var(--bg-secondary);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.formRow {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.formRow:last-child {
+    margin-bottom: 0;
+}
+
+.fieldGroup {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.fieldGroupLarge {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.fieldGroup label,
+.fieldGroupLarge label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.inputField {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+.inputField::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.inputField:hover:not(:disabled) {
+    border-color: var(--primary-light);
+}
+
+.inputField:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+.inputField:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Input com botão (IA e Select) */
+.inputWithButton {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.inputWithButton .inputField {
+    flex: 1;
+}
+
+.aiButton {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--success-color);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+}
+
+.aiButton svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.aiButton:hover:not(:disabled) {
+    background-color: var(--success-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.aiButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.aiButton:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.selectButton {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+.selectButton svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.selectButton:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.selectButton:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.selectButton:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-lg);
+    }
+
+    .header {
+        padding: var(--spacing-md);
+    }
+
+    .headerControls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .quickSearchGroup {
+        justify-content: center;
+    }
+
+    .navigationGroup {
+        justify-content: center;
+        margin-left: 0;
+    }
+
+    .headerActionButtons {
+        justify-content: center;
+    }
+
+    .formRow {
+        flex-direction: column;
+    }
+
+    .fieldGroup,
+    .fieldGroupLarge {
+        width: 100%;
+    }
+
+    .formContainer {
+        padding: var(--spacing-md);
+    }
+}

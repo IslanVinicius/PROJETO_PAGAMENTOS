@@ -1,5 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package } from 'lucide-react';
+import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package, MapPin } from 'lucide-react';
 import styles from "./Sidebar.module.css";
 
 function Sidebar({ activePage, onPageChange, onLogout }) {
@@ -113,6 +113,17 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
               <Package size={20} />
               <span>Itens</span>
             </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "enderecos" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("enderecos")}
+              title="Gerenciar endereços"
+            >
+              <MapPin size={20} />
+              <span>Endereços</span>
+            </div>
           </>
         )}
 
@@ -182,6 +193,17 @@ function Sidebar({ activePage, onPageChange, onLogout }) {
             >
               <Package size={20} />
               <span>Itens</span>
+            </div>
+
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "enderecos" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("enderecos")}
+              title="Gerenciar endereços"
+            >
+              <MapPin size={20} />
+              <span>Endereços</span>
             </div>
           </>
         )}

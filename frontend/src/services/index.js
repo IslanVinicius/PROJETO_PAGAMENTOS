@@ -13,6 +13,7 @@ export { solicitacaoAprovacaoService };
 export { userService };
 export { grupoItemService };
 export { itemService };
+export { enderecoService };
 
 // Importações dos services
 import { empresaService } from './empresaService';
@@ -23,3 +24,4 @@ import { solicitacaoAprovacaoService } from './solicitacaoAprovacaoService';
 import { userService } from './userService';
 import { grupoItemService } from './grupoItemService';
 import { itemService } from './itemService';
+import { enderecoService } from './enderecoService';
