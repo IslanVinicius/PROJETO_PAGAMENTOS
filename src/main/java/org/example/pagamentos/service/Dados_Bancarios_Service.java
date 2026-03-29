@@ -118,4 +118,14 @@ public class Dados_Bancarios_Service {
         return dto;
     }
 
+    // Busca dados bancários pelo ID do prestador
+    public Dados_BancariosModel buscarPorPrestador(Long prestadorId) {
+        var repository = this.dados_Bancarios_Repository;
+        return repository.findByPrestadorModelCodPrestador(prestadorId).orElse(null);
+    }
+
+    public Dados_BancariosDTO converterParaDTO(Dados_BancariosModel model) {
+        return toDTO(model);
+    }
+
 }

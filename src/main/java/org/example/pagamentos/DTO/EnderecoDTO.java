@@ -36,4 +36,6 @@ public class EnderecoDTO {
     private String estado;
 
     private Long idEmpresa;
+
+    private String nomeEmpresa;
 }

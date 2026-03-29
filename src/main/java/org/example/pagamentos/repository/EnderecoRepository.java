@@ -24,4 +24,9 @@ public interface EnderecoRepository extends JpaRepository<EnderecoModel, Long> {
      * Busca um endereço específico, verificando se pertence ao usuário
      */
     EnderecoModel findByIdEnderecoAndUsuarioCriador(Long idEndereco, Usuario usuarioCriador);
+
+    /**
+     * Verifica se já existe um endereço para a empresa informada
+     */
+    boolean existsByEmpresaIdEmpresa(Long idEmpresa);
 }

@@ -17,8 +17,17 @@ export const enderecoService = {
     },
 
     async criar(dados) {
-        const response = await api.post('/enderecos', dados);
-        return await response.json();
+        try {
+            const response = await api.post('/enderecos', dados);
+            return await response.json();
+        } catch (error) {
+            try {
+                const parsed = JSON.parse(error.message);
+                throw new Error(parsed.message || error.message);
+            } catch {
+                throw error;
+            }
+        }
     },
 
     async atualizar(id, dados) {
@@ -33,8 +42,18 @@ export const enderecoService = {
         return text ? JSON.parse(text) : { success: true };
     },
 
-    async buscarViaIA(cep, idEmpresa) {
-        const response = await api.post(`/enderecos/ia/${cep}/empresa/${idEmpresa}`);
-        return await response.json();
+    async buscarCep(cep) {
+        const cepLimpo = cep.replace(/\D/g, '');
+        try {
+            const response = await api.get(`/enderecos/cep/${cepLimpo}`);
+            return await response.json();
+        } catch (error) {
+            try {
+                const parsed = JSON.parse(error.message);
+                throw new Error(parsed.message || error.message);
+            } catch {
+                throw error;
+            }
+        }
     }
 };

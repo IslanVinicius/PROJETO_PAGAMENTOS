@@ -1,7 +1,10 @@
 package org.example.pagamentos.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.pagamentos.DTO.EnderecoDTO;
 import org.example.pagamentos.DTO.EnderecoRequest;
+import org.example.pagamentos.DTO.ViaCepDTO;
 import org.example.pagamentos.exception.AccessDeniedException;
 import org.example.pagamentos.model.EmpresaModel;
 import org.example.pagamentos.model.EnderecoModel;
@@ -12,6 +15,10 @@ import org.example.pagamentos.security.AuthenticationUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 @Service
@@ -109,9 +116,13 @@ public class EnderecoService {
                 .findById(enderecoRequest.getIdEmpresa())
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
-        if (!authenticationUtil.isAdmin() && 
+        if (!authenticationUtil.isAdmin() &&
             !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para criar endereços nesta empresa");
+        }
+
+        if (enderecoRepository.existsByEmpresaIdEmpresa(enderecoRequest.getIdEmpresa())) {
+            throw new RuntimeException("Esta empresa já possui um endereço cadastrado");
         }
 
         EnderecoModel endereco = new EnderecoModel();
@@ -188,51 +199,42 @@ public class EnderecoService {
     }
 
     /**
-     * Busca endereço via API externa de IA e associa à empresa
-     * Este método simula uma integração com serviço externo de IA
-     * Na implementação real, você integraria com uma API como ViaCEP, Google Maps, etc.
+     * Consulta o CEP na API ViaCEP e retorna os dados de endereço sem salvar
      */
-    @Transactional
-    public EnderecoDTO buscarEnderecoViaIA(String cep, Long idEmpresa) {
-        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
-
-        // Verifica se a empresa existe e se o usuário tem permissão
-        EmpresaModel empresa = empresaRepository
-                .findById(idEmpresa)
-                .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
-
-        if (!authenticationUtil.isAdmin() && 
-            !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
-            throw new AccessDeniedException("Você não tem permissão para adicionar endereços a esta empresa");
+    public ViaCepDTO buscarCep(String cep) {
+        String cepLimpo = cep.replaceAll("[^0-9]", "");
+        if (cepLimpo.length() != 8) {
+            throw new RuntimeException("CEP inválido. Informe 8 dígitos numéricos");
         }
 
-        // TODO: Implementar integração com API externa de IA
-        // Exemplo: ViaCEP, Google Maps API, ou outro serviço de geocoding
-        
-        // Simulação de chamada à API de IA
-        // Em produção, usar RestTemplate, WebClient ou FeignClient
-        EnderecoModel enderecoExistente = enderecoRepository
-                .findByIdEnderecoAndUsuarioCriador(empresa.getIdEmpresa(), usuarioAutenticado);
-        
-        // Se já existir um endereço para este CEP nesta empresa, retorna o existente
-        if (enderecoExistente != null && enderecoExistente.getCep().equals(cep)) {
-            return toDTO(enderecoExistente);
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://viacep.com.br/ws/" + cepLimpo + "/json/"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(response.body());
+
+            if (node.has("erro")) {
+                throw new RuntimeException("CEP não encontrado");
+            }
+
+            ViaCepDTO dto = new ViaCepDTO();
+            dto.setCep(node.path("cep").asText());
+            dto.setLogradouro(node.path("logradouro").asText());
+            dto.setComplemento(node.path("complemento").asText());
+            dto.setBairro(node.path("bairro").asText());
+            dto.setCidade(node.path("localidade").asText());
+            dto.setEstado(node.path("uf").asText());
+            return dto;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao consultar CEP: " + e.getMessage());
         }
-
-        // Cria um novo endereço com dados simulados da IA
-        // Na implementação real, os dados viriam da API externa
-        EnderecoModel novoEndereco = new EnderecoModel();
-        novoEndereco.setCep(cep);
-        novoEndereco.setLogradouro("Rua Exemplo (dados da IA)");
-        novoEndereco.setNumero("S/N");
-        novoEndereco.setComplemento("");
-        novoEndereco.setBairro("Bairro Exemplo");
-        novoEndereco.setCidade("Cidade Exemplo");
-        novoEndereco.setEstado("SP");
-        novoEndereco.setEmpresa(empresa);
-        novoEndereco.setUsuarioCriador(usuarioAutenticado);
-
-        return toDTO(enderecoRepository.save(novoEndereco));
     }
 
     /**
@@ -251,8 +253,9 @@ public class EnderecoService {
         
         if (enderecoModel.getEmpresa() != null) {
             dto.setIdEmpresa(enderecoModel.getEmpresa().getIdEmpresa());
+            dto.setNomeEmpresa(enderecoModel.getEmpresa().getNome());
         }
-        
+
         return dto;
     }
 }

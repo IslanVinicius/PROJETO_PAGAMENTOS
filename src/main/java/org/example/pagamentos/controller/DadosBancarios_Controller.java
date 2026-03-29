@@ -46,4 +46,14 @@ public class DadosBancarios_Controller {
         return ResponseEntity.status(201)
                 .body(dados_Bancarios_Service.cadastrarDados(dados));
     }
+
+    @GetMapping("/prestador/{prestadorId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SOLICITANTE', 'ESCRITORIO')")
+    public ResponseEntity<Dados_BancariosDTO> buscarPorPrestador(@PathVariable Long prestadorId){
+        Dados_BancariosModel dados = dados_Bancarios_Service.buscarPorPrestador(prestadorId);
+        if (dados != null) {
+            return ResponseEntity.ok().body(dados_Bancarios_Service.converterParaDTO(dados));
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

@@ -3,6 +3,7 @@ package org.example.pagamentos.controller;
 import jakarta.validation.Valid;
 import org.example.pagamentos.DTO.EnderecoDTO;
 import org.example.pagamentos.DTO.EnderecoRequest;
+import org.example.pagamentos.DTO.ViaCepDTO;
 import org.example.pagamentos.service.EnderecoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -81,20 +82,11 @@ public class EnderecoController {
     }
 
     /**
-     * POST /api/enderecos/ia/{cep}/empresa/{idEmpresa} - 
-     * Busca endereço via API de IA e associa à empresa
-     * Este endpoint integra com serviço externo para buscar dados do endereço
+     * GET /api/enderecos/cep/{cep} -
+     * Consulta o CEP via ViaCEP e retorna os dados de endereço para autofill (sem salvar)
      */
-    @PostMapping("/ia/{cep}/empresa/{idEmpresa}")
-    public ResponseEntity<EnderecoDTO> buscarEnderecoViaIA(
-            @PathVariable String cep,
-            @PathVariable Long idEmpresa) {
-        
-        System.out.println("Buscando endereço via IA para CEP: " + cep + 
-                          " e empresa: " + idEmpresa);
-        
-        EnderecoDTO enderecoDTO = enderecoService.buscarEnderecoViaIA(cep, idEmpresa);
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(enderecoDTO);
+    @GetMapping("/cep/{cep}")
+    public ResponseEntity<ViaCepDTO> buscarCep(@PathVariable String cep) {
+        return ResponseEntity.ok(enderecoService.buscarCep(cep));
     }
 }

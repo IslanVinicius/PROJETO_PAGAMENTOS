@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { 
-    ChevronLeft, 
-    ChevronRight, 
-    ChevronFirst, 
-    ChevronLast, 
-    Search, 
-    Plus, 
-    Edit2, 
-    Trash2, 
-    Save, 
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    ChevronFirst,
+    ChevronLast,
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    Save,
     X,
-    MapPin
+    MapPin,
+    Loader
 } from 'lucide-react';
 import styles from './EnderecoCadastro-novo.module.css';
 import { enderecoService } from '../../services/enderecoService';
-import { empresaService } from '../../services/empresaService';
 import ConfirmModal from '../Shared/ConfirmModal';
 import ModalPesquisaFiltroEmpresa from './ModalPesquisaFiltroEmpresa';
+import ModalPesquisaFiltroEndereco from './ModalPesquisaFiltroEndereco';
 import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -53,25 +54,27 @@ function EnderecoCadastro() {
 
     // Estados de controle
     const [enderecos, setEnderecos] = useState([]);
-    const [empresas, setEmpresas] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [modo, setModo] = useState('visualizacao'); // 'visualizacao', 'edicao', 'criacao'
 
     // Para armazenar dados originais durante edição (para cancelar)
     const [originalData, setOriginalData] = useState({});
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [showSearchModal, setShowSearchModal] = useState(false);
+    const [showAddressSearchModal, setShowAddressSearchModal] = useState(false);
+    const [showEmpresaSelectModal, setShowEmpresaSelectModal] = useState(false);
     const [quickSearchId, setQuickSearchId] = useState('');
+
+    const [cepLoading, setCepLoading] = useState(false);
 
     // Hook de mensagem temporária (3 segundos)
     const [message, setMessage] = useMensagemTemporaria(3000);
 
+    // Ref para evitar chamadas duplicadas ao mesmo CEP
+    const lastCepSearched = useRef('');
+
     useEffect(() => {
         carregarEnderecos();
-        carregarEmpresas();
     }, []);
 
     const carregarEnderecos = async () => {
@@ -101,15 +104,6 @@ function EnderecoCadastro() {
         }
     };
 
-    const carregarEmpresas = async () => {
-        try {
-            const data = await empresaService.listar();
-            setEmpresas(data);
-        } catch (error) {
-            console.error('Erro ao carregar empresas:', error);
-        }
-    };
-
     const selecionarEndereco = (endereco, index) => {
         setCurrentIndex(index);
         setIdEndereco(endereco.id);
@@ -126,44 +120,20 @@ function EnderecoCadastro() {
         setModo('visualizacao');
     };
 
-    const handleSearch = () => {
-        if (!searchTerm.trim()) {
-            setMessage({ type: 'error', text: 'Digite um termo para pesquisa!' });
-            return;
-        }
-        const results = enderecos.filter(end =>
-            end.logradouro.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            end.cep.includes(searchTerm) ||
-            end.bairro.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            end.cidade.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setSearchResults(results);
-        setMessage({
-            type: results.length ? 'success' : 'error',
-            text: results.length ? `${results.length} encontrado(s)` : 'Nenhum endereço encontrado'
-        });
-    };
-
-    const selectEndereco = (endereco) => {
-        const index = enderecos.findIndex(e => e.id === endereco.id);
-        selecionarEndereco(endereco, index);
-        setSearchResults([]);
-        setSearchTerm('');
-        setMessage({ type: '', text: '' });
-    };
-
     const handleEditar = () => {
-        setOriginalData({ 
-            id: idEndereco, 
-            cep, 
-            logradouro, 
-            numero, 
-            complemento, 
-            bairro, 
-            cidade, 
-            estado, 
-            idEmpresa 
+        setOriginalData({
+            id: idEndereco,
+            cep,
+            logradouro,
+            numero,
+            complemento,
+            bairro,
+            cidade,
+            estado,
+            idEmpresa,
+            nomeEmpresa
         });
+        lastCepSearched.current = cep.replace(/\D/g, '');
         setModo('edicao');
     };
 
@@ -179,6 +149,7 @@ function EnderecoCadastro() {
         setEstado('');
         setIdEmpresa('');
         setNomeEmpresa('');
+        lastCepSearched.current = '';
         setModo('criacao');
     };
 
@@ -193,6 +164,7 @@ function EnderecoCadastro() {
             setCidade(originalData.cidade);
             setEstado(originalData.estado);
             setIdEmpresa(originalData.idEmpresa);
+            setNomeEmpresa(originalData.nomeEmpresa || '');
         } else if (modo === 'criacao' && enderecos.length > 0 && currentIndex >= 0) {
             const enderecoAtual = enderecos[currentIndex];
             setIdEndereco(enderecoAtual.id);
@@ -204,6 +176,7 @@ function EnderecoCadastro() {
             setCidade(enderecoAtual.cidade);
             setEstado(enderecoAtual.estado);
             setIdEmpresa(enderecoAtual.idEmpresa);
+            setNomeEmpresa(enderecoAtual.nomeEmpresa || '');
         } else if (modo === 'criacao' && enderecos.length === 0) {
             setIdEndereco('');
             setCep('');
@@ -214,6 +187,7 @@ function EnderecoCadastro() {
             setCidade('');
             setEstado('');
             setIdEmpresa('');
+            setNomeEmpresa('');
         }
         setModo('visualizacao');
         setMessage({ type: '', text: '' });
@@ -225,15 +199,25 @@ function EnderecoCadastro() {
             return;
         }
 
-        const dados = { 
-            cep, 
-            logradouro, 
-            numero, 
-            complemento: complemento || null, 
-            bairro, 
-            cidade, 
-            estado, 
-            idEmpresa 
+        if (modo === 'criacao') {
+            const empresaJaPossuiEndereco = enderecos.some(
+                end => String(end.idEmpresa) === String(idEmpresa)
+            );
+            if (empresaJaPossuiEndereco) {
+                setMessage({ type: 'error', text: 'Esta empresa já possui um endereço cadastrado!' });
+                return;
+            }
+        }
+
+        const dados = {
+            cep,
+            logradouro,
+            numero,
+            complemento: complemento || null,
+            bairro,
+            cidade,
+            estado,
+            idEmpresa
         };
 
         setLoading(true);
@@ -249,7 +233,8 @@ function EnderecoCadastro() {
                     bairro: atualizado.bairro,
                     cidade: atualizado.cidade,
                     estado: atualizado.estado,
-                    idEmpresa: atualizado.idEmpresa
+                    idEmpresa: atualizado.idEmpresa,
+                    nomeEmpresa: atualizado.nomeEmpresa || nomeEmpresa
                 };
                 setEnderecos(prev => prev.map(end => end.id === idEndereco ? enderecoMapeado : end));
                 setOriginalData(enderecoMapeado);
@@ -265,7 +250,8 @@ function EnderecoCadastro() {
                     bairro: novo.bairro,
                     cidade: novo.cidade,
                     estado: novo.estado,
-                    idEmpresa: novo.idEmpresa
+                    idEmpresa: novo.idEmpresa,
+                    nomeEmpresa: novo.nomeEmpresa || nomeEmpresa
                 };
                 setEnderecos(prev => {
                     const updated = [...prev, novoMapeado];
@@ -309,6 +295,7 @@ function EnderecoCadastro() {
                 setCidade('');
                 setEstado('');
                 setIdEmpresa('');
+                setNomeEmpresa('');
                 setCurrentIndex(-1);
                 setOriginalData({});
             } else {
@@ -327,6 +314,7 @@ function EnderecoCadastro() {
                 setCidade(current.cidade);
                 setEstado(current.estado);
                 setIdEmpresa(current.idEmpresa);
+                setNomeEmpresa(current.nomeEmpresa || '');
                 setOriginalData({ ...current });
             }
             setModo('visualizacao');
@@ -389,64 +377,49 @@ function EnderecoCadastro() {
         }
     };
 
-    const handleOpenSearchModal = () => {
+    const handleOpenAddressSearchModal = () => {
         if (modo === 'visualizacao') {
-            setShowSearchModal(true);
+            setShowAddressSearchModal(true);
         }
     };
 
-    const handleCloseSearchModal = () => {
-        setShowSearchModal(false);
-    };
-
-    const handleSelectFromModal = (endereco) => {
+    const handleSelectFromAddressModal = (endereco) => {
         const index = enderecos.findIndex(e => e.id === endereco.id);
         selecionarEndereco(endereco, index);
-        setShowSearchModal(false);
+        setShowAddressSearchModal(false);
     };
 
-    const handleBuscarViaIA = async () => {
-        if (!cep || !idEmpresa) {
-            setMessage({ type: 'error', text: 'Informe o CEP e selecione uma empresa!' });
-            return;
-        }
+    const buscarCepAutofill = async (cepDigitos) => {
+        if (lastCepSearched.current === cepDigitos) return;
+        lastCepSearched.current = cepDigitos;
 
-        setLoading(true);
+        setCepLoading(true);
         try {
-            const enderecoRetornado = await enderecoService.buscarViaIA(cep, idEmpresa);
-            
-            // Preenche os campos com os dados retornados
-            setIdEndereco(enderecoRetornado.idEndereco);
-            setCep(enderecoRetornado.cep);
-            setLogradouro(enderecoRetornado.logradouro);
-            setNumero(enderecoRetornado.numero);
-            setComplemento(enderecoRetornado.complemento || '');
-            setBairro(enderecoRetornado.bairro);
-            setCidade(enderecoRetornado.cidade);
-            setEstado(enderecoRetornado.estado);
-            setIdEmpresa(enderecoRetornado.idEmpresa);
-
-            // Atualiza a lista
-            const index = enderecos.findIndex(e => e.id === enderecoRetornado.idEndereco);
-            if (index >= 0) {
-                setEnderecos(prev => prev.map(e => e.id === enderecoRetornado.idEndereco ? {
-                    ...e,
-                    cep: enderecoRetornado.cep,
-                    logradouro: enderecoRetornado.logradouro,
-                    numero: enderecoRetornado.numero,
-                    complemento: enderecoRetornado.complemento || '',
-                    bairro: enderecoRetornado.bairro,
-                    cidade: enderecoRetornado.cidade,
-                    estado: enderecoRetornado.estado,
-                    idEmpresa: enderecoRetornado.idEmpresa
-                } : e));
-            }
-
-            setMessage({ type: 'success', text: 'Endereço preenchido via IA com sucesso!' });
+            const data = await enderecoService.buscarCep(cepDigitos);
+            setLogradouro(data.logradouro || '');
+            setBairro(data.bairro || '');
+            setCidade(data.cidade || '');
+            setEstado(data.estado || '');
         } catch (error) {
-            setMessage({ type: 'error', text: error.message });
+            setMessage({ type: 'error', text: error.message || 'CEP não encontrado.' });
         } finally {
-            setLoading(false);
+            setCepLoading(false);
+        }
+    };
+
+    const handleCepChange = (e) => {
+        const value = e.target.value;
+        setCep(value);
+        const digits = value.replace(/\D/g, '');
+        if (digits.length === 8) {
+            buscarCepAutofill(digits);
+        }
+    };
+
+    const handleCepBlur = () => {
+        const digits = cep.replace(/\D/g, '');
+        if (digits.length === 8) {
+            buscarCepAutofill(digits);
         }
     };
 
@@ -472,7 +445,7 @@ function EnderecoCadastro() {
                     <div className={styles.quickSearchGroup}>
                         <button
                             className={styles.searchIconButton}
-                            onClick={handleOpenSearchModal}
+                            onClick={handleOpenAddressSearchModal}
                             disabled={loading || modo !== 'visualizacao'}
                             title="Abrir pesquisa avançada"
                         >
@@ -629,6 +602,40 @@ function EnderecoCadastro() {
 
             {/* Campos do Formulário */}
             <div className={styles.formContainer}>
+                {/* Linha 1: Empresa */}
+                <div className={styles.formRow}>
+                    <div className={styles.fieldGroupLarge}>
+                        <label htmlFor="empresa">Empresa *</label>
+                        <div className={styles.inputWithButton}>
+                            <input
+                                id="empresa"
+                                type="text"
+                                className={styles.inputField}
+                                value={nomeEmpresa}
+                                readOnly
+                                disabled={camposDesabilitados}
+                                placeholder="Selecione uma empresa"
+                            />
+                            {modo === 'criacao' && (
+                                <button
+                                    className={styles.selectButton}
+                                    onClick={() => setShowEmpresaSelectModal(true)}
+                                    disabled={loading}
+                                    title="Selecionar empresa"
+                                >
+                                    <Search size={16} />
+                                </button>
+                            )}
+                        </div>
+                        <input
+                            type="hidden"
+                            value={idEmpresa}
+                            readOnly
+                        />
+                    </div>
+                </div>
+
+                {/* Linha 2: CEP + Logradouro */}
                 <div className={styles.formRow}>
                     <div className={styles.fieldGroup}>
                         <label htmlFor="cep">CEP *</label>
@@ -638,19 +645,15 @@ function EnderecoCadastro() {
                                 type="text"
                                 className={styles.inputField}
                                 value={cep}
-                                onChange={(e) => setCep(e.target.value)}
+                                onChange={handleCepChange}
+                                onBlur={handleCepBlur}
                                 disabled={camposDesabilitados}
                                 placeholder="00000-000"
                             />
-                            {modo === 'criacao' && (
-                                <button
-                                    className={styles.aiButton}
-                                    onClick={handleBuscarViaIA}
-                                    disabled={loading || !idEmpresa}
-                                    title="Buscar endereço via IA"
-                                >
-                                    <MapPin size={16} /> IA
-                                </button>
+                            {cepLoading && (
+                                <span className={styles.cepSpinner}>
+                                    <Loader size={18} className={styles.spinnerIcon} />
+                                </span>
                             )}
                         </div>
                     </div>
@@ -669,6 +672,7 @@ function EnderecoCadastro() {
                     </div>
                 </div>
 
+                {/* Linha 3: Número + Complemento + Bairro */}
                 <div className={styles.formRow}>
                     <div className={styles.fieldGroup}>
                         <label htmlFor="numero">Número *</label>
@@ -710,6 +714,7 @@ function EnderecoCadastro() {
                     </div>
                 </div>
 
+                {/* Linha 4: Cidade + Estado */}
                 <div className={styles.formRow}>
                     <div className={styles.fieldGroup}>
                         <label htmlFor="cidade">Cidade *</label>
@@ -737,36 +742,6 @@ function EnderecoCadastro() {
                             maxLength={2}
                         />
                     </div>
-
-                    <div className={styles.fieldGroupLarge}>
-                        <label htmlFor="empresa">Empresa *</label>
-                        <div className={styles.inputWithButton}>
-                            <input
-                                id="empresa"
-                                type="text"
-                                className={styles.inputField}
-                                value={nomeEmpresa}
-                                readOnly
-                                disabled={camposDesabilitados}
-                                placeholder="Selecione uma empresa"
-                            />
-                            {modo === 'criacao' && (
-                                <button
-                                    className={styles.selectButton}
-                                    onClick={() => setShowSearchModal(true)}
-                                    disabled={loading}
-                                    title="Selecionar empresa"
-                                >
-                                    <Search size={16} />
-                                </button>
-                            )}
-                        </div>
-                        <input
-                            type="hidden"
-                            value={idEmpresa}
-                            readOnly
-                        />
-                    </div>
                 </div>
             </div>
 
@@ -781,11 +756,18 @@ function EnderecoCadastro() {
                 cancelText="Cancelar"
             />
 
+            {/* Modal de pesquisa de endereços (botão de busca no cabeçalho) */}
+            <ModalPesquisaFiltroEndereco
+                isOpen={showAddressSearchModal}
+                onClose={() => setShowAddressSearchModal(false)}
+                onSelect={handleSelectFromAddressModal}
+            />
+
+            {/* Modal de seleção de empresa (campo Empresa no formulário) */}
             <ModalPesquisaFiltroEmpresa
-                isOpen={showSearchModal}
-                onClose={handleCloseSearchModal}
+                isOpen={showEmpresaSelectModal}
+                onClose={() => setShowEmpresaSelectModal(false)}
                 onSelect={handleSelecionarEmpresa}
-                empresas={empresas}
             />
         </div>
     );
