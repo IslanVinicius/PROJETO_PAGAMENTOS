@@ -64,8 +64,8 @@ public class OrcamentoCompletoDTO {
             dto.setCpfPrestador(prestador.getCpf());
             
             // Dados bancários - usar getter
-            if (prestador.getDados_bancarios_model() != null) {
-                Dados_BancariosModel dadosBancarios = prestador.getDados_bancarios_model();
+            if (prestador.getDadosBancarios() != null) {
+                Dados_BancariosModel dadosBancarios = prestador.getDadosBancarios();
                 dto.setDadosBancarios(new Dados_BancariosDTO(
                     dadosBancarios.getId(),
                     prestador.getCodPrestador(),
