@@ -1,5 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, FolderOpen, Package, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from "./Sidebar.module.css";
 import { useState, useEffect } from "react";
 
