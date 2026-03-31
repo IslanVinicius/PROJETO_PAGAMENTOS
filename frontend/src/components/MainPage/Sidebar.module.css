@@ -18,7 +18,7 @@
     padding: var(--spacing-xl);
     text-align: center;
     border-bottom: 2px solid var(--border-light);
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: #EDC94F
 }
 
 .logo {
