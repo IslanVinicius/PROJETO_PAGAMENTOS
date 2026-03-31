@@ -7,23 +7,6 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
   const { user } = useAuth();
   const role = user?.role;
   const [isExpanded, setIsExpanded] = useState(true);
-  const [isHovering, setIsHovering] = useState(false);
-
-  // Controla expansão baseada no hover
-  const handleMouseEnter = () => {
-    setIsHovering(true);
-    setIsExpanded(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-    // Delay para colapsar após sair do hover
-    setTimeout(() => {
-      if (!isHovering) {
-        setIsExpanded(false);
-      }
-    }, 300);
-  };
 
   // Toggle manual com clique no botão
   const handleToggleClick = (e) => {
@@ -41,8 +24,6 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
   return (
     <div 
       className={`${styles.sidebar} ${!isExpanded ? styles.collapsed : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
       <div className={styles.header}>
         <img src="/logo.png" alt="Logo" className={styles.logoImage} />
