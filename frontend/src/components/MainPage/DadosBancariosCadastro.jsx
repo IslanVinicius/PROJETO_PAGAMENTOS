@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, MapPin } from 'lucide-react';
 import styles from './EmpresaCadastro-novo.module.css';
 import { dadosBancariosService } from '../../services/dadosBancariosService';
+import { prestadorService } from '../../services/prestadorService';
 import ModalPesquisa from './ModalPesquisa';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
@@ -12,6 +13,7 @@ import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 function DadosBancariosCadastro() {
     const [dadosId, setDadosId] = useState('');
     const [codPrestador, setCodPrestador] = useState('');
+    const [nomePrestador, setNomePrestador] = useState('');
     const [banco, setBanco] = useState('');
     const [tipoConta, setTipoConta] = useState('');
     const [agencia, setAgencia] = useState('');
@@ -93,6 +95,19 @@ function DadosBancariosCadastro() {
         setCurrentIndex(index);
         setDadosId(registro.dadosId);
         setCodPrestador(registro.codPrestador);
+        
+        // Buscar nome do prestador
+        if (registro.codPrestador) {
+            prestadorService.obter(registro.codPrestador)
+                .then(prestador => {
+                    setNomePrestador(prestador.nome || '');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar prestador:', error);
+                    setNomePrestador('');
+                });
+        }
+        
         setBanco(registro.banco);
         setTipoConta(registro.tipoConta);
         setAgencia(registro.agencia);
@@ -130,7 +145,7 @@ function DadosBancariosCadastro() {
     };
 
     const handleEditar = () => {
-        setOriginalData({ dadosId, codPrestador, banco, tipoConta, agencia, conta, chavePix });
+        setOriginalData({ dadosId, codPrestador, nomePrestador, banco, tipoConta, agencia, conta, chavePix });
         setModo('edicao');
     };
 
@@ -138,6 +153,7 @@ function DadosBancariosCadastro() {
         setOriginalData({});
         setDadosId('');
         setCodPrestador('');
+        setNomePrestador('');
         setBanco('');
         setTipoConta('');
         setAgencia('');
@@ -150,6 +166,7 @@ function DadosBancariosCadastro() {
         if (modo === 'edicao' && originalData.dadosId) {
             setDadosId(originalData.dadosId);
             setCodPrestador(originalData.codPrestador);
+            setNomePrestador(originalData.nomePrestador || '');
             setBanco(originalData.banco);
             setTipoConta(originalData.tipoConta);
             setAgencia(originalData.agencia);
@@ -164,9 +181,16 @@ function DadosBancariosCadastro() {
             setAgencia(registroAtual.agencia);
             setConta(registroAtual.conta);
             setChavePix(registroAtual.chavePix || '');
+            // Restaurar nome do prestador
+            if (registroAtual.codPrestador) {
+                prestadorService.obter(registroAtual.codPrestador)
+                    .then(prestador => setNomePrestador(prestador.nome || ''))
+                    .catch(() => setNomePrestador(''));
+            }
         } else if (modo === 'criacao' && registros.length === 0) {
             setDadosId('');
             setCodPrestador('');
+            setNomePrestador('');
             setBanco('');
             setTipoConta('');
             setAgencia('');
@@ -179,6 +203,19 @@ function DadosBancariosCadastro() {
 
     const handlePrestadorSelecionado = (prestadorId) => {
         setCodPrestador(prestadorId);
+        // Buscar nome do prestador
+        if (prestadorId) {
+            prestadorService.obter(prestadorId)
+                .then(prestador => {
+                    setNomePrestador(prestador.nome || '');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar prestador:', error);
+                    setNomePrestador('');
+                });
+        } else {
+            setNomePrestador('');
+        }
     };
 
     const handleSave = async () => {
@@ -549,23 +586,46 @@ function DadosBancariosCadastro() {
 
                     <div className={styles.formGroup}>
                         <label>CÓDIGO PRESTADOR *</label>
-                        <div className={styles.inputGroup}>
-                            <input
-                                type="number"
-                                value={codPrestador || ''}
-                                onChange={(e) => setCodPrestador(e.target.value)}
-                                placeholder="Código do prestador"
-                                disabled={camposDesabilitados}
-                            />
-                            <button
-                                className={styles.searchIconButton}
-                                onClick={() => setModalAberto(true)}
-                                disabled={camposDesabilitados}
-                                type="button"
-                                title="Pesquisar prestador"
-                            >
-                                <Search size={16} />
-                            </button>
+                        <div className={styles.inputFieldGroup}>
+                            <div className={styles.inputGroup}>
+                                <input
+                                    type="number"
+                                    value={codPrestador || ''}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setCodPrestador(valor);
+                                        if (!valor) {
+                                            setNomePrestador('');
+                                        } else {
+                                            // Buscar prestador pelo ID digitado
+                                            prestadorService.obter(parseInt(valor, 10))
+                                                .then(prestador => {
+                                                    setNomePrestador(prestador.nome || '');
+                                                })
+                                                .catch(error => {
+                                                    console.error('Erro ao buscar prestador:', error);
+                                                    setNomePrestador('');
+                                                });
+                                        }
+                                    }}
+                                    placeholder="Código do prestador"
+                                    disabled={camposDesabilitados}
+                                />
+                                <button
+                                    className={styles.searchIconButton}
+                                    onClick={() => setModalAberto(true)}
+                                    disabled={camposDesabilitados}
+                                    type="button"
+                                    title="Pesquisar prestador"
+                                >
+                                    <Search size={16} />
+                                </button>
+                            </div>
+                            {nomePrestador && (
+                                <span className={styles.fieldDisplay}>
+                                      {nomePrestador}
+                                </span>
+                            )}
                         </div>
                     </div>
 

@@ -22,7 +22,9 @@ function OrcamentoCadastro() {
     const [movimento, setMovimento] = useState('');
     const [movimentoDate, setMovimentoDate] = useState('');
     const [idPrestador, setIdPrestador] = useState('');
+    const [nomePrestador, setNomePrestador] = useState('');
     const [empresaID, setEmpresaID] = useState('');
+    const [nomeEmpresa, setNomeEmpresa] = useState('');
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
     const [valorTotalItens, setValorTotalItens] = useState('');
@@ -133,6 +135,31 @@ function OrcamentoCadastro() {
         setMovimentoDate(formatarDataParaInput(orcamento.movimento));
         setIdPrestador(orcamento.idPrestador);
         setEmpresaID(orcamento.empresaID);
+        
+        // Buscar nomes do prestador e empresa
+        if (orcamento.idPrestador) {
+            prestadorService.obter(orcamento.idPrestador)
+                .then(prestador => {
+                    setNomePrestador(prestador.nome || '');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar prestador:', error);
+                    setNomePrestador('');
+                });
+        }
+        
+        if (orcamento.empresaID) {
+            empresaService.obter(orcamento.empresaID)
+                .then(empresa => {
+                    // O campo correto é 'razao' ou 'nome', não 'razaoSocial'
+                    setNomeEmpresa(empresa.razao || empresa.nome || '');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar empresa:', error);
+                    setNomeEmpresa('');
+                });
+        }
+        
         setDescricao(orcamento.descricao);
         setValor(orcamento.valor);
         setValorTotalItens(orcamento.valorTotalItens || '');
@@ -173,14 +200,59 @@ function OrcamentoCadastro() {
 
     const handlePrestadorSelecionado = (prestadorId) => {
         setIdPrestador(prestadorId);
+        // Buscar nome do prestador
+        if (prestadorId) {
+            prestadorService.obter(prestadorId)
+                .then(prestador => {
+                    setNomePrestador(prestador.nome || '');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar prestador:', error);
+                    setNomePrestador('');
+                });
+        } else {
+            setNomePrestador('');
+        }
     };
 
     const handleEmpresaSelecionada = (empresaId) => {
+        console.log('Empresa selecionada:', empresaId);
         setEmpresaID(empresaId);
+        // Buscar nome da empresa
+        if (empresaId) {
+            empresaService.obter(empresaId)
+                .then(empresa => {
+                    console.log('Empresa encontrada:', empresa);
+                    // O campo correto é 'razao' ou 'nome', não 'razaoSocial'
+                    setNomeEmpresa(empresa.razao || empresa.nome || '');
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar empresa:', error);
+                    setNomeEmpresa('');
+                });
+        } else {
+            setNomeEmpresa('');
+        }
     };
 
     const handleEditar = () => {
-        setOriginalData({ orcamentoID, movimento, movimentoDate, idPrestador, empresaID, descricao, valor, valorTotalItens, desconto, valorFinal, tipoPagamento, itens: itensOrcamento, imagens });
+        setOriginalData({ 
+            orcamentoID, 
+            movimento, 
+            movimentoDate, 
+            idPrestador, 
+            nomePrestador,
+            empresaID, 
+            nomeEmpresa,
+            descricao, 
+            valor, 
+            valorTotalItens, 
+            desconto, 
+            valorFinal, 
+            tipoPagamento, 
+            itens: itensOrcamento, 
+            imagens 
+        });
         setModo('edicao');
     };
 
@@ -190,7 +262,9 @@ function OrcamentoCadastro() {
         setMovimento('');
         setMovimentoDate('');
         setIdPrestador('');
+        setNomePrestador('');
         setEmpresaID('');
+        setNomeEmpresa('');
         setDescricao('');
         setValor('');
         setValorTotalItens('');
@@ -211,6 +285,8 @@ function OrcamentoCadastro() {
             setMovimentoDate(originalData.movimentoDate);
             setIdPrestador(originalData.idPrestador);
             setEmpresaID(originalData.empresaID);
+            setNomePrestador(originalData.nomePrestador || '');
+            setNomeEmpresa(originalData.nomeEmpresa || '');
             setDescricao(originalData.descricao);
             setValor(originalData.valor);
             setValorTotalItens(originalData.valorTotalItens);
@@ -234,12 +310,25 @@ function OrcamentoCadastro() {
             setTipoPagamento(atual.tipoPagamento || '');
             setItensOrcamento(atual.itens || []);
             setImagens(atual.imagens || []);
+            // Restaurar nomes
+            if (atual.idPrestador) {
+                prestadorService.obter(atual.idPrestador)
+                    .then(prestador => setNomePrestador(prestador.nome || ''))
+                    .catch(() => setNomePrestador(''));
+            }
+            if (atual.empresaID) {
+                empresaService.obter(atual.empresaID)
+                    .then(empresa => setNomeEmpresa(empresa.razao || empresa.nome || ''))
+                    .catch(() => setNomeEmpresa(''));
+            }
         } else if (modo === 'criacao' && orcamentos.length === 0) {
             setOrcamentoID('');
             setMovimento('');
             setMovimentoDate('');
             setIdPrestador('');
             setEmpresaID('');
+            setNomePrestador('');
+            setNomeEmpresa('');
             setDescricao('');
             setValor('');
             setValorTotalItens('');
@@ -1041,7 +1130,7 @@ function OrcamentoCadastro() {
 
                     <div className={styles.formGroup}>
                         <label>MOVIMENTO *</label>
-                        <div className={styles.dateInputGroup}>
+                        <div className={styles.inputFieldGroup}>
                             <input
                                 type="date"
                                 className={styles.dateInput}
@@ -1059,7 +1148,7 @@ function OrcamentoCadastro() {
                                 disabled={camposDesabilitados}
                             />
                             {movimento && (
-                                <span className={styles.dateDisplay}>
+                                <span className={styles.fieldDisplay}>
                                     Data selecionada: {movimento}
                                 </span>
                             )}
@@ -1068,45 +1157,81 @@ function OrcamentoCadastro() {
 
                     <div className={styles.formGroup}>
                         <label>ID PRESTADOR *</label>
-                        <div className={styles.inputGroup}>
-                            <input
-                                type="number"
-                                value={idPrestador || ''}
-                                onChange={(e) => setIdPrestador(e.target.value)}
-                                placeholder="Código do prestador"
-                                disabled={camposDesabilitados}
-                            />
-                            <button
-                                className={styles.searchIconButton}
-                                onClick={() => setModalPrestadorAberto(true)}
-                                disabled={loading || camposDesabilitados}
-                                type="button"
-                                title="Pesquisar prestador"
-                            >
-                                <Search size={16} />
-                            </button>
+                        <div className={styles.inputFieldGroup}>
+                            <div className={styles.inputGroup}>
+                                <input
+                                    type="number"
+                                    value={idPrestador || ''}
+                                    onChange={(e) => {
+                                        setIdPrestador(e.target.value);
+                                        if (!e.target.value) {
+                                            setNomePrestador('');
+                                        }
+                                    }}
+                                    placeholder="Código do prestador"
+                                    disabled={camposDesabilitados}
+                                />
+                                <button
+                                    className={styles.searchIconButton}
+                                    onClick={() => setModalPrestadorAberto(true)}
+                                    disabled={loading || camposDesabilitados}
+                                    type="button"
+                                    title="Pesquisar prestador"
+                                >
+                                    <Search size={16} />
+                                </button>
+                            </div>
+                            {nomePrestador && (
+                                <span className={styles.fieldDisplay}>
+                                     {nomePrestador}
+                                </span>
+                            )}
                         </div>
                     </div>
 
                     <div className={styles.formGroup}>
                         <label>EMPRESA ID *</label>
-                        <div className={styles.inputGroup}>
-                            <input
-                                type="number"
-                                value={empresaID || ''}
-                                onChange={(e) => setEmpresaID(e.target.value)}
-                                placeholder="Código da empresa"
-                                disabled={camposDesabilitados}
-                            />
-                            <button
-                                className={styles.searchIconButton}
-                                onClick={() => setModalEmpresaAberto(true)}
-                                disabled={loading || camposDesabilitados}
-                                type="button"
-                                title="Pesquisar empresa"
-                            >
-                                <Search size={16} />
-                            </button>
+                        <div className={styles.inputFieldGroup}>
+                            <div className={styles.inputGroup}>
+                                <input
+                                    type="number"
+                                    value={empresaID || ''}
+                                    onChange={(e) => {
+                                        const valor = e.target.value;
+                                        setEmpresaID(valor);
+                                        if (!valor) {
+                                            setNomeEmpresa('');
+                                        } else {
+                                            // Buscar empresa pelo ID digitado
+                                            empresaService.obter(parseInt(valor, 10))
+                                                .then(empresa => {
+                                                    // O campo correto é 'razao' ou 'nome', não 'razaoSocial'
+                                                    setNomeEmpresa(empresa.razao || empresa.nome || '');
+                                                })
+                                                .catch(error => {
+                                                    console.error('Erro ao buscar empresa:', error);
+                                                    setNomeEmpresa('');
+                                                });
+                                        }
+                                    }}
+                                    placeholder="Código da empresa"
+                                    disabled={camposDesabilitados}
+                                />
+                                <button
+                                    className={styles.searchIconButton}
+                                    onClick={() => setModalEmpresaAberto(true)}
+                                    disabled={loading || camposDesabilitados}
+                                    type="button"
+                                    title="Pesquisar empresa"
+                                >
+                                    <Search size={16} />
+                                </button>
+                            </div>
+                            {nomeEmpresa && (
+                                <span className={styles.fieldDisplay}>
+                                    {nomeEmpresa}
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -1409,23 +1534,23 @@ function OrcamentoCadastro() {
                             type="button"
                             title="Fechar"
                         >
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                width="20" 
-                                height="20" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="#333" 
-                                strokeWidth="3" 
-                                strokeLinecap="round" 
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#333"
+                                strokeWidth="3"
+                                strokeLinecap="round"
                                 strokeLinejoin="round"
                             >
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
                         </button>
-                        <img 
-                            src={previewImage.url} 
+                        <img
+                            src={previewImage.url}
                             alt={previewImage.nome}
                             className={styles.previewModalImage}
                         />

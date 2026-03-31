@@ -266,6 +266,14 @@
     gap: 2px;
 }
 
+/* Container para campos com exibição adicional (Movimento, Prestador, Empresa) */
+.inputFieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    min-height: calc(36px + var(--spacing-xs) + 28px); /* input + gap + display height */
+}
+
 .formGroup label {
     font-weight: 600;
     color: var(--primary-color);
@@ -299,6 +307,11 @@
     resize: vertical;
     min-height: 60px;
     font-family: inherit;
+}
+
+/* Altura mínima para campos sem display adicional para alinhar com os demais */
+.formGroup:not(:has(.inputFieldGroup)):not(:has(textarea)) {
+    min-height: calc(36px + var(--spacing-xs) + 28px + 2px); /* input + gap + display height + gap do formGroup */
 }
 
 .formGroup input:hover:not(:disabled),
@@ -512,8 +525,8 @@
 }
 
 .searchIconButton {
-    width: 48px;
-    height: 48px;
+    width: 37px;
+    height: 37px;
     border: 2px solid var(--primary-color);
     border-radius: var(--radius-md);
     background-color: var(--primary-color);
@@ -555,13 +568,17 @@
     height: 48px;
 }
 
-.dateDisplay {
+.dateDisplay,
+.fieldDisplay {
     font-size: 13px;
     color: var(--text-secondary);
     font-weight: 600;
     padding: var(--spacing-xs) var(--spacing-sm);
     background-color: var(--bg-secondary);
     border-radius: var(--radius-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .select {
