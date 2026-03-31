@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Entity
 @Table(name = "PRESTADORES")
@@ -24,8 +25,9 @@ public class PrestadorModel {
     @Column(name = "CPF", nullable = false, unique = true)
     private String cpf;
 
+    @Getter @Setter
     @OneToOne(mappedBy = "prestadorModel", cascade = CascadeType.ALL)
-    private Dados_BancariosModel dados_bancarios_model;
+    private Dados_BancariosModel dadosBancarios;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_criador_id", nullable = false)
