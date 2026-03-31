@@ -11,16 +11,31 @@
     padding: var(--spacing-xl);
     min-height: 100vh;
     overflow-y: auto;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contentExpanded {
+    margin-left: 70px;
+}
+
+/* Container para formulários em largura total */
+.fullWidthContainer {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--spacing-xl);
+    box-sizing: border-box;
 }
 
 .card {
     background-color: var(--bg-primary);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
-    box-shadow: var(--shadow-md);
-    max-width: 900px;
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     border: 1px solid var(--border-light);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header {

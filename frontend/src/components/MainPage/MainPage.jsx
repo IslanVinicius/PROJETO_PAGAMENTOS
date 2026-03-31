@@ -18,6 +18,7 @@ function MainPage() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const role = user?.role;
+    const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
     // 🔥 Permissões por role
     const rolePermissions = {
@@ -114,8 +115,9 @@ function MainPage() {
                 activePage={activePage}
                 onPageChange={setActivePage}
                 onLogout={handleLogout}
+                onToggleSidebar={(expanded) => setSidebarExpanded(expanded)}
             />
-            <div className={styles.content}>
+            <div className={`${styles.content} ${!sidebarExpanded ? styles.contentExpanded : ''}`}>
                 {renderContent()}
             </div>
         </div>
