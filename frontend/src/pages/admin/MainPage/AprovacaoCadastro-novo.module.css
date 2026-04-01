@@ -1,0 +1,16 @@
+.listItemMain {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    min-width: 0;
+}
+
+.listItemIcon {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.listItemId {
+    font-weight: 600;
+    white-space: nowrap;
+}
