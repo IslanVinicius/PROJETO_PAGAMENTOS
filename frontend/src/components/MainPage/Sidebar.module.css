@@ -9,91 +9,16 @@
     background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
     color: var(--text-primary);
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-base);
     border-right: 1px solid var(--border-light);
-    overflow: hidden;
-    z-index: 1000;
-}
-
-.sidebar.collapsed {
-    width: 70px;
-}
-
-.sidebar.collapsed .header {
-    padding: var(--spacing-md);
-}
-
-.sidebar.collapsed .logoImage {
-    max-height: 40px;
-}
-
-.sidebar.collapsed .logoText {
-    display: none;
-}
-
-.sidebar.collapsed .menuItem {
-    justify-content: center;
-    padding: var(--spacing-md);
-}
-
-.sidebar.collapsed .menuItem span {
-    display: none;
-}
-
-.sidebar.collapsed .footer {
-    padding: var(--spacing-md);
-}
-
-.sidebar.collapsed .logoutBtn span {
-    display: none;
 }
 
 /* HEADER */
 .header {
-    padding: var(--spacing-xl) var(--spacing-lg);
+    padding: var(--spacing-xl);
     text-align: center;
     border-bottom: 2px solid var(--border-light);
-    background: #EDC94F;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-    transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-}
-
-.toggleButton {
-    position: absolute;
-    right: 8px;
-    top: var(--spacing-md);
-    background: transparent;
-    border: none;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    color: #c60a0a;
-    padding: 0;
-    border-radius: var(--radius-sm);
-    opacity: 0.7;
-}
-
-.toggleButton:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.95);
-    opacity: 1;
-    transform: scale(1.05);
-}
-
-.toggleButton:active {
-    transform: scale(0.95);
-}
-
-.sidebar.collapsed .toggleButton {
-    right: 6px;
+    background: #EDC94F
 }
 
 .logo {
@@ -108,17 +33,6 @@
     height: auto;
     max-height: 60px;
     object-fit: contain;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.logoText {
-    font-size: 12px;
-    font-weight: 600;
-    color: white;
-    margin-top: var(--spacing-xs);
-    white-space: nowrap;
-    opacity: 1;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* USER INFO (se houver) */
@@ -201,10 +115,8 @@
     color: var(--text-secondary);
     cursor: pointer;
     border-radius: var(--radius-md);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-fast);
     border-left: 3px solid transparent;
-    white-space: nowrap;
-    overflow: hidden;
 }
 
 .menuItem:hover {
@@ -212,10 +124,6 @@
     color: var(--primary-color);
     border-left-color: var(--primary-color);
     transform: translateX(4px);
-}
-
-.menuItem:active {
-    transform: scale(0.98);
 }
 
 .menuItem.active {
@@ -227,8 +135,6 @@
 
 .menuItem span {
     flex: 1;
-    opacity: 1;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* FOOTER */
@@ -236,7 +142,6 @@
     padding: var(--spacing-lg);
     border-top: 2px solid var(--border-light);
     background-color: var(--bg-secondary);
-    transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logoutBtn {
@@ -248,21 +153,15 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: var(--transition-fast);
     color: white;
     background-color: var(--danger-color);
     border: none;
     width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
 }
 
 .logoutBtn:hover {
     background-color: #b82a20;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-}
-
-.logoutBtn:active {
-    transform: scale(0.98);
 }

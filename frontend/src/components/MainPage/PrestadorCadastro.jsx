@@ -483,7 +483,7 @@ function PrestadorCadastro() {
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label>CPF *</label>
+                        <label>CPF/CNPJ *</label>
                         <input
                             type="text"
                             value={cpf || ''}

@@ -96,6 +96,17 @@ function MainPage() {
             case "enderecos":
                 return <EnderecoCadastro />;
 
+            case "dashboard":
+                return (
+                    <div className={styles.card}>
+                        <div className={styles.header}>
+                            <span>📊</span>
+                            <h2>Bem-vindo!</h2>
+                        </div>
+                        <p>Selecione uma opção no menu lateral.</p>
+                    </div>
+                );
+
             default:
                 return (
                     <div className={styles.card}>

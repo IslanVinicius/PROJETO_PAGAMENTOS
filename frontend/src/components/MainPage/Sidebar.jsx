@@ -1,40 +1,15 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, FolderOpen, Package, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package, MapPin } from 'lucide-react';
 import styles from "./Sidebar.module.css";
-import { useState, useEffect } from "react";
 
-function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
+function Sidebar({ activePage, onPageChange, onLogout }) {
   const { user } = useAuth();
   const role = user?.role;
-  const [isExpanded, setIsExpanded] = useState(true);
-
-  // Toggle manual com clique no botão
-  const handleToggleClick = (e) => {
-    e.stopPropagation();
-    setIsExpanded(!isExpanded);
-  };
-
-  // Notifica o componente pai sobre mudanças no estado de expansão
-  useEffect(() => {
-    if (onToggleSidebar) {
-      onToggleSidebar(isExpanded);
-    }
-  }, [isExpanded, onToggleSidebar]);
 
   return (
-    <div 
-      className={`${styles.sidebar} ${!isExpanded ? styles.collapsed : ''}`}
-    >
+    <div className={styles.sidebar}>
       <div className={styles.header}>
         <img src="/logo.png" alt="Logo" className={styles.logoImage} />
-        {isExpanded && <span className={styles.logoText}>Sistema de Orçamentos</span>}
-        <button 
-          className={styles.toggleButton}
-          onClick={handleToggleClick}
-          title={isExpanded ? "Recolher menu" : "Expandir menu"}
-        >
-          {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-        </button>
       </div>
 
       <div className={styles.menu}>
@@ -45,10 +20,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "empresa" ? styles.active : ""
               }`}
               onClick={() => onPageChange("empresa")}
-              title={isExpanded ? "Gerenciar empresas" : "Empresas"}
+              title="Gerenciar empresas"
             >
               <Building2 size={20} />
-              {isExpanded && <span>Empresas</span>}
+              <span>Empresas</span>
             </div>
 
             <div
@@ -56,10 +31,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "prestador" ? styles.active : ""
               }`}
               onClick={() => onPageChange("prestador")}
-              title={isExpanded ? "Gerenciar prestadores" : "Prestadores"}
+              title="Gerenciar prestadores"
             >
               <Users size={20} />
-              {isExpanded && <span>Prestadores</span>}
+              <span>Prestadores</span>
             </div>
 
             <div
@@ -67,10 +42,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "dadosBancarios" ? styles.active : ""
               }`}
               onClick={() => onPageChange("dadosBancarios")}
-              title={isExpanded ? "Dados bancários" : "Dados Bancários"}
+              title="Dados bancários"
             >
               <CreditCard size={20} />
-              {isExpanded && <span>Dados Bancários</span>}
+              <span>Dados Bancários</span>
             </div>
 
             <div
@@ -78,10 +53,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "orcamento" ? styles.active : ""
               }`}
               onClick={() => onPageChange("orcamento")}
-              title={isExpanded ? "Gerar orçamentos" : "Orçamentos"}
+              title="Gerar orçamentos"
             >
               <FileText size={20} />
-              {isExpanded && <span>Orçamentos</span>}
+              <span>Orçamentos</span>
             </div>
 
             <div
@@ -89,10 +64,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "pedidoAprovacao" ? styles.active : ""
               }`}
               onClick={() => onPageChange("pedidoAprovacao")}
-              title={isExpanded ? "Solicitações de aprovação" : "Solicitações"}
+              title="Solicitações de aprovação"
             >
               <ClipboardCheck size={20} />
-              {isExpanded && <span>Solicitações</span>}
+              <span>Solicitações</span>
             </div>
 
             <div
@@ -100,10 +75,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "aprovacao" ? styles.active : ""
               }`}
               onClick={() => onPageChange("aprovacao")}
-              title={isExpanded ? "Aprovar orçamentos" : "Aprovações"}
+              title="Aprovar orçamentos"
             >
               <CheckSquare size={20} />
-              {isExpanded && <span>Aprovações</span>}
+              <span>Aprovações</span>
             </div>
 
             <div
@@ -111,10 +86,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "usuario" ? styles.active : ""
               }`}
               onClick={() => onPageChange("usuario")}
-              title={isExpanded ? "Gerenciar usuários" : "Usuários"}
+              title="Gerenciar usuários"
             >
               <Users size={20} />
-              {isExpanded && <span>Usuários</span>}
+              <span>Usuários</span>
             </div>
 
             <div
@@ -122,10 +97,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "grupoItens" ? styles.active : ""
               }`}
               onClick={() => onPageChange("grupoItens")}
-              title={isExpanded ? "Gerenciar grupos de itens" : "Grupos de Itens"}
+              title="Gerenciar grupos de itens"
             >
               <FolderOpen size={20} />
-              {isExpanded && <span>Grupos de Itens</span>}
+              <span>Grupos de Itens</span>
             </div>
 
             <div
@@ -133,10 +108,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "itens" ? styles.active : ""
               }`}
               onClick={() => onPageChange("itens")}
-              title={isExpanded ? "Gerenciar itens" : "Itens"}
+              title="Gerenciar itens"
             >
               <Package size={20} />
-              {isExpanded && <span>Itens</span>}
+              <span>Itens</span>
             </div>
 
             <div
@@ -144,10 +119,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "enderecos" ? styles.active : ""
               }`}
               onClick={() => onPageChange("enderecos")}
-              title={isExpanded ? "Gerenciar endereços" : "Endereços"}
+              title="Gerenciar endereços"
             >
               <MapPin size={20} />
-              {isExpanded && <span>Endereços</span>}
+              <span>Endereços</span>
             </div>
           </>
         )}
@@ -157,19 +132,19 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
             <div
               className={styles.menuItem}
               onClick={() => onPageChange("prestador")}
-              title={isExpanded ? "Cadastro de prestadores" : "Prestadores"}
+              title="Cadastro de prestadores"
             >
               <Users size={20} />
-              {isExpanded && <span>Prestadores</span>}
+              <span>Prestadores</span>
             </div>
 
             <div
               className={styles.menuItem}
               onClick={() => onPageChange("orcamento")}
-              title={isExpanded ? "Gerar orçamentos" : "Orçamentos"}
+              title="Gerar orçamentos"
             >
               <FileText size={20} />
-              {isExpanded && <span>Orçamentos</span>}
+              <span>Orçamentos</span>
             </div>
           </>
         )}
@@ -181,10 +156,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "orcamento" ? styles.active : ""
               }`}
               onClick={() => onPageChange("orcamento")}
-              title={isExpanded ? "Gerar orçamentos" : "Orçamentos"}
+              title="Gerar orçamentos"
             >
               <FileText size={20} />
-              {isExpanded && <span>Orçamentos</span>}
+              <span>Orçamentos</span>
             </div>
 
             <div
@@ -192,10 +167,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "pedidoAprovacao" ? styles.active : ""
               }`}
               onClick={() => onPageChange("pedidoAprovacao")}
-              title={isExpanded ? "Solicitações de aprovação" : "Solicitações"}
+              title="Solicitações de aprovação"
             >
               <ClipboardCheck size={20} />
-              {isExpanded && <span>Solicitações</span>}
+              <span>Solicitações</span>
             </div>
 
             <div
@@ -203,10 +178,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "grupoItens" ? styles.active : ""
               }`}
               onClick={() => onPageChange("grupoItens")}
-              title={isExpanded ? "Gerenciar grupos de itens" : "Grupos de Itens"}
+              title="Gerenciar grupos de itens"
             >
               <FolderOpen size={20} />
-              {isExpanded && <span>Grupos de Itens</span>}
+              <span>Grupos de Itens</span>
             </div>
 
             <div
@@ -214,10 +189,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "itens" ? styles.active : ""
               }`}
               onClick={() => onPageChange("itens")}
-              title={isExpanded ? "Gerenciar itens" : "Itens"}
+              title="Gerenciar itens"
             >
               <Package size={20} />
-              {isExpanded && <span>Itens</span>}
+              <span>Itens</span>
             </div>
 
             <div
@@ -225,10 +200,10 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
                 activePage === "enderecos" ? styles.active : ""
               }`}
               onClick={() => onPageChange("enderecos")}
-              title={isExpanded ? "Gerenciar endereços" : "Endereços"}
+              title="Gerenciar endereços"
             >
               <MapPin size={20} />
-              {isExpanded && <span>Endereços</span>}
+              <span>Endereços</span>
             </div>
           </>
         )}
@@ -237,22 +212,18 @@ function Sidebar({ activePage, onPageChange, onLogout, onToggleSidebar }) {
           <div
             className={styles.menuItem}
             onClick={() => onPageChange("aprovacao")}
-            title={isExpanded ? "Aprovar orçamentos" : "Aprovações"}
+            title="Aprovar orçamentos"
           >
             <CheckSquare size={20} />
-            {isExpanded && <span>Aprovações</span>}
+            <span>Aprovações</span>
           </div>
         )}
       </div>
 
       <div className={styles.footer}>
-        <div 
-          className={styles.logoutBtn} 
-          onClick={onLogout} 
-          title={isExpanded ? "Fazer logout" : "Sair"}
-        >
+        <div className={styles.logoutBtn} onClick={onLogout} title="Fazer logout">
           <LogOut size={20} />
-          {isExpanded && <span>Sair</span>}
+          <span>Sair</span>
         </div>
       </div>
     </div>
