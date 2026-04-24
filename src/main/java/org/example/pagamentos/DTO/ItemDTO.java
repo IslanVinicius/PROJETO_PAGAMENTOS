@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.pagamentos.Enums.TipoUnitario;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,6 +26,12 @@ public class ItemDTO {
 
     private Float valorUnitario;
 
+    private Float precoMedio;
+
+    private TipoUnitario tipoUnitario;
+
     @NotNull(message = "O ID do grupo é obrigatório")
     private Long idGrupo;
+
+    private List<DescontoItemDTO> descontos = new ArrayList<>();
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, Package } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, Package, Percent } from 'lucide-react';
 import styles from './EmpresaCadastro-novo.module.css';
 import { itemService } from '../../services/itemService';
 import { grupoItemService } from '../../services/grupoItemService';
@@ -13,8 +13,11 @@ function ItemCadastro() {
     const [nome, setNome] = useState('');
     const [descricao, setDescricao] = useState('');
     const [valorUnitario, setValorUnitario] = useState('');
+    const [precoMedio, setPrecoMedio] = useState('');
+    const [tipoUnitario, setTipoUnitario] = useState('UNIDADE');
     const [idGrupo, setIdGrupo] = useState('');
     const [grupos, setGrupos] = useState([]);
+    const [descontos, setDescontos] = useState([]); // Lista de descontos progressivos
 
     const [itens, setItens] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
@@ -31,6 +34,25 @@ function ItemCadastro() {
     // Controles de header/pesquisa
     const [showFilters, setShowFilters] = useState(false);
     const [quickSearchId, setQuickSearchId] = useState('');
+
+    // Opções de tipo unitário
+    const tiposUnitarios = [
+        { value: 'UNIDADE', label: 'Unidade (un)' },
+        { value: 'METRO_CUBICO', label: 'Metro Cúbico (m³)' },
+        { value: 'METRO_QUADRADO', label: 'Metro Quadrado (m²)' },
+        { value: 'METRO', label: 'Metro (m)' },
+        { value: 'CENTIMETRO', label: 'Centímetro (cm)' },
+        { value: 'QUILOGRAMA', label: 'Quilograma (kg)' },
+        { value: 'GRAMA', label: 'Grama (g)' },
+        { value: 'LITRO', label: 'Litro (L)' },
+        { value: 'MILILITRO', label: 'Mililitro (ml)' },
+        { value: 'PACOTE', label: 'Pacote (pct)' },
+        { value: 'CAIXA', label: 'Caixa (cx)' },
+        { value: 'GALAO', label: 'Galão (gal)' },
+        { value: 'TAMBOR', label: 'Tambor (tmb)' },
+        { value: 'ROLO', label: 'Rolo (rl)' },
+        { value: 'PAR', label: 'Par (par)' }
+    ];
 
     // Configuração dos campos de pesquisa
     const camposPesquisaItem = [
@@ -75,7 +97,10 @@ function ItemCadastro() {
                 nome: item.nome,
                 descricao: item.descricao,
                 valorUnitario: item.valorUnitario,
-                idGrupo: item.idGrupo
+                precoMedio: item.precoMedio,
+                tipoUnitario: item.tipoUnitario,
+                idGrupo: item.idGrupo,
+                descontos: item.descontos || []
             }));
             setItens(itensFormatados);
             if (itensFormatados.length > 0) {
@@ -94,7 +119,10 @@ function ItemCadastro() {
         setNome(item.nome);
         setDescricao(item.descricao || '');
         setValorUnitario(item.valorUnitario || '');
+        setPrecoMedio(item.precoMedio || '');
+        setTipoUnitario(item.tipoUnitario || 'UNIDADE');
         setIdGrupo(item.idGrupo);
+        setDescontos(item.descontos || []);
         setOriginalData({ ...item });
         setModo('visualizacao');
     };
@@ -123,7 +151,7 @@ function ItemCadastro() {
     };
 
     const handleEditar = () => {
-        setOriginalData({ id: idItem, nome, descricao, valorUnitario, idGrupo });
+        setOriginalData({ id: idItem, nome, descricao, valorUnitario, precoMedio, tipoUnitario, idGrupo, descontos });
         setModo('edicao');
     };
 
@@ -133,7 +161,10 @@ function ItemCadastro() {
         setNome('');
         setDescricao('');
         setValorUnitario('');
+        setPrecoMedio('');
+        setTipoUnitario('UNIDADE');
         setIdGrupo('');
+        setDescontos([]);
         setModo('criacao');
     };
 
@@ -143,20 +174,29 @@ function ItemCadastro() {
             setNome(originalData.nome);
             setDescricao(originalData.descricao);
             setValorUnitario(originalData.valorUnitario);
+            setPrecoMedio(originalData.precoMedio);
+            setTipoUnitario(originalData.tipoUnitario);
             setIdGrupo(originalData.idGrupo);
+            setDescontos(originalData.descontos || []);
         } else if (modo === 'criacao' && itens.length > 0 && currentIndex >= 0) {
             const atual = itens[currentIndex];
             setIdItem(atual.id);
             setNome(atual.nome);
             setDescricao(atual.descricao);
             setValorUnitario(atual.valorUnitario);
+            setPrecoMedio(atual.precoMedio);
+            setTipoUnitario(atual.tipoUnitario);
             setIdGrupo(atual.idGrupo);
+            setDescontos(atual.descontos || []);
         } else if (modo === 'criacao' && itens.length === 0) {
             setIdItem('');
             setNome('');
             setDescricao('');
             setValorUnitario('');
+            setPrecoMedio('');
+            setTipoUnitario('UNIDADE');
             setIdGrupo('');
+            setDescontos([]);
         }
         setModo('visualizacao');
         setMessage({ type: '', text: '' });
@@ -176,7 +216,15 @@ function ItemCadastro() {
             nome,
             descricao,
             valorUnitario: valorUnitario ? parseFloat(valorUnitario) : null,
-            idGrupo: parseInt(idGrupo)
+            precoMedio: precoMedio ? parseFloat(precoMedio) : null,
+            tipoUnitario: tipoUnitario || 'UNIDADE',
+            idGrupo: parseInt(idGrupo),
+            descontos: descontos.map(d => ({
+                quantidadeMinima: d.quantidadeMinima,
+                percentualDesconto: d.percentualDesconto,
+                valorFinal: d.valorFinal,
+                descricao: d.descricao
+            }))
         };
 
         setLoading(true);
@@ -188,7 +236,10 @@ function ItemCadastro() {
                     nome: atualizado.nome,
                     descricao: atualizado.descricao,
                     valorUnitario: atualizado.valorUnitario,
-                    idGrupo: atualizado.idGrupo
+                    precoMedio: atualizado.precoMedio,
+                    tipoUnitario: atualizado.tipoUnitario,
+                    idGrupo: atualizado.idGrupo,
+                    descontos: atualizado.descontos || []
                 };
                 setItens(prev => prev.map(i => i.id === idItem ? itemMapeado : i));
                 setOriginalData(itemMapeado);
@@ -200,7 +251,10 @@ function ItemCadastro() {
                     nome: novo.nome,
                     descricao: novo.descricao,
                     valorUnitario: novo.valorUnitario,
-                    idGrupo: novo.idGrupo
+                    precoMedio: novo.precoMedio,
+                    tipoUnitario: novo.tipoUnitario,
+                    idGrupo: novo.idGrupo,
+                    descontos: novo.descontos || []
                 };
                 setItens(prev => {
                     const updated = [...prev, novoMapeado];
@@ -319,6 +373,40 @@ function ItemCadastro() {
     const getNomeGrupo = (id) => {
         const grupo = grupos.find(g => g.idGrupo === id);
         return grupo ? grupo.nome : 'Grupo não encontrado';
+    };
+
+    // Funções para gerenciar descontos progressivos
+    const handleAddDesconto = () => {
+        setDescontos([...descontos, { quantidadeMinima: 0, percentualDesconto: 0, valorFinal: null, descricao: '' }]);
+    };
+
+    const handleRemoveDesconto = (index) => {
+        setDescontos(descontos.filter((_, i) => i !== index));
+    };
+
+    const handleUpdateDesconto = (index, field, value) => {
+        const novosDescontos = [...descontos];
+        novosDescontos[index] = { ...novosDescontos[index], [field]: value };
+        
+        // Se atualizou valorFinal, recalcula percentual
+        if (field === 'valorFinal' && valorUnitario) {
+            const valorFinalNum = parseFloat(value) || 0;
+            const valorUnitarioNum = parseFloat(valorUnitario) || 0;
+            if (valorUnitarioNum > 0) {
+                const percentual = ((valorUnitarioNum - valorFinalNum) / valorUnitarioNum) * 100;
+                novosDescontos[index].percentualDesconto = parseFloat(percentual.toFixed(2));
+            }
+        }
+        
+        // Se atualizou percentual, recalcula valorFinal
+        if (field === 'percentualDesconto' && valorUnitario) {
+            const percentualNum = parseFloat(value) || 0;
+            const valorUnitarioNum = parseFloat(valorUnitario) || 0;
+            const valorFinal = valorUnitarioNum * (1 - (percentualNum / 100));
+            novosDescontos[index].valorFinal = parseFloat(valorFinal.toFixed(2));
+        }
+        
+        setDescontos(novosDescontos);
     };
 
     const camposDesabilitados = modo === 'visualizacao' || loading;
@@ -551,6 +639,32 @@ function ItemCadastro() {
                         />
                     </div>
                     <div className={styles.formGroup}>
+                        <label>PREÇO MÉDIO</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={precoMedio || ''}
+                            onChange={(e) => setPrecoMedio(e.target.value)}
+                            placeholder="0,00"
+                            disabled={camposDesabilitados}
+                        />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>TIPO UNITÁRIO</label>
+                        <select
+                            value={tipoUnitario || 'UNIDADE'}
+                            onChange={(e) => setTipoUnitario(e.target.value)}
+                            disabled={camposDesabilitados}
+                            className={styles.select}
+                        >
+                            {tiposUnitarios.map(tipo => (
+                                <option key={tipo.value} value={tipo.value}>
+                                    {tipo.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className={styles.formGroup}>
                         <label>GRUPO *</label>
                         <select
                             value={idGrupo || ''}
@@ -567,6 +681,125 @@ function ItemCadastro() {
                         </select>
                     </div>
                 </div>
+
+                {/* Seção de Descontos Progressivos */}
+                {(modo === 'edicao' || modo === 'criacao') && (
+                    <div className={styles.formSection} style={{ marginTop: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <h3 style={{ margin: 0, fontSize: '16px', color: '#333' }}>
+                                <Percent size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                                Descontos Progressivos por Quantidade
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={handleAddDesconto}
+                                className={`${styles.headerBtn} ${styles.headerBtnNew}`}
+                                style={{ padding: '8px 12px', fontSize: '12px' }}
+                            >
+                                <Plus size={14} /> Adicionar Condição
+                            </button>
+                        </div>
+
+                        {descontos.length > 0 ? (
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+                                            <th style={{ padding: '10px', textAlign: 'left' }}>Qtd. Mínima</th>
+                                            <th style={{ padding: '10px', textAlign: 'left' }}>Desconto (%)</th>
+                                            <th style={{ padding: '10px', textAlign: 'left' }}>Valor Final (R$)</th>
+                                            <th style={{ padding: '10px', textAlign: 'left' }}>Total (R$)</th>
+                                            <th style={{ padding: '10px', textAlign: 'left' }}>Descrição</th>
+                                            <th style={{ padding: '10px', textAlign: 'center', width: '80px' }}>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {descontos.map((desconto, index) => {
+                                            const valorFinalNum = parseFloat(desconto.valorFinal) || 0;
+                                            const qtdMinima = parseInt(desconto.quantidadeMinima) || 0;
+                                            const total = valorFinalNum * qtdMinima;
+                                            
+                                            return (
+                                                <tr key={index} style={{ borderBottom: '1px solid #eee' }}>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={desconto.quantidadeMinima}
+                                                            onChange={(e) => handleUpdateDesconto(index, 'quantidadeMinima', parseInt(e.target.value) || 0)}
+                                                            style={{ width: '100%', padding: '6px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#ffffff', color: '#000000' }}
+                                                            disabled={camposDesabilitados}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            max="100"
+                                                            step="0.01"
+                                                            value={desconto.percentualDesconto || ''}
+                                                            onChange={(e) => handleUpdateDesconto(index, 'percentualDesconto', e.target.value)}
+                                                            placeholder="%"
+                                                            style={{ width: '100%', padding: '6px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#ffffff', color: '#000000' }}
+                                                            disabled={camposDesabilitados}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            step="0.01"
+                                                            value={desconto.valorFinal || ''}
+                                                            onChange={(e) => handleUpdateDesconto(index, 'valorFinal', e.target.value)}
+                                                            placeholder="R$ 0,00"
+                                                            style={{ width: '100%', padding: '6px', border: '1px solid #4CAF50', borderRadius: '4px', backgroundColor: '#ffffff', color: '#000000' }}
+                                                            disabled={camposDesabilitados}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <input
+                                                            type="text"
+                                                            value={`R$ ${total.toFixed(2).replace('.', ',')}`}
+                                                            readOnly
+                                                            style={{ width: '100%', padding: '6px', border: '1px solid #ccc', borderRadius: '4px', backgroundColor: '#f0f0f0', color: '#333', fontWeight: 'bold', cursor: 'not-allowed' }}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '8px' }}>
+                                                        <input
+                                                            type="text"
+                                                            value={desconto.descricao || ''}
+                                                            onChange={(e) => handleUpdateDesconto(index, 'descricao', e.target.value)}
+                                                            placeholder="Ex: 5-10 unidades"
+                                                            style={{ width: '100%', padding: '6px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#ffffff', color: '#000000' }}
+                                                            disabled={camposDesabilitados}
+                                                        />
+                                                    </td>
+                                                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveDesconto(index)}
+                                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc3545' }}
+                                                            title="Remover condição"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px', fontSize: '12px', color: '#1976d2' }}>
+                                    💡 <strong>Dica:</strong> Preencha o <strong>Desconto (%)</strong> ou o <strong>Valor Final (R$)</strong> - o outro campo será calculado automaticamente! O campo "Total" é calculado automaticamente (Qtd. Mínima × Valor Final).
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#f9f9f9', borderRadius: '4px', color: '#666' }}>
+                                Nenhum desconto progressivo cadastrado. Clique em "Adicionar Condição" para criar.
+                            </div>
+                        )}
+                    </div>
+                )}
 
 
                 {message.text && (

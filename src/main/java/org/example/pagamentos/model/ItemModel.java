@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.pagamentos.Enums.TipoUnitario;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +37,17 @@ public class ItemModel {
     @Setter
     private Float valorUnitario;
 
+    @Column(name = "PRECO_MEDIO")
+    @Getter
+    @Setter
+    private Float precoMedio;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TIPO_UNITARIO")
+    @Getter
+    @Setter
+    private TipoUnitario tipoUnitario;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_GRUPO", nullable = false)
     @Getter
@@ -44,4 +59,9 @@ public class ItemModel {
     @Getter
     @Setter
     private Usuario usuarioCriador;
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Getter
+    @Setter
+    private List<DescontoItemModel> descontos = new ArrayList<>();
 }

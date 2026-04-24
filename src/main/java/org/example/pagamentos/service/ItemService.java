@@ -1,34 +1,43 @@
 package org.example.pagamentos.service;
 
+import org.example.pagamentos.DTO.DescontoItemDTO;
 import org.example.pagamentos.DTO.ItemDTO;
 import org.example.pagamentos.exception.AccessDeniedException;
+import org.example.pagamentos.model.DescontoItemModel;
 import org.example.pagamentos.model.GrupoItemModel;
 import org.example.pagamentos.model.ItemModel;
 import org.example.pagamentos.model.Usuario;
+import org.example.pagamentos.repository.DescontoItemRepository;
 import org.example.pagamentos.repository.GrupoItemRepository;
 import org.example.pagamentos.repository.ItemRepository;
 import org.example.pagamentos.security.AuthenticationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
 
     private final ItemRepository itemRepository;
     private final GrupoItemRepository grupoItemRepository;
+    private final DescontoItemRepository descontoItemRepository;
     private final AuthenticationUtil authenticationUtil;
 
     @Autowired
     public ItemService(ItemRepository itemRepository,
                        GrupoItemRepository grupoItemRepository,
+                       DescontoItemRepository descontoItemRepository,
                        AuthenticationUtil authenticationUtil) {
         this.itemRepository = itemRepository;
         this.grupoItemRepository = grupoItemRepository;
+        this.descontoItemRepository = descontoItemRepository;
         this.authenticationUtil = authenticationUtil;
     }
 
+    @Transactional
     public ItemDTO salvar(ItemDTO itemDTO) {
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
@@ -45,8 +54,36 @@ public class ItemService {
         itemModel.setNome(itemDTO.getNome());
         itemModel.setDescricao(itemDTO.getDescricao());
         itemModel.setValorUnitario(itemDTO.getValorUnitario());
+        itemModel.setPrecoMedio(itemDTO.getPrecoMedio());
+        itemModel.setTipoUnitario(itemDTO.getTipoUnitario());
         itemModel.setGrupo(grupo);
         itemModel.setUsuarioCriador(usuarioAutenticado);
+
+        // Adicionar descontos progressivos
+        if (itemDTO.getDescontos() != null && !itemDTO.getDescontos().isEmpty()) {
+            for (DescontoItemDTO descontoDTO : itemDTO.getDescontos()) {
+                DescontoItemModel desconto = new DescontoItemModel();
+                desconto.setItem(itemModel);
+                desconto.setQuantidadeMinima(descontoDTO.getQuantidadeMinima());
+                
+                // Se o usuário informou valorFinal, calcula o percentual
+                if (descontoDTO.getValorFinal() != null && itemDTO.getValorUnitario() != null) {
+                    desconto.setValorFinal(descontoDTO.getValorFinal());
+                    float percentual = ((itemDTO.getValorUnitario() - descontoDTO.getValorFinal()) / itemDTO.getValorUnitario()) * 100;
+                    desconto.setPercentualDesconto(percentual);
+                } else {
+                    // Se informou percentual, usa diretamente
+                    desconto.setPercentualDesconto(descontoDTO.getPercentualDesconto());
+                    if (descontoDTO.getPercentualDesconto() != null && itemDTO.getValorUnitario() != null) {
+                        float valorFinal = itemDTO.getValorUnitario() * (1 - (descontoDTO.getPercentualDesconto() / 100));
+                        desconto.setValorFinal(valorFinal);
+                    }
+                }
+                
+                desconto.setDescricao(descontoDTO.getDescricao());
+                itemModel.getDescontos().add(desconto);
+            }
+        }
 
         itemRepository.save(itemModel);
 
@@ -103,6 +140,7 @@ public class ItemService {
         return toDTO(itemModel);
     }
 
+    @Transactional
     public ItemDTO atualizar(Long idItem, ItemDTO itemDTO) {
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
@@ -131,6 +169,38 @@ public class ItemService {
         itemModel.setNome(itemDTO.getNome());
         itemModel.setDescricao(itemDTO.getDescricao());
         itemModel.setValorUnitario(itemDTO.getValorUnitario());
+        itemModel.setPrecoMedio(itemDTO.getPrecoMedio());
+        itemModel.setTipoUnitario(itemDTO.getTipoUnitario());
+
+        // Atualizar descontos progressivos
+        if (itemDTO.getDescontos() != null) {
+            // Limpar descontos existentes
+            itemModel.getDescontos().clear();
+            
+            // Adicionar novos descontos
+            for (DescontoItemDTO descontoDTO : itemDTO.getDescontos()) {
+                DescontoItemModel desconto = new DescontoItemModel();
+                desconto.setItem(itemModel);
+                desconto.setQuantidadeMinima(descontoDTO.getQuantidadeMinima());
+                
+                // Se o usuário informou valorFinal, calcula o percentual
+                if (descontoDTO.getValorFinal() != null && itemDTO.getValorUnitario() != null) {
+                    desconto.setValorFinal(descontoDTO.getValorFinal());
+                    float percentual = ((itemDTO.getValorUnitario() - descontoDTO.getValorFinal()) / itemDTO.getValorUnitario()) * 100;
+                    desconto.setPercentualDesconto(percentual);
+                } else {
+                    // Se informou percentual, usa diretamente
+                    desconto.setPercentualDesconto(descontoDTO.getPercentualDesconto());
+                    if (descontoDTO.getPercentualDesconto() != null && itemDTO.getValorUnitario() != null) {
+                        float valorFinal = itemDTO.getValorUnitario() * (1 - (descontoDTO.getPercentualDesconto() / 100));
+                        desconto.setValorFinal(valorFinal);
+                    }
+                }
+                
+                desconto.setDescricao(descontoDTO.getDescricao());
+                itemModel.getDescontos().add(desconto);
+            }
+        }
 
         return toDTO(itemRepository.save(itemModel));
     }
@@ -174,7 +244,24 @@ public class ItemService {
         dto.setNome(itemModel.getNome());
         dto.setDescricao(itemModel.getDescricao());
         dto.setValorUnitario(itemModel.getValorUnitario());
+        dto.setPrecoMedio(itemModel.getPrecoMedio());
+        dto.setTipoUnitario(itemModel.getTipoUnitario());
         dto.setIdGrupo(itemModel.getGrupo().getIdGrupo());
+        
+        // Converter descontos
+        if (itemModel.getDescontos() != null) {
+            List<DescontoItemDTO> descontosDTO = itemModel.getDescontos().stream()
+                .map(desconto -> new DescontoItemDTO(
+                    desconto.getIdDesconto(),
+                    desconto.getQuantidadeMinima(),
+                    desconto.getPercentualDesconto(),
+                    desconto.getValorFinal(),
+                    desconto.getDescricao()
+                ))
+                .collect(Collectors.toList());
+            dto.setDescontos(descontosDTO);
+        }
+        
         return dto;
     }
 }
