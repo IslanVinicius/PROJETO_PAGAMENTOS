@@ -1,5 +1,6 @@
 package org.example.pagamentos.service;
 
+import org.example.pagamentos.DTO.OrcamentoCompletoDTO;
 import org.example.pagamentos.DTO.OrcamentoDTO;
 import org.example.pagamentos.DTO.OrcamentoImagemDTO;
 import org.example.pagamentos.DTO.OrcamentoItemDTO;
@@ -365,6 +366,21 @@ public class OrcamentoService {
 
     public byte[] carregarImagem(OrcamentoImagemDTO imagem) throws IOException {
         return fileUploadService.carregarArquivo(imagem.getUrlImagem());
+    }
+
+    public OrcamentoCompletoDTO buscarOrcamentoCompleto(Long orcamentoID) {
+        Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
+
+        OrcamentoModel orcamentoModel = orcamentoRepository
+                .findById(orcamentoID)
+                .orElseThrow(() -> new RuntimeException("Orçamento não encontrado"));
+
+        // Verifica se o usuário é ADMIN ou se criou o orçamento
+        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+            throw new AccessDeniedException("Você não tem permissão para acessar este orçamento");
+        }
+
+        return OrcamentoCompletoDTO.fromModel(orcamentoModel);
     }
 
 }

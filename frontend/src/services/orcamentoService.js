@@ -129,5 +129,34 @@ export const orcamentoService = {
         if (response.status === 204) return { success: true };
         const text = await response.text();
         return text ? JSON.parse(text) : { success: true };
+    },
+    // Método para gerar PDF
+    async gerarPdf(orcamentoId) {
+        const baseUrl = getBaseUrl();
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${baseUrl}/orcamento/${orcamentoId}/pdf`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage = `Erro ${response.status}`;
+            if (errorText) {
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.message || errorJson.error || errorText;
+                } catch {
+                    errorMessage = errorText;
+                }
+            }
+            throw new Error(errorMessage || 'Erro ao gerar PDF');
+        }
+        
+        // Retornar o blob do PDF
+        return await response.blob();
     }
 };

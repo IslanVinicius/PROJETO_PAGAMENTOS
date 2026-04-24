@@ -2,6 +2,8 @@ package org.example.pagamentos.service;
 
 import com.itextpdf.io.font.constants
         .StandardFonts;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -21,6 +23,7 @@ import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.properties.VerticalAlignment;
 import org.example.pagamentos.DTO.OrcamentoCompletoDTO;
 import org.example.pagamentos.DTO.OrcamentoItemDTO;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -67,9 +70,22 @@ public class PdfService {
         headerTable.setWidth(UnitValue.createPercentValue(100));
         headerTable.setBorder(Border.NO_BORDER);
         
-        Paragraph logoText = new Paragraph();
-        logoText.add(new Text("+ Permanente").setFont(fontBold).setFontSize(20).setFontColor(PRIMARY_COLOR));
-        headerTable.addCell(new Cell().add(logoText).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+        // Adicionar logo da empresa
+        try {
+            ClassPathResource resource = new ClassPathResource("images/logo.png");
+            ImageData imageData = ImageDataFactory.create(resource.getURL());
+            Image logo = new Image(imageData);
+            
+            // Ajustar tamanho da logo (ajuste conforme necessário)
+            logo.scaleToFit(80, 40); // largura máxima 80px, altura máxima 40px
+            
+            headerTable.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+        } catch (Exception e) {
+            // Se não conseguir carregar a logo, usa texto como fallback
+            Paragraph logoText = new Paragraph();
+            logoText.add(new Text("+ Permanente").setFont(fontBold).setFontSize(20).setFontColor(PRIMARY_COLOR));
+            headerTable.addCell(new Cell().add(logoText).setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE));
+        }
         
         Paragraph empresaInfo = new Paragraph();
         empresaInfo.add(new Text(orcamento.getNomeEmpresa() != null ? orcamento.getNomeEmpresa() : "Permanente").setFont(fontBold).setFontSize(14));

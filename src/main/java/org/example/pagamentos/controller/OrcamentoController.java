@@ -3,6 +3,7 @@ package org.example.pagamentos.controller;
 import org.example.pagamentos.DTO.OrcamentoDTO;
 import org.example.pagamentos.DTO.OrcamentoImagemDTO;
 import org.example.pagamentos.service.OrcamentoService;
+import org.example.pagamentos.service.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,9 @@ import java.util.List;
 public class OrcamentoController {
     @Autowired
     private OrcamentoService orcamentoService;
+
+    @Autowired
+    private PdfService pdfService;
 
     @PostMapping()
     public ResponseEntity<OrcamentoDTO> salvar(@RequestBody OrcamentoDTO orcamentoDTO) {
@@ -93,6 +97,28 @@ public class OrcamentoController {
             @PathVariable Long imagemId) {
         orcamentoService.deletarImagem(orcamentoId, imagemId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> gerarPdf(@PathVariable Long id) {
+        try {
+            // Buscar dados completos do orçamento
+            var orcamentoCompleto = orcamentoService.buscarOrcamentoCompleto(id);
+            
+            // Gerar PDF
+            byte[] pdfBytes = pdfService.gerarOrcamentoPdf(orcamentoCompleto);
+            
+            // Configurar headers para download
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", 
+                "orcamento_" + id + ".pdf");
+            headers.setContentLength(pdfBytes.length);
+            
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao gerar PDF: " + e.getMessage());
+        }
     }
 
 }

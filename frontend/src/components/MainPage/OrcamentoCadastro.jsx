@@ -8,7 +8,6 @@ import ModalPesquisa from './ModalPesquisa';
 import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
 import ModalPesquisaItens from './ModalPesquisaItens';
 import ConfirmModal from '../Shared/ConfirmModal';
-import { jsPDF } from 'jspdf';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
 import headerStyles from './EmpresaCadastro-novo.module.css';
@@ -730,173 +729,23 @@ function OrcamentoCadastro() {
 
         setLoading(true);
         try {
-            // Buscar dados completos da empresa e prestador
-            const [empresaData, prestadorData] = await Promise.all([
-                empresaService.obter(empresaID),
-                prestadorService.obter(idPrestador)
-            ]);
-
-            // Criar o PDF
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 20;
-            let yPos = 20;
-
-            // Título
-            doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            doc.text('ORÇAMENTO', pageWidth / 2, yPos, { align: 'center' });
-            yPos += 15;
-
-            // Linha divisória
-            doc.setDrawColor(0);
-            doc.line(margin, yPos, pageWidth - margin, yPos);
-            yPos += 15;
-
-            // Dados do Orçamento
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('DADOS DO ORÇAMENTO', margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`ID do Orçamento: ${orcamentoID}`, margin, yPos);
-            yPos += 7;
-            doc.text(`Movimento: ${movimento}`, margin, yPos);
-            yPos += 7;
-            if (tipoPagamento) {
-                const tipoPagamentoText = {
-                    'A_VISTA': 'À Vista',
-                    'ANTECIPADO': 'Antecipado',
-                    'CINQUENTA_CINQUENTA': '50% - 50%'
-                }[tipoPagamento] || tipoPagamento;
-                doc.text(`Tipo de Pagamento: ${tipoPagamentoText}`, margin, yPos);
-                yPos += 7;
-            }
-            yPos += 8;
-
-            // Dados da Empresa
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('DADOS DA EMPRESA', margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Razão Social: ${empresaData.razaoSocial || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`CNPJ: ${empresaData.cnpj || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`Endereço: ${empresaData.endereco || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`Cidade: ${empresaData.cidade || 'N/A'} - ${empresaData.estado || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`CEP: ${empresaData.cep || 'N/A'}`, margin, yPos);
-            yPos += 15;
-
-            // Dados do Prestador
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('DADOS DO PRESTADOR', margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Nome: ${prestadorData.nome || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`CPF/CNPJ: ${prestadorData.cpfCnpj || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`Email: ${prestadorData.email || 'N/A'}`, margin, yPos);
-            yPos += 7;
-            doc.text(`Telefone: ${prestadorData.telefone || 'N/A'}`, margin, yPos);
-            yPos += 15;
-
-            // Descrição do Serviço
-            if (descricao) {
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.text('DESCRIÇÃO DO SERVIÇO', margin, yPos);
-                yPos += 10;
-
-                doc.setFontSize(11);
-                doc.setFont('helvetica', 'normal');
-                const descricaoLines = doc.splitTextToSize(descricao, pageWidth - (margin * 2));
-                doc.text(descricaoLines, margin, yPos);
-                yPos += (descricaoLines.length * 7) + 15;
-            }
-
-            // Itens do Orçamento
-            if (itensOrcamento.length > 0) {
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.text('ITENS DO ORÇAMENTO', margin, yPos);
-                yPos += 10;
-
-                // Cabeçalho da tabela
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'bold');
-                doc.setFillColor(230, 230, 230);
-                doc.rect(margin, yPos - 5, pageWidth - (margin * 2), 8, 'F');
-                doc.text('Item', margin + 2, yPos);
-                doc.text('Qtd', margin + 80, yPos);
-                doc.text('V. Unitário', margin + 100, yPos);
-                doc.text('V. Total', margin + 140, yPos);
-                yPos += 8;
-
-                // Linhas dos itens
-                doc.setFont('helvetica', 'normal');
-                itensOrcamento.forEach((item) => {
-                    doc.text(item.itemNome.substring(0, 35), margin + 2, yPos);
-                    doc.text(String(item.quantidade), margin + 80, yPos);
-                    doc.text(formatarValor(item.valorUnitario), margin + 100, yPos);
-                    doc.text(formatarValor(item.valorTotal), margin + 140, yPos);
-                    yPos += 7;
-                });
-
-                yPos += 10;
-            }
-
-            // Resumo Financeiro
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            doc.text('RESUMO FINANCEIRO', margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Valor Total dos Itens: ${formatarValor(valorTotalItens)}`, margin, yPos);
-            yPos += 7;
+            // Chamar o backend para gerar o PDF
+            const pdfBlob = await orcamentoService.gerarPdf(orcamentoID);
             
-            if (desconto && parseFloat(desconto) > 0) {
-                doc.text(`Desconto: - ${formatarValor(desconto)}`, margin, yPos);
-                yPos += 7;
-            }
-
-            // Linha divisória
-            doc.line(margin, yPos, pageWidth - margin, yPos);
-            yPos += 10;
-
-            // Valor Final
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(0, 100, 0);
-            doc.text(`VALOR FINAL: ${formatarValor(valorFinal)}`, margin, yPos);
-            doc.setTextColor(0, 0, 0);
-            yPos += 20;
-
-            // Linha divisória
-            doc.line(margin, yPos, pageWidth - margin, yPos);
-            yPos += 10;
-
-            // Data de emissão
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'italic');
-            const dataEmissao = new Date().toLocaleDateString('pt-BR');
-            doc.text(`Documento gerado em: ${dataEmissao}`, margin, yPos);
-
-            // Salvar o PDF
-            doc.save(`orcamento_${orcamentoID}_${movimento.replace(/\//g, '-')}.pdf`);
+            // Criar URL temporária para o blob
+            const url = window.URL.createObjectURL(pdfBlob);
+            
+            // Criar link temporário para download
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `orcamento_${orcamentoID}_${movimento.replace(/\//g, '-')}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            
+            // Limpar
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            
             setMessage({ type: 'success', text: 'PDF gerado com sucesso!' });
         } catch (error) {
             setMessage({ type: 'error', text: 'Erro ao gerar PDF: ' + error.message });
