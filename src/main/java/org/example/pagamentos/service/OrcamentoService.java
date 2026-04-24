@@ -233,14 +233,27 @@ public class OrcamentoService {
         // Converter itens
         if (orcamentoModel.getItens() != null) {
             List<OrcamentoItemDTO> itensDTO = orcamentoModel.getItens().stream()
-                .map(item -> new OrcamentoItemDTO(
-                    item.getIdOrcamentoItem(),
-                    item.getItem().getIdItem(),
-                    item.getItem().getNome(),
-                    item.getQuantidade(),
-                    item.getValorUnitario(),
-                    item.getValorTotal()
-                ))
+                .map(item -> {
+                    ItemModel itemModel = item.getItem();
+                    Float valorOriginal = itemModel.getValorUnitario();
+                    Float valorComDesconto = item.getValorUnitario();
+                    
+                    OrcamentoItemDTO dto = new OrcamentoItemDTO();
+                    dto.setIdOrcamentoItem(item.getIdOrcamentoItem());
+                    dto.setItemId(itemModel.getIdItem());
+                    dto.setItemNome(itemModel.getNome());
+                    dto.setDescricao(itemModel.getDescricao());
+                    dto.setTipoUnitario(itemModel.getTipoUnitario() != null ? itemModel.getTipoUnitario().name() : "UNIDADE");
+                    dto.setPrecoMedio(itemModel.getPrecoMedio());
+                    dto.setValorUnitarioOriginal(valorOriginal);
+                    // Se o valor unitário for diferente do original, significa que houve desconto aplicado pelo backend
+                    dto.setValorComDesconto(!valorOriginal.equals(valorComDesconto) ? valorComDesconto : null);
+                    dto.setQuantidade(item.getQuantidade());
+                    dto.setValorUnitario(item.getValorUnitario());
+                    dto.setValorTotal(item.getValorTotal());
+                    
+                    return dto;
+                })
                 .collect(Collectors.toList());
             orcamentoDTO.setItens(itensDTO);
         }

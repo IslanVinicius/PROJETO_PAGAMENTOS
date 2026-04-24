@@ -4,6 +4,7 @@ import styles from './OrcamentoCadastro-novo.module.css';
 import { orcamentoService } from '../../services/orcamentoService';
 import { empresaService } from '../../services/empresaService';
 import { prestadorService } from '../../services/prestadorService';
+import { itemService } from '../../services/itemService';
 import ModalPesquisa from './ModalPesquisa';
 import ModalPesquisaEmpresa from './ModalPesquisaEmpresa';
 import ModalPesquisaItens from './ModalPesquisaItens';
@@ -566,17 +567,33 @@ function OrcamentoCadastro() {
     };
 
     // Funções para gerenciar itens do orçamento
-    const handleAdicionarItem = (item) => {
-        const novoItem = {
-            itemId: item.id,
-            itemNome: item.nome,
-            quantidade: 1,
-            valorUnitario: item.valorUnitario || 0,
-            valorTotal: item.valorUnitario || 0
-        };
-        const novosItens = [...itensOrcamento, novoItem];
-        setItensOrcamento(novosItens);
-        calcularTotais(novosItens, desconto);
+    const handleAdicionarItem = async (item) => {
+        try {
+            // Buscar detalhes completos do item incluindo descontos, descricao, tipoUnitario, precoMedio
+            const itemCompleto = await itemService.obter(item.id);
+            
+            console.log('Item adicionado - Dados completos:', itemCompleto);
+            
+            const novoItem = {
+                itemId: itemCompleto.idItem,
+                itemNome: itemCompleto.nome,
+                descricao: itemCompleto.descricao || '',
+                tipoUnitario: itemCompleto.tipoUnitario || 'UNIDADE',
+                precoMedio: itemCompleto.precoMedio || 0,
+                valorUnitarioOriginal: itemCompleto.valorUnitario || 0,
+                valorComDesconto: null,
+                quantidade: 1,
+                valorUnitario: itemCompleto.valorUnitario || 0,
+                valorTotal: itemCompleto.valorUnitario || 0,
+                descontos: itemCompleto.descontos || []
+            };
+            const novosItens = [...itensOrcamento, novoItem];
+            setItensOrcamento(novosItens);
+            calcularTotais(novosItens, desconto);
+        } catch (error) {
+            console.error('Erro ao buscar detalhes do item:', error);
+            setMessage({ type: 'error', text: 'Erro ao carregar detalhes do item' });
+        }
     };
 
     const handleRemoverItem = (index) => {
@@ -585,20 +602,88 @@ function OrcamentoCadastro() {
         calcularTotais(novosItens, desconto);
     };
 
-    const handleQuantidadeChange = (index, novaQuantidade) => {
+    const handleQuantidadeChange = async (index, novaQuantidade) => {
         const qtd = parseInt(novaQuantidade, 10) || 0;
-        const novosItens = itensOrcamento.map((item, i) => {
-            if (i === index) {
-                return {
-                    ...item,
-                    quantidade: qtd,
-                    valorTotal: qtd * item.valorUnitario
-                };
+        const itemAtual = itensOrcamento[index];
+        
+        try {
+            // Consultar o item completo no backend para obter os descontos
+            const itemCompleto = await itemService.obter(itemAtual.itemId);
+            
+            console.log('Item completo recebido:', itemCompleto);
+            console.log('Descontos disponíveis:', itemCompleto.descontos);
+            console.log('Quantidade informada:', qtd);
+            
+            // Calcular valor com desconto baseado na quantidade
+            let valorUnitarioComDesconto = itemCompleto.valorUnitario;
+            let valorComDesconto = null;
+            
+            if (itemCompleto.descontos && itemCompleto.descontos.length > 0 && qtd > 0) {
+                // Encontrar o melhor desconto aplicável
+                let melhorDesconto = null;
+                for (const desconto of itemCompleto.descontos) {
+                    console.log(`Verificando desconto: qtdMinima=${desconto.quantidadeMinima}, valorFinal=${desconto.valorFinal}, percentual=${desconto.percentualDesconto}`);
+                    if (qtd >= desconto.quantidadeMinima) {
+                        if (!melhorDesconto || desconto.quantidadeMinima > melhorDesconto.quantidadeMinima) {
+                            melhorDesconto = desconto;
+                            console.log('Melhor desconto encontrado:', melhorDesconto);
+                        }
+                    }
+                }
+                
+                // Aplicar desconto se encontrado
+                if (melhorDesconto) {
+                    console.log('Aplicando desconto:', melhorDesconto);
+                    if (melhorDesconto.valorFinal != null) {
+                        valorUnitarioComDesconto = melhorDesconto.valorFinal;
+                        valorComDesconto = melhorDesconto.valorFinal;
+                        console.log(`Usando valorFinal: ${valorUnitarioComDesconto}`);
+                    } else if (melhorDesconto.percentualDesconto != null) {
+                        valorUnitarioComDesconto = itemCompleto.valorUnitario * (1 - (melhorDesconto.percentualDesconto / 100));
+                        valorComDesconto = valorUnitarioComDesconto;
+                        console.log(`Calculando pelo percentual: ${itemCompleto.valorUnitario} * (1 - ${melhorDesconto.percentualDesconto}/100) = ${valorUnitarioComDesconto}`);
+                    }
+                } else {
+                    console.log('Nenhum desconto aplicável para esta quantidade');
+                }
+            } else {
+                console.log('Item sem descontos ou quantidade zero');
             }
-            return item;
-        });
-        setItensOrcamento(novosItens);
-        calcularTotais(novosItens, desconto);
+            
+            // Atualizar o item com o novo valor
+            const novosItens = itensOrcamento.map((item, i) => {
+                if (i === index) {
+                    return {
+                        ...item,
+                        quantidade: qtd,
+                        valorUnitarioOriginal: itemCompleto.valorUnitario,
+                        valorComDesconto: valorComDesconto,
+                        valorUnitario: parseFloat(valorUnitarioComDesconto.toFixed(2)),
+                        valorTotal: parseFloat((qtd * valorUnitarioComDesconto).toFixed(2))
+                    };
+                }
+                return item;
+            });
+            
+            console.log('Novos itens atualizados:', novosItens[index]);
+            setItensOrcamento(novosItens);
+            calcularTotais(novosItens, desconto);
+        } catch (error) {
+            console.error('Erro ao consultar desconto:', error);
+            // Em caso de erro, usa o cálculo simples
+            const novosItens = itensOrcamento.map((item, i) => {
+                if (i === index) {
+                    return {
+                        ...item,
+                        quantidade: qtd,
+                        valorTotal: parseFloat((qtd * item.valorUnitario).toFixed(2))
+                    };
+                }
+                return item;
+            });
+            setItensOrcamento(novosItens);
+            calcularTotais(novosItens, desconto);
+        }
     };
 
     const handleDescontoChange = (novoDesconto) => {
@@ -1132,8 +1217,12 @@ function OrcamentoCadastro() {
                             <thead>
                                 <tr>
                                     <th>Item</th>
+                                    <th>Descrição</th>
+                                    <th>Tipo</th>
+                                    <th>Preço Médio</th>
+                                    <th>Valor sem Desconto</th>
+                                    <th>Valor com Desconto</th>
                                     <th>Quantidade</th>
-                                    <th>Valor Unitário</th>
                                     <th>Valor Total</th>
                                     {!camposDesabilitados && <th>Ações</th>}
                                 </tr>
@@ -1141,7 +1230,42 @@ function OrcamentoCadastro() {
                             <tbody>
                                 {itensOrcamento.map((item, index) => (
                                     <tr key={index}>
-                                        <td>{item.itemNome}</td>
+                                        <td><strong>{item.itemNome}</strong></td>
+                                        <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.descricao || ''}>
+                                            {item.descricao || '-'}
+                                        </td>
+                                        <td>
+                                            <span style={{ 
+                                                backgroundColor: '#e3f2fd', 
+                                                padding: '4px 8px', 
+                                                borderRadius: '4px',
+                                                fontSize: '12px',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {item.tipoUnitario === 'UNIDADE' ? 'un' : 
+                                                 item.tipoUnitario === 'METRO_CUBICO' ? 'm³' :
+                                                 item.tipoUnitario === 'METRO_QUADRADO' ? 'm²' :
+                                                 item.tipoUnitario === 'METRO' ? 'm' :
+                                                 item.tipoUnitario === 'CENTIMETRO' ? 'cm' :
+                                                 item.tipoUnitario === 'QUILOGRAMA' ? 'kg' :
+                                                 item.tipoUnitario === 'GRAMA' ? 'g' :
+                                                 item.tipoUnitario === 'LITRO' ? 'L' :
+                                                 item.tipoUnitario === 'MILILITRO' ? 'ml' :
+                                                 item.tipoUnitario === 'PACOTE' ? 'pct' :
+                                                 item.tipoUnitario === 'CAIXA' ? 'cx' :
+                                                 item.tipoUnitario === 'GALAO' ? 'gal' :
+                                                 item.tipoUnitario === 'TAMBOR' ? 'tmb' :
+                                                 item.tipoUnitario === 'ROLO' ? 'rl' :
+                                                 item.tipoUnitario === 'PAR' ? 'par' : 'un'}
+                                            </span>
+                                        </td>
+                                        <td>{formatarValor(item.precoMedio)}</td>
+                                        <td style={{ textDecoration: item.valorComDesconto ? 'line-through' : 'none', color: item.valorComDesconto ? '#999' : '#000' }}>
+                                            {formatarValor(item.valorUnitarioOriginal || item.valorUnitario)}
+                                        </td>
+                                        <td style={{ fontWeight: 'bold', color: item.valorComDesconto ? '#4CAF50' : '#000' }}>
+                                            {item.valorComDesconto ? formatarValor(item.valorComDesconto) : formatarValor(item.valorUnitario)}
+                                        </td>
                                         <td>
                                             {camposDesabilitados ? (
                                                 item.quantidade
@@ -1155,8 +1279,7 @@ function OrcamentoCadastro() {
                                                 />
                                             )}
                                         </td>
-                                        <td>{formatarValor(item.valorUnitario)}</td>
-                                        <td>{formatarValor(item.valorTotal)}</td>
+                                        <td style={{ fontWeight: 'bold' }}>{formatarValor(item.valorTotal)}</td>
                                         {!camposDesabilitados && (
                                             <td>
                                                 <button

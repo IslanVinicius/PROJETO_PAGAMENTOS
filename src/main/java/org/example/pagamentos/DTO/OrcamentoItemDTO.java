@@ -13,6 +13,11 @@ public class OrcamentoItemDTO {
     private Long idOrcamentoItem;
     private Long itemId;
     private String itemNome;
+    private String descricao;
+    private String tipoUnitario;
+    private Float precoMedio;
+    private Float valorUnitarioOriginal;
+    private Float valorComDesconto;
     private Integer quantidade;
     private Float valorUnitario;
     private Float valorTotal;
