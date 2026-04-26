@@ -39,6 +39,9 @@ public class OrcamentoCompletoDTO {
     // Itens
     private List<OrcamentoItemDTO> itens;
     
+    // Imagens
+    private List<OrcamentoImagemDTO> imagens;
+    
     // Usuário solicitante
     private String nomeSolicitante;
     private String usernameSolicitante;
@@ -128,6 +131,20 @@ public class OrcamentoCompletoDTO {
                     
                     return itemDTO;
                 })
+                .toList());
+        }
+        
+        // Imagens
+        if (orcamento.getImagens() != null) {
+            dto.setImagens(orcamento.getImagens().stream()
+                .map(imagem -> new OrcamentoImagemDTO(
+                    imagem.getIdImagem(),
+                    imagem.getNomeArquivo(),
+                    imagem.getTipoArquivo(),
+                    imagem.getTamanhoArquivo(),
+                    imagem.getCaminhoArquivo(),
+                    imagem.getDataUpload()
+                ))
                 .toList());
         }
         

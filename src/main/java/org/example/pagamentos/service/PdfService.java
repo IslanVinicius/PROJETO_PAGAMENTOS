@@ -1,7 +1,6 @@
 package org.example.pagamentos.service;
 
 import com.itextpdf.io.font.constants.StandardFonts;
-import com.itextpdf.io.image.ImageData;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.*;
 import com.itextpdf.kernel.font.PdfFont;
@@ -18,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
@@ -25,144 +25,142 @@ import java.util.Locale;
 @Service
 public class PdfService {
 
+    private final FileUploadService fileUploadService;
+
+    public PdfService(FileUploadService fileUploadService) {
+        this.fileUploadService = fileUploadService;
+    }
+
     private static final Color PRIMARY_COLOR = new DeviceRgb(128, 20, 40);
     private static final Color DARK_COLOR = new DeviceRgb(40, 10, 15);
     private static final Color LIGHT_GRAY = new DeviceRgb(245, 245, 245);
     private static final Color BORDER_COLOR = new DeviceRgb(200, 200, 200);
 
-    public byte[] gerarOrcamentoPdf(OrcamentoCompletoDTO orcamento) throws Exception {
+    public byte[] gerarOrcamentoPdf(OrcamentoCompletoDTO o) throws Exception {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(baos);
-        PdfDocument pdf = new PdfDocument(writer);
-        Document document = new Document(pdf, PageSize.A4);
+        PdfDocument pdf = new PdfDocument(new PdfWriter(baos));
+        Document doc = new Document(pdf, PageSize.A4);
 
-        document.setMargins(15, 15, 15, 15);
+        doc.setMargins(15, 15, 15, 15);
 
-        PdfFont fontBold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+        PdfFont bold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
         PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
 
-        Table mainContainer = new Table(UnitValue.createPercentArray(1))
-                .setWidth(UnitValue.createPercentValue(100))
+        Table container = new Table(1)
+                .useAllAvailableWidth()
                 .setBorder(new SolidBorder(BORDER_COLOR, 1))
                 .setPadding(10);
 
-        Cell containerCell = new Cell().setBorder(Border.NO_BORDER).setPadding(0);
+        Cell cell = new Cell().setBorder(Border.NO_BORDER);
+
         Div content = new Div();
 
-        adicionarCabecalho(content, orcamento, fontBold, font);
-        adicionarPrestadorBanco(content, orcamento, fontBold, font);
-        adicionarEmpresa(content, orcamento, fontBold, font);
-        adicionarItens(content, orcamento, fontBold, font);
-        adicionarDescricaoEPagamento(content, orcamento, fontBold, font);
-        adicionarResumo(content, orcamento, fontBold, font);
+        adicionarCabecalho(content, o, bold, font);
+        adicionarPrestadorBanco(content, o, bold, font);
+        adicionarEmpresa(content, o, bold, font);
+        adicionarItens(content, o, bold, font);
+        adicionarDescricaoPagamento(content, o, bold, font);
+        adicionarResumo(content, o, bold, font);
+        adicionarImagens(content, o, bold, font);
 
-        containerCell.add(content);
-        mainContainer.addCell(containerCell);
-        document.add(mainContainer);
+        cell.add(content);
+        container.addCell(cell);
+        doc.add(container);
 
-        document.close();
+        doc.close();
         return baos.toByteArray();
     }
 
-    private void adicionarCabecalho(Div container, OrcamentoCompletoDTO o,
+    // ================= CABEÇALHO =================
+    private void adicionarCabecalho(Div c, OrcamentoCompletoDTO o,
                                     PdfFont bold, PdfFont font) {
 
-        Table t = new Table(new float[]{0.7f, 2, 1}).useAllAvailableWidth();
-        t.setMarginBottom(4);
+        Table t = new Table(new float[]{1, 2, 1}).useAllAvailableWidth();
 
         try {
             Image logo = new Image(ImageDataFactory.create(
                     new ClassPathResource("images/logo.png").getURL()))
-                    .scaleToFit(50, 25);
-            t.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER).setPadding(0));
+                    .scaleToFit(80, 40); // 🔥 AUMENTADO
+
+            t.addCell(new Cell().add(logo).setBorder(Border.NO_BORDER));
         } catch (Exception e) {
-            t.addCell(new Cell().add(new Paragraph("LOGO")).setBorder(Border.NO_BORDER));
+            t.addCell(new Cell().add(new Paragraph("LOGO")));
         }
 
-        Paragraph empresa = new Paragraph()
-                .add(new Text(o.getRazaoEmpresa()).setFont(bold).setFontSize(11))
-                .add(new Text(" | CNPJ: " + o.getCnpjEmpresa()).setFont(font).setFontSize(8))
-                .setMargin(0);
-
-        t.addCell(new Cell().add(empresa).setBorder(Border.NO_BORDER).setPadding(0));
+        t.addCell(new Cell().add(new Paragraph()
+                        .add(new Text(o.getRazaoEmpresa()).setFont(bold).setFontSize(11))
+                        .add(new Text(" | CNPJ: " + o.getCnpjEmpresa()).setFont(font).setFontSize(8)))
+                .setBorder(Border.NO_BORDER));
 
         String data = o.getMovimento() != null ?
                 o.getMovimento().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
 
-        Paragraph direita = new Paragraph()
-                .add(new Text("Nº " + o.getOrcamentoID()).setFont(bold).setFontSize(9))
-                .add(new Text(" | " + data).setFont(font).setFontSize(8))
-                .setTextAlignment(TextAlignment.RIGHT)
-                .setMargin(0);
+        t.addCell(new Cell().add(new Paragraph()
+                        .add(new Text("Nº " + o.getOrcamentoID()).setFont(bold))
+                        .add(new Text(" | " + data).setFont(font))
+                        .setTextAlignment(TextAlignment.RIGHT))
+                .setBorder(Border.NO_BORDER));
 
-        t.addCell(new Cell().add(direita).setBorder(Border.NO_BORDER).setPadding(0));
-
-        container.add(t);
-        container.add(new LineSeparator(new SolidLine(0.5f)).setMarginBottom(5));
+        c.add(t);
+        c.add(new LineSeparator(new SolidLine(0.5f)));
     }
 
-    private void adicionarPrestadorBanco(Div container, OrcamentoCompletoDTO o,
+    // ================= PRESTADOR =================
+    private void adicionarPrestadorBanco(Div c, OrcamentoCompletoDTO o,
                                          PdfFont bold, PdfFont font) {
 
-        Table t = new Table(2).useAllAvailableWidth().setMarginBottom(5);
+        Table t = new Table(2).useAllAvailableWidth();
 
-        String prestador = "PRESTADOR: " + o.getNomePrestador() +
-                " | CPF: " + o.getCpfPrestador();
-
-        t.addCell(cellTexto(prestador, bold, font));
+        t.addCell(cellTexto("PRESTADOR: " + o.getNomePrestador() +
+                " | CPF: " + o.getCpfPrestador(), font));
 
         var b = o.getDadosBancarios();
 
         String banco = b != null ?
                 "BANCO: " + b.getBanco() +
-                " | Ag: " + b.getAgencia() +
-                " | CC: " + b.getConta() +
-                " | PIX: " + b.getChavePix()
+                        " | Ag: " + b.getAgencia() +
+                        " | CC: " + b.getConta() +
+                        " | PIX: " + b.getChavePix()
                 : "Dados bancários não informados";
 
-        t.addCell(cellTexto(banco, bold, font));
+        t.addCell(cellTexto(banco, font));
 
-        container.add(t);
+        c.add(t);
     }
 
-    private void adicionarEmpresa(Div container, OrcamentoCompletoDTO o,
+    // ================= EMPRESA =================
+    private void adicionarEmpresa(Div c, OrcamentoCompletoDTO o,
                                   PdfFont bold, PdfFont font) {
-
-        Table t = new Table(1).useAllAvailableWidth().setMarginBottom(5);
 
         String endereco = o.getEnderecoEmpresa() != null ?
                 o.getEnderecoEmpresa().getLogradouro() + ", " +
                         o.getEnderecoEmpresa().getCidade()
                 : "Endereço não informado";
 
-        String linha = "EMPRESA: " + o.getRazaoEmpresa() +
+        c.add(cellTexto("EMPRESA: " + o.getRazaoEmpresa() +
                 " | CNPJ: " + o.getCnpjEmpresa() +
-                " | " + endereco;
-
-        t.addCell(cellTexto(linha, bold, font));
-        container.add(t);
+                " | " + endereco, font));
     }
 
-    private void adicionarItens(Div container, OrcamentoCompletoDTO o,
+    // ================= ITENS =================
+    private void adicionarItens(Div c, OrcamentoCompletoDTO o,
                                 PdfFont bold, PdfFont font) {
 
-        container.add(new Paragraph("ITENS DO ORÇAMENTO")
-                .setFont(bold).setFontSize(9).setFontColor(PRIMARY_COLOR));
+        c.add(new Paragraph("ITENS DO ORÇAMENTO")
+                .setFont(bold).setFontColor(PRIMARY_COLOR).setFontSize(9));
 
-        Table t = new Table(new float[]{8, 42, 15, 12, 23})
-                .useAllAvailableWidth()
-                .setMarginBottom(5);
+        Table t = new Table(new float[]{8, 35, 15, 10, 15, 17})
+                .useAllAvailableWidth();
 
-        String[] headers = {"#", "DESCRIÇÃO", "VALOR", "QTD", "TOTAL"};
+        String[] headers = {"#", "DESCRIÇÃO", "VALOR UNIT.", "QTD", "DESCONTO UN.", "TOTAL"};
 
         for (String h : headers) {
             t.addHeaderCell(new Cell()
                     .add(new Paragraph(h).setFont(bold).setFontSize(7).setFontColor(ColorConstants.WHITE))
                     .setBackgroundColor(PRIMARY_COLOR)
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setPadding(3)
-                    .setBorder(Border.NO_BORDER));
+                    .setBorder(new SolidBorder(ColorConstants.WHITE, 0.5f)) // 🔥 LINHA
+                    .setTextAlignment(TextAlignment.CENTER));
         }
 
         DecimalFormat df = new DecimalFormat("#,##0.00", new DecimalFormatSymbols(new Locale("pt", "BR")));
@@ -172,77 +170,216 @@ public class PdfService {
 
             t.addCell(cellTabela(String.valueOf(i++), font));
             t.addCell(cellTabela(item.getItemNome() + " - " + item.getDescricao(), font));
-            t.addCell(cellTabela("R$ " + df.format(item.getValorUnitario()), font));
+            
+            // Valor unitário original (sem desconto)
+            t.addCell(cellTabela("R$ " + df.format(item.getValorUnitarioOriginal()), font));
+            
             t.addCell(cellTabela(String.valueOf(item.getQuantidade()), font));
+            
+            // Coluna de desconto do item
+            Float descontoItem = null;
+            if (item.getValorComDesconto() != null && !item.getValorUnitarioOriginal().equals(item.getValorComDesconto())) {
+                descontoItem = item.getValorUnitarioOriginal() - item.getValorComDesconto();
+            }
+            String descontoTexto = (descontoItem != null && descontoItem > 0) ? 
+                "R$ " + df.format(descontoItem) : "-";
+            t.addCell(cellTabela(descontoTexto, font));
+            
             t.addCell(cellTabela("R$ " + df.format(item.getValorTotal()), font));
         }
 
-        container.add(t);
+        c.add(t);
     }
 
-    private void adicionarDescricaoEPagamento(Div container, OrcamentoCompletoDTO o,
-                                              PdfFont bold, PdfFont font) {
+    // ================= DESCRIÇÃO + PAGAMENTO =================
+    private void adicionarDescricaoPagamento(Div c, OrcamentoCompletoDTO o,
+                                             PdfFont bold, PdfFont font) {
 
-        Table t = new Table(new float[]{2, 1}).useAllAvailableWidth().setMarginBottom(5);
+        Table t = new Table(new float[]{2, 1}).useAllAvailableWidth();
 
-        Cell desc = new Cell().setPadding(4)
-                .add(new Paragraph("DESCRIÇÃO").setFont(bold).setFontSize(9).setFontColor(PRIMARY_COLOR))
-                .add(new Paragraph(o.getDescricao()).setFont(font).setFontSize(7));
 
-        Cell pag = new Cell().setPadding(4)
+        t.addCell(new Cell()
+                .add(new Paragraph("DESCRIÇÃO").setFont(bold).setFontColor(PRIMARY_COLOR).setFontSize(9))
+                .add(new Paragraph(o.getDescricao()).setFont(font).setFontSize(7))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f)));
+
+        t.addCell(new Cell()
+                .add(new Paragraph("PAGAMENTO").setFont(bold).setFontColor(PRIMARY_COLOR).setFontSize(9))
+                .add(new Paragraph(o.getTipoPagamento()).setFont(font).setFontSize(7))
                 .setBackgroundColor(LIGHT_GRAY)
-                .add(new Paragraph("PAGAMENTO").setFont(bold).setFontSize(9).setFontColor(PRIMARY_COLOR))
-                .add(new Paragraph(o.getTipoPagamento()).setFont(font).setFontSize(8));
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f)));
 
-        t.addCell(desc);
-        t.addCell(pag);
-
-        container.add(t);
+        c.add(t);
     }
 
-    private void adicionarResumo(Div container, OrcamentoCompletoDTO o,
+    // ================= RESUMO =================
+    private void adicionarResumo(Div c, OrcamentoCompletoDTO o,
                                  PdfFont bold, PdfFont font) {
 
         DecimalFormat df = new DecimalFormat("#,##0.00", new DecimalFormatSymbols(new Locale("pt", "BR")));
 
-        container.add(new Paragraph("RESUMO FINANCEIRO")
-                .setFont(bold).setFontSize(9).setFontColor(PRIMARY_COLOR));
+        c.add(new Paragraph("RESUMO FINANCEIRO")
+                .setFont(bold).setFontColor(PRIMARY_COLOR).setFontSize(9));
+
+        // Calcular totais
+        // Total bruto (soma dos valores originais sem nenhum desconto)
+        Float totalBruto = 0f;
+        Float totalDescontosItens = 0f;
+        
+        if (o.getItens() != null) {
+            for (OrcamentoItemDTO item : o.getItens()) {
+                // Total bruto = quantidade * valor unitário original
+                totalBruto += item.getQuantidade() * item.getValorUnitarioOriginal();
+                
+                // Calcular desconto do item se houver
+                if (item.getValorComDesconto() != null && !item.getValorUnitarioOriginal().equals(item.getValorComDesconto())) {
+                    Float descontoItem = item.getValorUnitarioOriginal() - item.getValorComDesconto();
+                    totalDescontosItens += descontoItem * item.getQuantidade();
+                }
+            }
+        }
+        
+        Float descontoAplicado = o.getDesconto() != null ? o.getDesconto() : 0f;
+        Float descontoTotal = totalDescontosItens + descontoAplicado;
 
         Table t = new Table(2).useAllAvailableWidth();
 
-        t.addCell(box("Total Itens:", "R$ " + df.format(o.getValorTotalItens()), bold, font, PRIMARY_COLOR));
-        t.addCell(box("Desconto:", "R$ " + df.format(o.getDesconto()), font, font, LIGHT_GRAY));
-        t.addCell(box("VALOR FINAL:", "R$ " + df.format(o.getValorFinal()), bold, bold, DARK_COLOR, true));
+        // Linha 1: Total Bruto
+        t.addCell(new Cell()
+                .add(new Paragraph("Total Itens (bruto):").setFont(font).setFontSize(9))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                .setPadding(5));
+        t.addCell(new Cell()
+                .add(new Paragraph("R$ " + df.format(totalBruto)).setFont(bold).setFontSize(9))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                .setPadding(5)
+                .setTextAlignment(TextAlignment.RIGHT));
 
-        container.add(t);
+        // Seção de Descontos
+        t.addCell(new Cell()
+                .add(new Paragraph("Desconto Itens:").setFont(font).setFontSize(9))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                .setPadding(5));
+        t.addCell(new Cell()
+                .add(new Paragraph("R$ " + df.format(totalDescontosItens)).setFont(font).setFontSize(9))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                .setPadding(5)
+                .setTextAlignment(TextAlignment.RIGHT));
+
+        t.addCell(new Cell()
+                .add(new Paragraph("Desconto Aplicado:").setFont(font).setFontSize(9))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                .setPadding(5));
+        t.addCell(new Cell()
+                .add(new Paragraph("R$ " + df.format(descontoAplicado)).setFont(font).setFontSize(9))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                .setPadding(5)
+                .setTextAlignment(TextAlignment.RIGHT));
+
+        // Desconto Total (destaque)
+        t.addCell(new Cell()
+                .add(new Paragraph("Desconto Total:").setFont(bold).setFontSize(10).setFontColor(ColorConstants.WHITE))
+                .setBackgroundColor(PRIMARY_COLOR)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(5));
+        t.addCell(new Cell()
+                .add(new Paragraph("R$ " + df.format(descontoTotal)).setFont(bold).setFontSize(11).setFontColor(ColorConstants.WHITE))
+                .setBackgroundColor(PRIMARY_COLOR)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(5)
+                .setTextAlignment(TextAlignment.RIGHT));
+
+        // Linha final: VALOR FINAL (destaque máximo)
+        t.addCell(new Cell()
+                .add(new Paragraph("VALOR FINAL:").setFont(bold).setFontSize(10).setFontColor(ColorConstants.WHITE))
+                .setBackgroundColor(DARK_COLOR)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(5));
+        t.addCell(new Cell()
+                .add(new Paragraph("R$ " + df.format(o.getValorFinal())).setFont(bold).setFontSize(12).setFontColor(ColorConstants.WHITE))
+                .setBackgroundColor(DARK_COLOR)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(5)
+                .setTextAlignment(TextAlignment.RIGHT));
+
+        c.add(t);
     }
 
-    private Cell box(String label, String valor, PdfFont fontLabel, PdfFont fontValor, Color cor) {
-        return box(label, valor, fontLabel, fontValor, cor, false);
-    }
+    // ================= HELPERS =================
+    private Cell box(String label, String valor,
+                     PdfFont fontLabel, PdfFont fontValor,
+                     Color cor, boolean big) {
 
-    private Cell box(String label, String valor, PdfFont fontLabel, PdfFont fontValor, Color cor, boolean destaque) {
-
-        Paragraph p = new Paragraph()
-                .add(new Text(label + " ").setFont(fontLabel).setFontSize(8))
-                .add(new Text(valor).setFont(fontValor).setFontSize(destaque ? 12 : 9));
-
-        return new Cell().add(p)
+        return new Cell().add(new Paragraph()
+                        .add(new Text(label + " ").setFont(fontLabel).setFontSize(8))
+                        .add(new Text(valor).setFont(fontValor).setFontSize(big ? 12 : 9)))
                 .setBackgroundColor(cor)
                 .setFontColor(ColorConstants.WHITE)
-                .setPadding(4)
-                .setBorder(Border.NO_BORDER);
+                .setBorder(Border.NO_BORDER)
+                .setPadding(5);
     }
 
-    private Cell cellTexto(String texto, PdfFont bold, PdfFont font) {
-        return new Cell().add(new Paragraph(texto).setFont(font).setFontSize(8))
+    private Cell cellTexto(String txt, PdfFont font) {
+        return new Cell().add(new Paragraph(txt).setFont(font).setFontSize(8))
                 .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
                 .setPadding(4);
     }
 
-    private Cell cellTabela(String texto, PdfFont font) {
-        return new Cell().add(new Paragraph(texto).setFont(font).setFontSize(7).setMargin(0))
-                .setPadding(3)
-                .setBorder(Border.NO_BORDER);
+    private Cell cellTabela(String txt, PdfFont font) {
+        return new Cell().add(new Paragraph(txt).setFont(font).setFontSize(7))
+                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f)) // 🔥 GRID
+                .setPadding(3);
+    }
+
+    // ================= IMAGENS =================
+    private void adicionarImagens(Div c, OrcamentoCompletoDTO o,
+                                  PdfFont bold, PdfFont font) {
+        
+        if (o.getImagens() == null || o.getImagens().isEmpty()) {
+            return;
+        }
+
+        c.add(new Paragraph("IMAGENS ANEXADAS")
+                .setFont(bold).setFontColor(PRIMARY_COLOR)
+                .setFontSize(9)
+                .setMarginTop(10));
+
+        // Criar tabela para as imagens (3 colunas)
+        int numColunas = 3;
+        Table t = new Table(numColunas).useAllAvailableWidth();
+
+        try {
+            for (OrcamentoImagemDTO imagem : o.getImagens()) {
+                try {
+                    // Carregar imagem usando FileUploadService
+                    byte[] imagemBytes = fileUploadService.carregarArquivo(imagem.getUrlImagem());
+                    if (imagemBytes != null && imagemBytes.length > 0) {
+                        Image pdfImage = new Image(ImageDataFactory.create(imagemBytes))
+                                .scaleToFit(150, 150);
+                        
+                        Cell cell = new Cell()
+                                .add(pdfImage)
+                                .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                                .setPadding(5)
+                                .setTextAlignment(TextAlignment.CENTER);
+                        
+                        t.addCell(cell);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erro ao carregar imagem " + imagem.getNomeArquivo() + ": " + e.getMessage());
+                    // Se não conseguir carregar a imagem, adiciona célula com nome
+                    t.addCell(new Cell()
+                            .add(new Paragraph("Imagem: " + imagem.getNomeArquivo())
+                                    .setFont(font).setFontSize(6))
+                            .setBorder(new SolidBorder(BORDER_COLOR, 0.5f))
+                            .setPadding(5));
+                }
+            }
+        } catch (Exception e) {
+            c.add(new Paragraph("Erro ao carregar imagens: " + e.getMessage())
+                    .setFont(font).setFontSize(8).setFontColor(ColorConstants.RED));
+        }
+
+        c.add(t);
     }
 }
