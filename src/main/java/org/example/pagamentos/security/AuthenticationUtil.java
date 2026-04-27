@@ -44,5 +44,19 @@ public class AuthenticationUtil {
             return false;
         }
     }
+
+    /**
+     * Verifica se o usuário autenticado é ADMIN ou EXPANSAO (visão completa dos dados)
+     * @return true se for ADMIN ou EXPANSAO, false caso contrário
+     */
+    public boolean hasFullDataAccess() {
+        try {
+            Usuario usuario = getUsuarioAutenticado();
+            String role = usuario.getRole().name();
+            return role.equals("ADMIN") || role.equals("EXPANSAO");
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
 }
 

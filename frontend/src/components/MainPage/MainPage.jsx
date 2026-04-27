@@ -36,7 +36,8 @@ function MainPage() {
         ],
         ROLE_SOLICITANTE: ["prestador", "orcamento"],
         ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao", "grupoItens", "itens", "enderecos"],
-        ROLE_APROVADOR: ["aprovacao"]
+        ROLE_APROVADOR: ["aprovacao"],
+        ROLE_EXPANSAO: ["empresa", "enderecos", "prestador", "dadosBancarios", "grupoItens", "itens", "orcamento"]
     };
 
     const [activePage, setActivePage] = useState("");

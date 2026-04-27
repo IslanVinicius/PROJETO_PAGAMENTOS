@@ -25,8 +25,8 @@ public class PrestadorService {
     public List<PrestadorDTO> procurarTodos(){
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
-        // ADMIN vê todos, SOLICITANTE vê apenas seus
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todos, outros veem apenas seus
+        if (authenticationUtil.hasFullDataAccess()) {
             return prestadorRepository
                     .findAll()
                     .stream()
@@ -48,8 +48,8 @@ public class PrestadorService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Prestador nao encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o prestador
-        if (!authenticationUtil.isAdmin() && !prestadorModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o prestador
+        if (!authenticationUtil.hasFullDataAccess() && !prestadorModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar este prestador");
         }
 
@@ -74,8 +74,8 @@ public class PrestadorService {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Prestador não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o prestador
-        if (!authenticationUtil.isAdmin() && !prestadorModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o prestador
+        if (!authenticationUtil.hasFullDataAccess() && !prestadorModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar este prestador");
         }
 
@@ -93,8 +93,8 @@ public class PrestadorService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Prestador nao encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o prestador
-        if (!authenticationUtil.isAdmin() && !prestador.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o prestador
+        if (!authenticationUtil.hasFullDataAccess() && !prestador.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar este prestador");
         }
 

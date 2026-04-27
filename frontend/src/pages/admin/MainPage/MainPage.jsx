@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "@components/layout/Sidebar";
+import Sidebar from "./Sidebar";
 import EmpresaCadastro from "./EmpresaCadastro";
 import PrestadorCadastro from "./PrestadorCadastro";
 import DadosBancariosCadastro from "./DadosBancariosCadastro";
@@ -10,8 +10,9 @@ import AprovacaoCadastro from "./AprovacaoCadastro";
 import UserCadastro from "./UserCadastro.jsx";
 import GrupoItemCadastro from "./GrupoItemCadastro";
 import ItemCadastro from "./ItemCadastro";
+import EnderecoCadastro from "../../../components/MainPage/EnderecoCadastro";
 import styles from "./MainPage.module.css";
-import { useAuth } from "@contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 function MainPage() {
     const { user, logout } = useAuth();
@@ -29,11 +30,13 @@ function MainPage() {
             "aprovacao",
             "usuario",
             "grupoItens",
-            "itens"
+            "itens",
+            "enderecos"
         ],
         ROLE_SOLICITANTE: ["prestador", "orcamento"],
-        ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao", "grupoItens", "itens"],
-        ROLE_APROVADOR: ["aprovacao"]
+        ROLE_ESCRITORIO: ["orcamento", "pedidoAprovacao", "grupoItens", "itens", "enderecos"],
+        ROLE_APROVADOR: ["aprovacao"],
+        ROLE_EXPANSAO: ["empresa", "enderecos", "prestador", "dadosBancarios", "grupoItens", "itens", "orcamento"]
     };
 
     const [activePage, setActivePage] = useState("");
@@ -89,6 +92,9 @@ function MainPage() {
 
             case "itens":
                 return <ItemCadastro />;
+
+            case "enderecos":
+                return <EnderecoCadastro />;
 
             default:
                 return (

@@ -4,5 +4,6 @@ public enum Role {
     ADMIN,
     SOLICITANTE,
     ESCRITORIO,
-    APROVADOR
+    APROVADOR,
+    EXPANSAO
 }

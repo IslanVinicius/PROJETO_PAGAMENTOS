@@ -63,8 +63,8 @@ public class EnderecoService {
         
         List<EnderecoDTO> listaDTO;
         
-        // ADMIN vê todos, SOLICITANTE vê apenas seus
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todos, outros veem apenas seus
+        if (authenticationUtil.hasFullDataAccess()) {
             listaDTO = enderecoRepository
                     .findAll()
                     .stream()
@@ -92,7 +92,7 @@ public class EnderecoService {
                 .findById(idEmpresa)
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
-        if (!authenticationUtil.isAdmin() && 
+        if (!authenticationUtil.hasFullDataAccess() && 
             !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar os endereços desta empresa");
         }
@@ -116,7 +116,7 @@ public class EnderecoService {
                 .findById(enderecoRequest.getIdEmpresa())
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
-        if (!authenticationUtil.isAdmin() &&
+        if (!authenticationUtil.hasFullDataAccess() &&
             !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para criar endereços nesta empresa");
         }
@@ -150,8 +150,8 @@ public class EnderecoService {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o endereço
-        if (!authenticationUtil.isAdmin() && 
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o endereço
+        if (!authenticationUtil.hasFullDataAccess() && 
             !endereco.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar este endereço");
         }
@@ -161,7 +161,7 @@ public class EnderecoService {
                 .findById(enderecoRequest.getIdEmpresa())
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
-        if (!authenticationUtil.isAdmin() && 
+        if (!authenticationUtil.hasFullDataAccess() && 
             !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para associar este endereço a esta empresa");
         }
@@ -189,8 +189,8 @@ public class EnderecoService {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o endereço
-        if (!authenticationUtil.isAdmin() && 
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o endereço
+        if (!authenticationUtil.hasFullDataAccess() && 
             !endereco.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar este endereço");
         }

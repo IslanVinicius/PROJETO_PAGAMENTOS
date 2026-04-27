@@ -24,6 +24,7 @@ function AppRoutes() {
       <Route path="/solicitante" element={<PrivateRoute><MainPage /></PrivateRoute>} />
       <Route path="/escritorio" element={<PrivateRoute><MainPage /></PrivateRoute>} />
       <Route path="/aprovador" element={<PrivateRoute><MainPage /></PrivateRoute>} />
+      <Route path="/expansao" element={<PrivateRoute><MainPage /></PrivateRoute>} />
       <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );

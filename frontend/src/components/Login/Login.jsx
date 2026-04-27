@@ -37,6 +37,7 @@ function Login() {
       else if (role === "ROLE_SOLICITANTE") navigate("/solicitante");
       else if (role === "ROLE_ESCRITORIO") navigate("/escritorio");
       else if (role === "ROLE_APROVADOR") navigate("/aprovador");
+      else if (role === "ROLE_EXPANSAO") navigate("/expansao");
       else navigate("/");
     } catch (err) {
       setError(err.message || "Erro ao fazer login. Tente novamente.");

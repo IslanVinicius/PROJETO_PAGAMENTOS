@@ -47,8 +47,8 @@ public class GrupoItemService {
     public List<GrupoItemDTO> listarTodos() {
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
-        // ADMIN vê todos, SOLICITANTE vê apenas seus
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todos, outros veem apenas seus
+        if (authenticationUtil.hasFullDataAccess()) {
             return grupoItemRepository.findAll()
                     .stream()
                     .map(this::toDTO)
@@ -68,8 +68,8 @@ public class GrupoItemService {
                 .findById(idGrupo)
                 .orElseThrow(() -> new RuntimeException("Grupo de itens não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o grupo
-        if (!authenticationUtil.isAdmin() && !grupoItemModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o grupo
+        if (!authenticationUtil.hasFullDataAccess() && !grupoItemModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar este grupo de itens");
         }
 
@@ -83,8 +83,8 @@ public class GrupoItemService {
                 .findById(idGrupo)
                 .orElseThrow(() -> new RuntimeException("Grupo de itens não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o grupo
-        if (!authenticationUtil.isAdmin() && !grupoItemModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o grupo
+        if (!authenticationUtil.hasFullDataAccess() && !grupoItemModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar este grupo de itens");
         }
 
@@ -101,8 +101,8 @@ public class GrupoItemService {
                 .findById(idGrupo)
                 .orElseThrow(() -> new RuntimeException("Grupo de itens não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o grupo
-        if (!authenticationUtil.isAdmin() && !grupoItemModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o grupo
+        if (!authenticationUtil.hasFullDataAccess() && !grupoItemModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar este grupo de itens");
         }
 
@@ -115,7 +115,7 @@ public class GrupoItemService {
         List<GrupoItemModel> grupos = grupoItemRepository.findByNomeContainingIgnoreCase(nome);
 
         // Filtra por permissão
-        if (authenticationUtil.isAdmin()) {
+        if (authenticationUtil.hasFullDataAccess()) {
             return grupos.stream()
                     .map(this::toDTO)
                     .toList();

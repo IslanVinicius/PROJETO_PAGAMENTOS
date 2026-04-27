@@ -114,8 +114,8 @@ public class OrcamentoService {
     public List<OrcamentoDTO> listarTodos() {
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
         
-        // ADMIN vê todos, SOLICITANTE vê apenas seus
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todos, outros veem apenas seus
+        if (authenticationUtil.hasFullDataAccess()) {
             return orcamentoRepository.findAll()
                                       .stream()
                                       .map(this::toDTO)
@@ -143,8 +143,8 @@ public class OrcamentoService {
                                         .findById(orcamentoID)
                                         .orElseThrow(()-> new RuntimeException("Orcamento não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o orçamento
-        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o orçamento
+        if (!authenticationUtil.hasFullDataAccess() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar este orçamento");
         }
 
@@ -158,8 +158,8 @@ public class OrcamentoService {
                 .findById(orcamentoID)
                 .orElseThrow(()-> new RuntimeException("Orcamento não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o orçamento
-        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o orçamento
+        if (!authenticationUtil.hasFullDataAccess() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar este orçamento");
         }
 
@@ -174,8 +174,8 @@ public class OrcamentoService {
                 .findById(orcamentoID)
                 .orElseThrow(()-> new RuntimeException("Orcamento não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o orçamento
-        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o orçamento
+        if (!authenticationUtil.hasFullDataAccess() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar este orçamento");
         }
 
@@ -285,8 +285,8 @@ public class OrcamentoService {
         OrcamentoModel orcamentoModel = orcamentoRepository.findById(orcamentoID)
                 .orElseThrow(() -> new RuntimeException("Orçamento não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o orçamento
-        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o orçamento
+        if (!authenticationUtil.hasFullDataAccess() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para adicionar imagens a este orçamento");
         }
 
@@ -340,8 +340,8 @@ public class OrcamentoService {
         OrcamentoModel orcamentoModel = orcamentoRepository.findById(orcamentoID)
                 .orElseThrow(() -> new RuntimeException("Orçamento não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o orçamento
-        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o orçamento
+        if (!authenticationUtil.hasFullDataAccess() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar imagens deste orçamento");
         }
 
@@ -388,8 +388,8 @@ public class OrcamentoService {
                 .findById(orcamentoID)
                 .orElseThrow(() -> new RuntimeException("Orçamento não encontrado"));
 
-        // Verifica se o usuário é ADMIN ou se criou o orçamento
-        if (!authenticationUtil.isAdmin() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou o orçamento
+        if (!authenticationUtil.hasFullDataAccess() && !orcamentoModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar este orçamento");
         }
 

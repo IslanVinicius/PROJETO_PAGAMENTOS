@@ -46,13 +46,17 @@ public class SecurityConfig {
 
                         // 🔐 somente ADMIN pode acessar
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/orcamento/gerar").hasAnyRole("ADMIN", "SOLICITANTE", "ESCRITORIO")
+                        .requestMatchers("/api/orcamento/gerar").hasAnyRole("ADMIN", "SOLICITANTE", "ESCRITORIO", "EXPANSAO")
                         .requestMatchers("/api/orcamento/aprovar").hasRole("APROVADOR")
-                        .requestMatchers("/api/prestador/**").hasAnyRole("ADMIN", "SOLICITANTE")
+                        .requestMatchers("/api/prestador/**").hasAnyRole("ADMIN", "SOLICITANTE", "EXPANSAO")
 
-                        // 🔐 Grupos de Itens e Itens - ADMIN e ESCRITORIO
-                        .requestMatchers("/api/grupo-itens/**").hasAnyRole("ADMIN", "ESCRITORIO")
-                        .requestMatchers("/api/itens/**").hasAnyRole("ADMIN", "ESCRITORIO")
+                        // 🔐 Grupos de Itens e Itens - ADMIN, ESCRITORIO e EXPANSAO
+                        .requestMatchers("/api/grupo-itens/**").hasAnyRole("ADMIN", "ESCRITORIO", "EXPANSAO")
+                        .requestMatchers("/api/itens/**").hasAnyRole("ADMIN", "ESCRITORIO", "EXPANSAO")
+
+                        // 🔐 Empresas e Endereços - ADMIN e EXPANSAO
+                        .requestMatchers("/api/empresa/**").hasAnyRole("ADMIN", "EXPANSAO")
+                        .requestMatchers("/api/endereco/**").hasAnyRole("ADMIN", "ESCRITORIO", "EXPANSAO")
 
                         // 🔐 todo resto precisa estar autenticado
                         .anyRequest().authenticated()

@@ -42,8 +42,8 @@ public class EmpresaService {
         
         List<EmpresaDTO> listaDTO;
         
-        // ADMIN vê todas, SOLICITANTE vê apenas suas
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todas, outros veem apenas suas
+        if (authenticationUtil.hasFullDataAccess()) {
             listaDTO = empresaRespository
                     .findAll()
                     .stream()
@@ -80,8 +80,8 @@ public class EmpresaService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Empresa não encontrada"));
 
-        // Verifica se o usuário é ADMIN ou se criou a empresa
-        if (!authenticationUtil.isAdmin() && !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou a empresa
+        if (!authenticationUtil.hasFullDataAccess() && !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar esta empresa");
         }
 
@@ -99,8 +99,8 @@ public class EmpresaService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Empresa não encontrada"));
 
-        // Verifica se o usuário é ADMIN ou se criou a empresa
-        if (!authenticationUtil.isAdmin() && !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou a empresa
+        if (!authenticationUtil.hasFullDataAccess() && !empresa.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar esta empresa");
         }
 

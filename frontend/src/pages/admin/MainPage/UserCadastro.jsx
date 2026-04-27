@@ -23,7 +23,7 @@ function UserCadastro() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // Lista de roles disponíveis
-    const roles = ['ADMIN', 'SOLICITANTE', 'ESCRITORIO', 'APROVADOR'];
+    const roles = ['ADMIN', 'SOLICITANTE', 'ESCRITORIO', 'APROVADOR', 'EXPANSAO'];
 
     // Configuração dos campos de pesquisa
     const camposPesquisaUsuario = [

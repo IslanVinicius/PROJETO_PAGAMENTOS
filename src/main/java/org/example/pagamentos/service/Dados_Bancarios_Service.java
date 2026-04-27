@@ -38,8 +38,8 @@ public class Dados_Bancarios_Service {
                .findById(id)
                .orElseThrow(() -> new RuntimeException("Dados não encontrados"));
 
-        // Verifica se o usuário é ADMIN ou se criou os dados
-        if (!authenticationUtil.isAdmin() && !dados.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou os dados
+        if (!authenticationUtil.hasFullDataAccess() && !dados.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar estes dados bancários");
         }
 
@@ -49,8 +49,8 @@ public class Dados_Bancarios_Service {
     public List<Dados_BancariosDTO> procurarTodos() {
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
-        // ADMIN vê todos, SOLICITANTE vê apenas seus
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todos, outros veem apenas seus
+        if (authenticationUtil.hasFullDataAccess()) {
             return dados_Bancarios_Repository
                     .findAll()
                     .stream()
@@ -73,8 +73,8 @@ public class Dados_Bancarios_Service {
                 .findById(id)
                 .orElseThrow(() -> new RuntimeException("Dados não encontrados"));
 
-        // Verifica se o usuário é ADMIN ou se criou os dados
-        if (!authenticationUtil.isAdmin() && !dados.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou os dados
+        if (!authenticationUtil.hasFullDataAccess() && !dados.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar estes dados bancários");
         }
 

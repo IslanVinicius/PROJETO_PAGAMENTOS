@@ -40,8 +40,8 @@ public class SolicitacaoAprovacaoService {
                 .findById(id)
                 .orElseThrow(()->new RuntimeException("Solicitação não encontrada"));
 
-        // Verifica se o usuário é ADMIN ou se criou a solicitação
-        if (!authenticationUtil.isAdmin() && !model.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou a solicitação
+        if (!authenticationUtil.hasFullDataAccess() && !model.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar esta solicitação");
         }
 
@@ -51,8 +51,8 @@ public class SolicitacaoAprovacaoService {
     public List<SolicitacaoAprovacaoDTO> procurarTodos(){
         Usuario usuarioAutenticado = authenticationUtil.getUsuarioAutenticado();
 
-        // ADMIN vê todas, SOLICITANTE vê apenas suas
-        if (authenticationUtil.isAdmin()) {
+        // ADMIN e EXPANSAO veem todas, outros veem apenas suas
+        if (authenticationUtil.hasFullDataAccess()) {
             return solicitacaoAprovacaoRepository
                     .findAll()
                     .stream()
@@ -87,8 +87,8 @@ public class SolicitacaoAprovacaoService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Solicitação não encontrada"));
 
-        // Verifica se o usuário é ADMIN ou se criou a solicitação
-        if (!authenticationUtil.isAdmin() && !model.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou a solicitação
+        if (!authenticationUtil.hasFullDataAccess() && !model.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar esta solicitação");
         }
 
@@ -102,8 +102,8 @@ public class SolicitacaoAprovacaoService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Solicitação não encontrada"));
 
-        // Verifica se o usuário é ADMIN ou se criou a solicitação
-        if (!authenticationUtil.isAdmin() && !model.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou a solicitação
+        if (!authenticationUtil.hasFullDataAccess() && !model.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para alterar esta solicitação");
         }
 

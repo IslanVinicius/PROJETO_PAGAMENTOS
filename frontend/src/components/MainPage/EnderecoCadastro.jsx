@@ -24,12 +24,13 @@ import { useAuth } from '../../contexts/AuthContext';
 function EnderecoCadastro() {
     const { user } = useAuth();
 
-    // Verifica permissão - apenas ADMIN e ESCRITORIO podem acessar
+    // Verifica permissão - ADMIN, ESCRITORIO e EXPANSAO podem acessar
     // Aceita tanto 'ADMIN' quanto 'ROLE_ADMIN' (com ou sem prefixo)
     const isAdmin = user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN';
     const isEscritorio = user?.role === 'ESCRITORIO' || user?.role === 'ROLE_ESCRITORIO';
+    const isExpansao = user?.role === 'EXPANSAO' || user?.role === 'ROLE_EXPANSAO';
     
-    if (!user || (!isAdmin && !isEscritorio)) {
+    if (!user || (!isAdmin && !isEscritorio && !isExpansao)) {
         return (
             <div className={styles.container}>
                 <div className={styles.accessDenied}>
