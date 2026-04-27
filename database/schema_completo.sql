@@ -1,415 +1,275 @@
 -- ============================================
 -- SCHEMA COMPLETO - PROJETO PAGAMENTOS
 -- Banco de Dados: PostgreSQL 14+
--- Gerado em: 27/04/2026
+-- Padrão: MAIÚSCULO, snake_case
 -- ============================================
 
--- Criar banco de dados
-CREATE DATABASE projeto_pagamentos
-    WITH 
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'pt_BR.UTF-8'
-    LC_CTYPE = 'pt_BR.UTF-8'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1;
+-- Tabela: USUARIOS
+CREATE TABLE USUARIOS (
+    ID_USUARIO BIGSERIAL NOT NULL,
+    USERNAME VARCHAR(50) NOT NULL UNIQUE,
+    PASSWORD VARCHAR(255) NOT NULL,
+    ROLE VARCHAR(50) NOT NULL,
 
-\c projeto_pagamentos
+    CONSTRAINT PK_USUARIOS PRIMARY KEY (ID_USUARIO)
+);
+
+CREATE INDEX IDX_USUARIOS_USERNAME ON USUARIOS(USERNAME);
+
+-- Tabela: EMPRESAS
+CREATE TABLE EMPRESAS (
+    ID_EMPRESA BIGSERIAL NOT NULL,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    NOME VARCHAR(100) NOT NULL,
+    CNPJ VARCHAR(18) NOT NULL UNIQUE,
+    RAZAO VARCHAR(150),
+
+    CONSTRAINT PK_EMPRESAS PRIMARY KEY (ID_EMPRESA),
+    CONSTRAINT FK_EMPRESAS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_EMPRESAS_USUARIO_CRIADOR ON EMPRESAS(ID_USUARIO_CRIADOR);
+CREATE INDEX IDX_EMPRESAS_CNPJ ON EMPRESAS(CNPJ);
+
+-- Tabela: PRESTADORES
+CREATE TABLE PRESTADORES (
+    COD_PRESTADOR BIGSERIAL NOT NULL,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    NOME VARCHAR(50) NOT NULL,
+    CPF VARCHAR(14) NOT NULL UNIQUE,
+
+    CONSTRAINT PK_PRESTADORES PRIMARY KEY (COD_PRESTADOR),
+    CONSTRAINT FK_PRESTADORES_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_PRESTADORES_USUARIO_CRIADOR ON PRESTADORES(ID_USUARIO_CRIADOR);
+CREATE INDEX IDX_PRESTADORES_CPF ON PRESTADORES(CPF);
+
+-- Tabela: DADOS_BANCARIOS_PRESTADOR
+CREATE TABLE DADOS_BANCARIOS_PRESTADOR (
+    ID_DADOS_BANCARIO BIGSERIAL NOT NULL,
+    COD_PRESTADOR BIGINT NOT NULL UNIQUE,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    BANCO VARCHAR(50),
+    TIPO_CONTA VARCHAR(20),
+    AGENCIA VARCHAR(10),
+    CONTA VARCHAR(20),
+    CHAVE_PIX VARCHAR(100),
+
+    CONSTRAINT PK_DADOS_BANCARIOS PRIMARY KEY (ID_DADOS_BANCARIO),
+    CONSTRAINT FK_DADOS_BANCARIOS_PRESTADOR FOREIGN KEY (COD_PRESTADOR)
+        REFERENCES PRESTADORES(COD_PRESTADOR),
+    CONSTRAINT FK_DADOS_BANCARIOS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_DADOS_BANCARIOS_PRESTADOR ON DADOS_BANCARIOS_PRESTADOR(COD_PRESTADOR);
+CREATE INDEX IDX_DADOS_BANCARIOS_USUARIO_CRIADOR ON DADOS_BANCARIOS_PRESTADOR(ID_USUARIO_CRIADOR);
+
+-- Tabela: ENDERECOS
+CREATE TABLE ENDERECOS (
+    ID_ENDERECO BIGSERIAL NOT NULL,
+    ID_EMPRESA BIGINT,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    CEP VARCHAR(9) NOT NULL,
+    LOGRADOURO VARCHAR(100) NOT NULL,
+    NUMERO VARCHAR(10) NOT NULL,
+    COMPLEMENTO VARCHAR(50),
+    BAIRRO VARCHAR(50) NOT NULL,
+    CIDADE VARCHAR(50) NOT NULL,
+    ESTADO VARCHAR(2) NOT NULL,
+
+    CONSTRAINT PK_ENDERECOS PRIMARY KEY (ID_ENDERECO),
+    CONSTRAINT FK_ENDERECOS_EMPRESA FOREIGN KEY (ID_EMPRESA)
+        REFERENCES EMPRESAS(ID_EMPRESA),
+    CONSTRAINT FK_ENDERECOS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_ENDERECOS_EMPRESA ON ENDERECOS(ID_EMPRESA);
+CREATE INDEX IDX_ENDERECOS_USUARIO_CRIADOR ON ENDERECOS(ID_USUARIO_CRIADOR);
+CREATE INDEX IDX_ENDERECOS_CEP ON ENDERECOS(CEP);
+
+-- Tabela: GRUPO_ITENS
+CREATE TABLE GRUPO_ITENS (
+    ID_GRUPO BIGSERIAL NOT NULL,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    NOME VARCHAR(100) NOT NULL,
+    DESCRICAO TEXT,
+
+    CONSTRAINT PK_GRUPO_ITENS PRIMARY KEY (ID_GRUPO),
+    CONSTRAINT FK_GRUPO_ITENS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_GRUPO_ITENS_USUARIO_CRIADOR ON GRUPO_ITENS(ID_USUARIO_CRIADOR);
+
+-- Tabela: ITENS
+CREATE TABLE ITENS (
+    ID_ITEM BIGSERIAL NOT NULL,
+    ID_GRUPO BIGINT NOT NULL,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    NOME VARCHAR(100) NOT NULL,
+    DESCRICAO TEXT,
+    VALOR_UNITARIO NUMERIC(10, 2),
+    PRECO_MEDIO NUMERIC(10, 2),
+    TIPO_UNITARIO VARCHAR(20),
+
+    CONSTRAINT PK_ITENS PRIMARY KEY (ID_ITEM),
+    CONSTRAINT FK_ITENS_GRUPO FOREIGN KEY (ID_GRUPO)
+        REFERENCES GRUPO_ITENS(ID_GRUPO),
+    CONSTRAINT FK_ITENS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_ITENS_GRUPO ON ITENS(ID_GRUPO);
+CREATE INDEX IDX_ITENS_USUARIO_CRIADOR ON ITENS(ID_USUARIO_CRIADOR);
+
+-- Tabela: DESCONTO_ITEM
+CREATE TABLE DESCONTO_ITEM (
+    ID_DESCONTO BIGSERIAL NOT NULL,
+    ID_ITEM BIGINT NOT NULL,
+    QUANTIDADE_MINIMA INTEGER NOT NULL,
+    PERCENTUAL_DESCONTO NUMERIC(5, 2),
+    VALOR_FINAL NUMERIC(10, 2),
+    DESCRICAO TEXT,
+
+    CONSTRAINT PK_DESCONTO_ITEM PRIMARY KEY (ID_DESCONTO),
+    CONSTRAINT FK_DESCONTO_ITEM_ITEM FOREIGN KEY (ID_ITEM)
+        REFERENCES ITENS(ID_ITEM)
+);
+
+CREATE INDEX IDX_DESCONTO_ITEM_ITEM ON DESCONTO_ITEM(ID_ITEM);
+
+-- Tabela: ORCAMENTOS
+CREATE TABLE ORCAMENTOS (
+    ORCAMENTO_ID BIGSERIAL NOT NULL,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    ENTIDADE BIGINT NOT NULL,
+    COD_PRESTADOR BIGINT NOT NULL,
+    MOVIMENTO DATE NOT NULL,
+    DESCRICAO TEXT,
+    VALOR NUMERIC(12, 2),
+    VALOR_TOTAL_ITENS NUMERIC(12, 2),
+    DESCONTO NUMERIC(12, 2),
+    VALOR_FINAL NUMERIC(12, 2),
+    TIPO_PAGAMENTO VARCHAR(30),
+
+    CONSTRAINT PK_ORCAMENTOS PRIMARY KEY (ORCAMENTO_ID),
+    CONSTRAINT FK_ORCAMENTOS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO),
+    CONSTRAINT FK_ORCAMENTOS_EMPRESA FOREIGN KEY (ENTIDADE)
+        REFERENCES EMPRESAS(ID_EMPRESA),
+    CONSTRAINT FK_ORCAMENTOS_PRESTADOR FOREIGN KEY (COD_PRESTADOR)
+        REFERENCES PRESTADORES(COD_PRESTADOR)
+);
+
+CREATE INDEX IDX_ORCAMENTOS_USUARIO_CRIADOR ON ORCAMENTOS(ID_USUARIO_CRIADOR);
+CREATE INDEX IDX_ORCAMENTOS_EMPRESA ON ORCAMENTOS(ENTIDADE);
+CREATE INDEX IDX_ORCAMENTOS_PRESTADOR ON ORCAMENTOS(COD_PRESTADOR);
+CREATE INDEX IDX_ORCAMENTOS_MOVIMENTO ON ORCAMENTOS(MOVIMENTO);
+
+-- Tabela: ORCAMENTO_ITENS
+CREATE TABLE ORCAMENTO_ITENS (
+    ID_ORCAMENTO_ITEM BIGSERIAL NOT NULL,
+    ORCAMENTO_ID BIGINT NOT NULL,
+    ITEM_ID BIGINT NOT NULL,
+    QUANTIDADE INTEGER NOT NULL,
+    VALOR_UNITARIO NUMERIC(10, 2) NOT NULL,
+    VALOR_TOTAL NUMERIC(10, 2),
+
+    CONSTRAINT PK_ORCAMENTO_ITENS PRIMARY KEY (ID_ORCAMENTO_ITEM),
+    CONSTRAINT FK_ORCAMENTO_ITENS_ORCAMENTO FOREIGN KEY (ORCAMENTO_ID)
+        REFERENCES ORCAMENTOS(ORCAMENTO_ID),
+    CONSTRAINT FK_ORCAMENTO_ITENS_ITEM FOREIGN KEY (ITEM_ID)
+        REFERENCES ITENS(ID_ITEM)
+);
+
+CREATE INDEX IDX_ORCAMENTO_ITENS_ORCAMENTO ON ORCAMENTO_ITENS(ORCAMENTO_ID);
+CREATE INDEX IDX_ORCAMENTO_ITENS_ITEM ON ORCAMENTO_ITENS(ITEM_ID);
+
+-- Tabela: ORCAMENTO_IMAGENS
+CREATE TABLE ORCAMENTO_IMAGENS (
+    ID_IMAGEM BIGSERIAL NOT NULL,
+    ORCAMENTO_ID BIGINT NOT NULL,
+    NOME_ARQUIVO VARCHAR(255) NOT NULL,
+    TIPO_ARQUIVO VARCHAR(50),
+    TAMANHO_ARQUIVO BIGINT,
+    CAMINHO_ARQUIVO VARCHAR(500) NOT NULL,
+    DATA_UPLOAD TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT PK_ORCAMENTO_IMAGENS PRIMARY KEY (ID_IMAGEM),
+    CONSTRAINT FK_ORCAMENTO_IMAGENS_ORCAMENTO FOREIGN KEY (ORCAMENTO_ID)
+        REFERENCES ORCAMENTOS(ORCAMENTO_ID)
+);
+
+CREATE INDEX IDX_ORCAMENTO_IMAGENS_ORCAMENTO ON ORCAMENTO_IMAGENS(ORCAMENTO_ID);
+
+-- Tabela: SOLICITACOES_APROVACAO
+CREATE TABLE SOLICITACOES_APROVACAO (
+    SOLICITACAO_APROVACAO_ID BIGSERIAL NOT NULL,
+    ORCAMENTO_ID BIGINT NOT NULL UNIQUE,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    MOVIMENTO DATE,
+    STATUS_SOLICITACAO VARCHAR(30) NOT NULL DEFAULT 'PENDENTE',
+
+    CONSTRAINT PK_SOLICITACOES_APROVACAO PRIMARY KEY (SOLICITACAO_APROVACAO_ID),
+    CONSTRAINT FK_SOLICITACOES_APROVACAO_ORCAMENTO FOREIGN KEY (ORCAMENTO_ID)
+        REFERENCES ORCAMENTOS(ORCAMENTO_ID),
+    CONSTRAINT FK_SOLICITACOES_APROVACAO_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_SOLICITACOES_APROVACAO_ORCAMENTO ON SOLICITACOES_APROVACAO(ORCAMENTO_ID);
+CREATE INDEX IDX_SOLICITACOES_APROVACAO_USUARIO_CRIADOR ON SOLICITACOES_APROVACAO(ID_USUARIO_CRIADOR);
+CREATE INDEX IDX_SOLICITACOES_APROVACAO_STATUS ON SOLICITACOES_APROVACAO(STATUS_SOLICITACAO);
+
+-- Tabela: PAGAMENTOS
+CREATE TABLE PAGAMENTOS (
+    PAGAMENTO_ID BIGSERIAL NOT NULL,
+    SOLICITACAO_APROVACAO_ID BIGINT NOT NULL,
+    COD_PRESTADOR BIGINT NOT NULL,
+    ID_DADOS_BANCARIO BIGINT NOT NULL,
+    ID_USUARIO_CRIADOR BIGINT NOT NULL,
+    MOVIMENTO DATE,
+
+    CONSTRAINT PK_PAGAMENTOS PRIMARY KEY (PAGAMENTO_ID),
+    CONSTRAINT FK_PAGAMENTOS_SOLICITACAO FOREIGN KEY (SOLICITACAO_APROVACAO_ID)
+        REFERENCES SOLICITACOES_APROVACAO(SOLICITACAO_APROVACAO_ID),
+    CONSTRAINT FK_PAGAMENTOS_PRESTADOR FOREIGN KEY (COD_PRESTADOR)
+        REFERENCES PRESTADORES(COD_PRESTADOR),
+    CONSTRAINT FK_PAGAMENTOS_DADOS_BANCARIOS FOREIGN KEY (ID_DADOS_BANCARIO)
+        REFERENCES DADOS_BANCARIOS_PRESTADOR(ID_DADOS_BANCARIO),
+    CONSTRAINT FK_PAGAMENTOS_USUARIO_CRIADOR FOREIGN KEY (ID_USUARIO_CRIADOR)
+        REFERENCES USUARIOS(ID_USUARIO)
+);
+
+CREATE INDEX IDX_PAGAMENTOS_SOLICITACAO ON PAGAMENTOS(SOLICITACAO_APROVACAO_ID);
+CREATE INDEX IDX_PAGAMENTOS_PRESTADOR ON PAGAMENTOS(COD_PRESTADOR);
+CREATE INDEX IDX_PAGAMENTOS_DADOS_BANCARIOS ON PAGAMENTOS(ID_DADOS_BANCARIO);
+CREATE INDEX IDX_PAGAMENTOS_USUARIO_CRIADOR ON PAGAMENTOS(ID_USUARIO_CRIADOR);
+CREATE INDEX IDX_PAGAMENTOS_MOVIMENTO ON PAGAMENTOS(MOVIMENTO);
 
 -- ============================================
--- TABELAS PRINCIPAIS
+-- COMENTÁRIOS NAS TABELAS (OPCIONAL)
 -- ============================================
 
--- 1. USUÁRIOS (Tabela base para autenticação)
-CREATE TABLE usuarios (
-    -- PK
-    id BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'SOLICITANTE', 'ESCRITORIO', 'APROVADOR', 'EXPANSAO')),
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_username ON usuarios(username);
-CREATE INDEX idx_role ON usuarios(role);
-
--- 2. EMPRESAS
-CREATE TABLE empresas (
-    -- PK
-    entidade BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    nome VARCHAR(100) NOT NULL,
-    cnpj VARCHAR(18) NOT NULL UNIQUE,
-    razao VARCHAR(150) NOT NULL,
-    
-    -- FK
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_cnpj ON empresas(cnpj);
-CREATE INDEX idx_nome ON empresas(nome);
-CREATE INDEX idx_usuario_criador ON empresas(usuario_criador_id);
-
--- 3. PRESTADORES
-CREATE TABLE prestadores (
-    -- PK
-    codprestador BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    nome VARCHAR(50) NOT NULL,
-    cpf VARCHAR(14) NOT NULL UNIQUE,
-    
-    -- FK
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_cpf ON prestadores(cpf);
-CREATE INDEX idx_nome ON prestadores(nome);
-CREATE INDEX idx_usuario_criador ON prestadores(usuario_criador_id);
-
--- 4. ENDEREÇOS
-CREATE TABLE enderecos (
-    -- PK
-    idendereco BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    cep VARCHAR(9) NOT NULL,
-    logradouro VARCHAR(100) NOT NULL,
-    numero VARCHAR(10) NOT NULL,
-    complemento VARCHAR(50),
-    bairro VARCHAR(50) NOT NULL,
-    cidade VARCHAR(50) NOT NULL,
-    estado VARCHAR(2) NOT NULL,
-    
-    -- FK
-    empresa_id BIGINT REFERENCES empresas(entidade) ON DELETE CASCADE,
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_cep ON enderecos(cep);
-CREATE INDEX idx_empresa ON enderecos(empresa_id);
-CREATE INDEX idx_usuario_criador ON enderecos(usuario_criador_id);
-
--- 5. DADOS BANCÁRIOS PRESTADOR
-CREATE TABLE dados_bancarios_prestador (
-    -- PK
-    dados_bancario_id BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    banco VARCHAR(50),
-    tipo_conta VARCHAR(20),
-    agencia VARCHAR(10),
-    conta VARCHAR(20),
-    chave_pix VARCHAR(100),
-    
-    -- FK
-    cod_prestador BIGINT NOT NULL UNIQUE REFERENCES prestadores(codprestador) ON DELETE CASCADE,
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_prestador ON dados_bancarios_prestador(cod_prestador);
-CREATE INDEX idx_usuario_criador ON dados_bancarios_prestador(usuario_criador_id);
-
--- 6. GRUPO DE ITENS
-CREATE TABLE grupo_itens (
-    -- PK
-    id_grupo BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    
-    -- FK
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_nome ON grupo_itens(nome);
-CREATE INDEX idx_usuario_criador ON grupo_itens(usuario_criador_id);
-
--- 7. ITENS
-CREATE TABLE itens (
-    -- PK
-    id_item BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    nome VARCHAR(100) NOT NULL,
-    descricao TEXT,
-    valor_unitario DECIMAL(10, 2),
-    preco_medio DECIMAL(10, 2),
-    tipo_unitario VARCHAR(20) CHECK (tipo_unitario IN ('UNIDADE', 'KILO', 'METRO', 'LITRO', 'CAIXA', 'PACOTE')),
-    
-    -- FK
-    id_grupo BIGINT NOT NULL REFERENCES grupo_itens(id_grupo) ON DELETE RESTRICT,
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_nome ON itens(nome);
-CREATE INDEX idx_grupo ON itens(id_grupo);
-CREATE INDEX idx_usuario_criador ON itens(usuario_criador_id);
-
--- 8. DESCONTO ITEM (Descontos progressivos por quantidade)
-CREATE TABLE desconto_item (
-    -- PK
-    id_desconto BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    quantidade_minima INT NOT NULL,
-    percentual_desconto DECIMAL(5, 2),
-    valor_final DECIMAL(10, 2),
-    descricao VARCHAR(255),
-    
-    -- FK
-    id_item BIGINT NOT NULL REFERENCES itens(id_item) ON DELETE CASCADE,
-    
-    -- Índices
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_item ON desconto_item(id_item);
-CREATE INDEX idx_quantidade ON desconto_item(quantidade_minima);
-
--- 9. ORÇAMENTOS
-CREATE TABLE orcamentos (
-    -- PK
-    orcamentoid BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    movimento DATE NOT NULL,
-    descricao TEXT,
-    valor DECIMAL(10, 2),
-    valor_total_itens DECIMAL(10, 2),
-    desconto DECIMAL(10, 2) DEFAULT 0,
-    valor_final DECIMAL(10, 2),
-    tipo_pagamento VARCHAR(20) CHECK (tipo_pagamento IN ('DINHEIRO', 'PIX', 'BOLETO', 'TRANSFERENCIA', 'CARTAO_CREDITO', 'CARTAO_DEBITO')),
-    
-    -- FK
-    entidade BIGINT NOT NULL REFERENCES empresas(entidade) ON DELETE RESTRICT,
-    cod_prestador BIGINT NOT NULL REFERENCES prestadores(codprestador) ON DELETE RESTRICT,
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_movimento ON orcamentos(movimento);
-CREATE INDEX idx_empresa ON orcamentos(entidade);
-CREATE INDEX idx_prestador ON orcamentos(cod_prestador);
-CREATE INDEX idx_usuario_criador ON orcamentos(usuario_criador_id);
-
--- 10. ORÇAMENTO ITENS (Itens do orçamento)
-CREATE TABLE orcamento_itens (
-    -- PK
-    id_orcamento_item BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    quantidade INT NOT NULL,
-    valor_unitario DECIMAL(10, 2) NOT NULL,
-    valor_total DECIMAL(10, 2),
-    
-    -- FK
-    orcamento_id BIGINT NOT NULL REFERENCES orcamentos(orcamentoid) ON DELETE CASCADE,
-    item_id BIGINT NOT NULL REFERENCES itens(id_item) ON DELETE RESTRICT,
-    
-    -- Índices
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_orcamento ON orcamento_itens(orcamento_id);
-CREATE INDEX idx_item ON orcamento_itens(item_id);
-
--- Trigger para calcular valor total
-CREATE OR REPLACE FUNCTION calcular_valor_total()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.valor_total := NEW.quantidade * NEW.valor_unitario;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_calcular_valor_total
-BEFORE INSERT OR UPDATE ON orcamento_itens
-FOR EACH ROW EXECUTE FUNCTION calcular_valor_total();
-
--- 11. ORÇAMENTO IMAGENS (Anexos do orçamento)
-CREATE TABLE orcamento_imagens (
-    -- PK
-    id_imagem BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    nome_arquivo VARCHAR(255) NOT NULL,
-    tipo_arquivo VARCHAR(50),
-    tamanho_arquivo BIGINT,
-    caminho_arquivo VARCHAR(500) NOT NULL,
-    data_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    -- FK
-    orcamento_id BIGINT NOT NULL REFERENCES orcamentos(orcamentoid) ON DELETE CASCADE,
-    
-    -- Índices
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_orcamento ON orcamento_imagens(orcamento_id);
-CREATE INDEX idx_data_upload ON orcamento_imagens(data_upload);
-
--- 12. SOLICITAÇÕES DE APROVAÇÃO
-CREATE TABLE solicitacoes_aprovacao (
-    -- PK
-    solicitacao_aprovacao BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    movimento DATE,
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'APROVADO', 'REJEITADO', 'CANCELADO')),
-    
-    -- FK
-    orcamentoid BIGINT NOT NULL UNIQUE REFERENCES orcamentos(orcamentoid) ON DELETE CASCADE,
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_status ON solicitacoes_aprovacao(status);
-CREATE INDEX idx_movimento ON solicitacoes_aprovacao(movimento);
-CREATE INDEX idx_orcamento ON solicitacoes_aprovacao(orcamentoid);
-CREATE INDEX idx_usuario_criador ON solicitacoes_aprovacao(usuario_criador_id);
-
--- 13. PAGAMENTOS
-CREATE TABLE pagamentos (
-    -- PK
-    pagamentoid BIGSERIAL PRIMARY KEY,
-    
-    -- Colunas
-    valor DECIMAL(10, 2) NOT NULL,
-    data_pagamento DATE,
-    status_pagamento VARCHAR(20) NOT NULL DEFAULT 'PENDENTE' CHECK (status_pagamento IN ('PENDENTE', 'PAGO', 'CANCELADO', 'ATRASADO')),
-    forma_pagamento VARCHAR(20) CHECK (forma_pagamento IN ('DINHEIRO', 'PIX', 'BOLETO', 'TRANSFERENCIA', 'CARTAO_CREDITO', 'CARTAO_DEBITO')),
-    observacoes TEXT,
-    
-    -- FK
-    solicitacaoaprovacaoid BIGINT NOT NULL UNIQUE REFERENCES solicitacoes_aprovacao(solicitacao_aprovacao) ON DELETE CASCADE,
-    usuario_criador_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE RESTRICT,
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Índices
-CREATE INDEX idx_status ON pagamentos(status_pagamento);
-CREATE INDEX idx_data ON pagamentos(data_pagamento);
-CREATE INDEX idx_solicitacao ON pagamentos(solicitacaoaprovacaoid);
-CREATE INDEX idx_usuario_criador ON pagamentos(usuario_criador_id);
+COMMENT ON TABLE USUARIOS IS 'Usuários do sistema com diferentes roles';
+COMMENT ON TABLE EMPRESAS IS 'Empresas clientes do sistema';
+COMMENT ON TABLE PRESTADORES IS 'Prestadores de serviços cadastrados';
+COMMENT ON TABLE DADOS_BANCARIOS_PRESTADOR IS 'Dados bancários dos prestadores para pagamento';
+COMMENT ON TABLE ENDERECOS IS 'Endereços das empresas';
+COMMENT ON TABLE GRUPO_ITENS IS 'Grupos de itens/serviços';
+COMMENT ON TABLE ITENS IS 'Itens/serviços que compõem os orçamentos';
+COMMENT ON TABLE DESCONTO_ITEM IS 'Tabela de descontos progressivos por quantidade';
+COMMENT ON TABLE ORCAMENTOS IS 'Orçamentos gerados para empresas';
+COMMENT ON TABLE ORCAMENTO_ITENS IS 'Itens que compõem cada orçamento';
+COMMENT ON TABLE ORCAMENTO_IMAGENS IS 'Imagens anexadas aos orçamentos';
+COMMENT ON TABLE SOLICITACOES_APROVACAO IS 'Solicitações de aprovação de orçamentos';
+COMMENT ON TABLE PAGAMENTOS IS 'Pagamentos realizados após aprovação';
 
 -- ============================================
--- DADOS INICIAIS (Opcional)
--- ============================================
-
--- Inserir usuário ADMIN padrão (senha: admin123 - BCrypt)
--- IMPORTANTE: Altere a senha após o primeiro login!
-INSERT INTO usuarios (username, password, role) VALUES 
-('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN');
-
--- Inserir usuário EXPANSAO de exemplo (senha: expansao123 - BCrypt)
-INSERT INTO usuarios (username, password, role) VALUES 
-('expansao', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'EXPANSAO');
-
--- ============================================
--- VIEWS ÚTEIS (Opcional)
--- ============================================
-
--- View: Orçamentos com detalhes completos
-CREATE OR REPLACE VIEW vw_orcamentos_completos AS
-SELECT 
-    o.orcamentoid,
-    o.movimento,
-    e.nome AS empresa_nome,
-    e.cnpj AS empresa_cnpj,
-    p.nome AS prestador_nome,
-    p.cpf AS prestador_cpf,
-    o.descricao,
-    o.valor,
-    o.valor_total_itens,
-    o.desconto,
-    o.valor_final,
-    o.tipo_pagamento,
-    u.username AS criado_por,
-    sa.status AS status_aprovacao
-FROM orcamentos o
-JOIN empresas e ON o.entidade = e.entidade
-JOIN prestadores p ON o.cod_prestador = p.codprestador
-JOIN usuarios u ON o.usuario_criador_id = u.id
-LEFT JOIN solicitacoes_aprovacao sa ON sa.orcamentoid = o.orcamentoid;
-
--- View: Itens com grupo e descontos
-CREATE OR REPLACE VIEW vw_itens_completos AS
-SELECT 
-    i.id_item,
-    i.nome AS item_nome,
-    i.descricao AS item_descricao,
-    i.valor_unitario,
-    i.preco_medio,
-    i.tipo_unitario,
-    g.nome AS grupo_nome,
-    COUNT(di.id_desconto) AS total_descontos
-FROM itens i
-JOIN grupo_itens g ON i.id_grupo = g.id_grupo
-LEFT JOIN desconto_item di ON i.id_item = di.id_item
-GROUP BY i.id_item, i.nome, i.descricao, i.valor_unitario, i.preco_medio, i.tipo_unitario, g.nome;
-
--- ============================================
--- PERMISSÕES (Opcional - para produção)
--- ============================================
-
--- Criar usuário específico para a aplicação
--- CREATE USER app_pagamentos WITH PASSWORD 'senha_segura_aqui';
--- GRANT ALL PRIVILEGES ON DATABASE projeto_pagamentos TO app_pagamentos;
--- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_pagamentos;
--- GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_pagamentos;
-
--- ============================================
--- FIM DO SCRIPT
+-- FIM DO SCHEMA
 -- ============================================
