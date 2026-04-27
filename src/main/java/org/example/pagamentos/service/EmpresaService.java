@@ -29,8 +29,8 @@ public class EmpresaService {
                 .findById(id)
                 .orElseThrow(()-> new RuntimeException("Empresa não encontrada"));
 
-        // Verifica se o usuário é ADMIN ou se criou a empresa
-        if (!authenticationUtil.isAdmin() && !empresaModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
+        // Verifica se o usuário é ADMIN/EXPANSAO ou se criou a empresa
+        if (!authenticationUtil.hasFullDataAccess() && !empresaModel.getUsuarioCriador().getId().equals(usuarioAutenticado.getId())) {
             throw new AccessDeniedException("Você não tem permissão para acessar esta empresa");
         }
 
