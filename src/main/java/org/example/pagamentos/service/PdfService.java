@@ -96,9 +96,12 @@ public class PdfService {
         String data = o.getMovimento() != null ?
                 o.getMovimento().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
 
+        String analista = o.getAnalistaOrcamento() != null ? 
+                " | Analista: " + o.getAnalistaOrcamento() : "";
+
         t.addCell(new Cell().add(new Paragraph()
                         .add(new Text("Nº " + o.getOrcamentoID()).setFont(bold))
-                        .add(new Text(" | " + data).setFont(font))
+                        .add(new Text(" | " + data + analista).setFont(font))
                         .setTextAlignment(TextAlignment.RIGHT))
                 .setBorder(Border.NO_BORDER));
 

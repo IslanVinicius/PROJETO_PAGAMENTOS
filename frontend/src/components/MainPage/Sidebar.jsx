@@ -2,12 +2,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package, MapPin } from 'lucide-react';
 import styles from "./Sidebar.module.css";
 
-function Sidebar({ activePage, onPageChange, onLogout }) {
+function Sidebar({ activePage, onPageChange, onLogout, mobileOpen }) {
   const { user } = useAuth();
   const role = user?.role;
 
   return (
-    <div className={styles.sidebar}>
+    <div className={`${styles.sidebar} ${mobileOpen ? styles.open : ''}`}>
       <div className={styles.header}>
         <img src="/logo.png" alt="Logo" className={styles.logoImage} />
       </div>

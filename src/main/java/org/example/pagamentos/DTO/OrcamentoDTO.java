@@ -44,4 +44,7 @@ public class OrcamentoDTO {
 
     private List<OrcamentoImagemDTO> imagens;
 
+    // Campo apenas para exibição - nome do analista que criou o orçamento
+    private String analistaOrcamento;
+
 }

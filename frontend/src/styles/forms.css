@@ -1,0 +1,315 @@
+/* ============================================
+   FORMULÁRIOS RESPONSIVOS - PADRÃO GLOBAL
+   Aplicar em todos os formulários do projeto
+   ============================================ */
+
+/* Container principal do formulário */
+.form-container {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+    .form-container {
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (min-width: 1024px) {
+    .form-container {
+        padding: var(--spacing-xl);
+    }
+}
+
+/* Grid de campos do formulário */
+.form-grid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: 1fr;
+}
+
+/* Mobile: 1 coluna */
+@media (min-width: 480px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Tablet: 2-3 colunas */
+@media (min-width: 768px) {
+    .form-grid {
+        gap: var(--spacing-lg);
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 3-4 colunas */
+@media (min-width: 1024px) {
+    .form-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Wide screen: até 4 colunas */
+@media (min-width: 1440px) {
+    .form-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Grupo de campo */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    width: 100%;
+}
+
+/* Campo que ocupa largura total */
+.form-group-full {
+    grid-column: 1 / -1;
+}
+
+/* Label */
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Input, Select, Textarea */
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem; /* Previne zoom no iOS */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: var(--transition-fast);
+    min-height: 48px; /* Área de toque mínima */
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+    border-color: var(--primary-light);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 76, 76, 0.1);
+}
+
+/* Textarea específico */
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Botões de ação */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    width: 100%;
+}
+
+@media (min-width: 480px) {
+    .form-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+}
+
+/* Botão full-width no mobile */
+.form-button {
+    width: 100%;
+    min-height: 48px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+@media (min-width: 480px) {
+    .form-button {
+        width: auto;
+        min-height: auto;
+    }
+}
+
+/* Seções do formulário */
+.form-section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-secondary);
+}
+
+.form-section-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Tabelas responsivas */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: var(--spacing-lg);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Garante scroll horizontal no mobile */
+}
+
+.data-table th,
+.data-table td {
+    padding: var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* Cards para visualização mobile de tabelas */
+@media (max-width: 767px) {
+    .data-table-cards {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+    
+    .data-card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+    }
+    
+    .data-card-row {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    .data-card-row:last-child {
+        border-bottom: none;
+    }
+    
+    .data-card-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    .data-card-value {
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+}
+
+/* Mensagens de feedback */
+.form-message {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    font-weight: 500;
+}
+
+.form-message-success {
+    background-color: rgba(92, 184, 92, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.form-message-error {
+    background-color: rgba(217, 83, 79, 0.1);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+}
+
+.form-message-warning {
+    background-color: rgba(240, 173, 78, 0.1);
+    border: 1px solid var(--warning);
+    color: var(--warning);
+}
+
+/* Loading state */
+.form-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Campos desabilitados */
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled {
+    background-color: var(--bg-secondary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Placeholders */
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-tertiary);
+    opacity: 0.7;
+}
+
+/* Validação */
+.form-input.error,
+.form-select.error,
+.form-textarea.error {
+    border-color: var(--danger);
+}
+
+.form-input.success,
+.form-select.success,
+.form-textarea.success {
+    border-color: var(--success);
+}
+
+/* Helper text */
+.form-helper {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
+}
+
+/* Required indicator */
+.form-required {
+    color: var(--danger);
+    margin-left: var(--spacing-xs);
+}

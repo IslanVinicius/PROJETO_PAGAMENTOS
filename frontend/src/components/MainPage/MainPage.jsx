@@ -19,6 +19,7 @@ function MainPage() {
     const navigate = useNavigate();
     const role = user?.role;
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
+    const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
     // 🔥 Permissões por role
     const rolePermissions = {
@@ -123,12 +124,34 @@ function MainPage() {
 
     return (
         <div className={styles.mainContainer}>
+            {/* Overlay para mobile */}
+            {sidebarMobileOpen && (
+                <div 
+                    className={styles.sidebarOverlay}
+                    onClick={() => setSidebarMobileOpen(false)}
+                />
+            )}
+            
             <Sidebar
                 activePage={activePage}
-                onPageChange={setActivePage}
+                onPageChange={(page) => {
+                    setActivePage(page);
+                    setSidebarMobileOpen(false);
+                }}
                 onLogout={handleLogout}
                 onToggleSidebar={(expanded) => setSidebarExpanded(expanded)}
+                mobileOpen={sidebarMobileOpen}
             />
+            
+            {/* Botão Hambúrguer - Mobile */}
+            <button 
+                className={styles.menuToggleButton}
+                onClick={() => setSidebarMobileOpen(!sidebarMobileOpen)}
+                aria-label="Toggle menu"
+            >
+                ☰
+            </button>
+            
             <div className={`${styles.content} ${!sidebarExpanded ? styles.contentExpanded : ''}`}>
                 {renderContent()}
             </div>

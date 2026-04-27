@@ -46,6 +46,9 @@ public class OrcamentoCompletoDTO {
     private String nomeSolicitante;
     private String usernameSolicitante;
     
+    // Analista do orçamento (usuário que criou)
+    private String analistaOrcamento;
+    
     public static OrcamentoCompletoDTO fromModel(OrcamentoModel orcamento) {
         OrcamentoCompletoDTO dto = new OrcamentoCompletoDTO();
         
@@ -152,6 +155,7 @@ public class OrcamentoCompletoDTO {
         if (orcamento.getUsuarioCriador() != null) {
             dto.setNomeSolicitante(orcamento.getUsuarioCriador().getUsername());
             dto.setUsernameSolicitante(orcamento.getUsuarioCriador().getUsername());
+            dto.setAnalistaOrcamento(orcamento.getUsuarioCriador().getUsername());
         }
         
         return dto;

@@ -14,8 +14,10 @@ import { usePesquisa } from '../../hooks/usePesquisa';
 import headerStyles from './EmpresaCadastro-novo.module.css';
 import ModalPesquisaComum from './ModalPesquisaComum';
 import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
+import { useAuth } from '../../contexts/AuthContext';
 
 function OrcamentoCadastro() {
+    const { user } = useAuth(); // Pegar usuário logado
     const [showFilters, setShowFilters] = useState(false);
     const [quickSearchId, setQuickSearchId] = useState('');
     const [orcamentoID, setOrcamentoID] = useState('');
@@ -31,6 +33,7 @@ function OrcamentoCadastro() {
     const [desconto, setDesconto] = useState('');
     const [valorFinal, setValorFinal] = useState('');
     const [tipoPagamento, setTipoPagamento] = useState('');
+    const [analistaOrcamento, setAnalistaOrcamento] = useState(''); // Campo apenas para exibição
     const [itensOrcamento, setItensOrcamento] = useState([]);
     const [imagens, setImagens] = useState([]);
     const [pendingImages, setPendingImages] = useState([]); // Imagens pendentes para upload
@@ -114,6 +117,7 @@ function OrcamentoCadastro() {
                 desconto: item.desconto,
                 valorFinal: item.valorFinal,
                 tipoPagamento: item.tipoPagamento,
+                analistaOrcamento: item.analistaOrcamento,
                 itens: item.itens || [],
                 imagens: item.imagens || []
             }));
@@ -166,6 +170,7 @@ function OrcamentoCadastro() {
         setDesconto(orcamento.desconto || '');
         setValorFinal(orcamento.valorFinal || '');
         setTipoPagamento(orcamento.tipoPagamento || '');
+        setAnalistaOrcamento(orcamento.analistaOrcamento || ''); // Preencher analista
         setItensOrcamento(orcamento.itens || []);
         setImagens(orcamento.imagens || []);
         setOriginalData({ ...orcamento });
@@ -271,6 +276,7 @@ function OrcamentoCadastro() {
         setDesconto('');
         setValorFinal('');
         setTipoPagamento('');
+        setAnalistaOrcamento(user?.sub || ''); // Preencher com usuário logado
         setItensOrcamento([]);
         setImagens([]);
         setPendingImages([]);
@@ -293,6 +299,7 @@ function OrcamentoCadastro() {
             setDesconto(originalData.desconto);
             setValorFinal(originalData.valorFinal);
             setTipoPagamento(originalData.tipoPagamento);
+            setAnalistaOrcamento(originalData.analistaOrcamento || ''); // Restaurar analista
             setItensOrcamento(originalData.itens || []);
             setImagens(originalData.imagens || []);
         } else if (modo === 'criacao' && orcamentos.length > 0 && currentIndex >= 0) {
@@ -308,6 +315,7 @@ function OrcamentoCadastro() {
             setDesconto(atual.desconto || '');
             setValorFinal(atual.valorFinal || '');
             setTipoPagamento(atual.tipoPagamento || '');
+            setAnalistaOrcamento(atual.analistaOrcamento || user?.sub || ''); // Restaurar analista
             setItensOrcamento(atual.itens || []);
             setImagens(atual.imagens || []);
             // Restaurar nomes
@@ -335,6 +343,7 @@ function OrcamentoCadastro() {
             setDesconto('');
             setValorFinal('');
             setTipoPagamento('');
+            setAnalistaOrcamento(user?.sub || ''); // Preencher com usuário logado
             setItensOrcamento([]);
             setImagens([]);
         }
@@ -378,6 +387,7 @@ function OrcamentoCadastro() {
                     desconto: atualizado.desconto,
                     valorFinal: atualizado.valorFinal,
                     tipoPagamento: atualizado.tipoPagamento,
+                    analistaOrcamento: atualizado.analistaOrcamento,
                     itens: atualizado.itens || [],
                     imagens: atualizado.imagens || []
                 };
@@ -400,6 +410,7 @@ function OrcamentoCadastro() {
                     desconto: novo.desconto,
                     valorFinal: novo.valorFinal,
                     tipoPagamento: novo.tipoPagamento,
+                    analistaOrcamento: novo.analistaOrcamento,
                     itens: novo.itens || [],
                     imagens: novo.imagens || []
                 };
@@ -1167,6 +1178,16 @@ function OrcamentoCadastro() {
                                 </span>
                             )}
                         </div>
+                    </div>
+
+                    <div className={`${styles.formGroup} ${styles.idField}`}>
+                        <label>ANALISTA DO ORÇAMENTO</label>
+                        <input 
+                            type="text" 
+                            value={analistaOrcamento || user?.sub || ''} 
+                            disabled 
+                            placeholder="Usuário logado" 
+                        />
                     </div>
 
                     <div className={styles.formGroup}>

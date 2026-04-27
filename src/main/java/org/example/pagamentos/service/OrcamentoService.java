@@ -273,6 +273,11 @@ public class OrcamentoService {
             orcamentoDTO.setImagens(imagensDTO);
         }
 
+        // Preencher campo analistaOrcamento com o username do criador
+        if (orcamentoModel.getUsuarioCriador() != null) {
+            orcamentoDTO.setAnalistaOrcamento(orcamentoModel.getUsuarioCriador().getUsername());
+        }
+
         return orcamentoDTO;
     }
 

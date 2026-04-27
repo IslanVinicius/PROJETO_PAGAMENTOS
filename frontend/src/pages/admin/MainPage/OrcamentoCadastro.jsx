@@ -10,8 +10,10 @@ import ModalPesquisaItens from './ModalPesquisaItens';
 import ConfirmModal from '../Shared/ConfirmModal';
 import { BarraPesquisa, ResultadosPesquisa } from '../common';
 import { usePesquisa } from '../../hooks/usePesquisa';
+import { useAuth } from '../../contexts/AuthContext';
 
 function OrcamentoCadastro() {
+    const { user } = useAuth(); // Pegar usuário logado
     const [orcamentoID, setOrcamentoID] = useState('');
     const [movimento, setMovimento] = useState('');
     const [movimentoDate, setMovimentoDate] = useState('');
@@ -23,6 +25,7 @@ function OrcamentoCadastro() {
     const [desconto, setDesconto] = useState('');
     const [valorFinal, setValorFinal] = useState('');
     const [tipoPagamento, setTipoPagamento] = useState('');
+    const [analistaOrcamento, setAnalistaOrcamento] = useState(''); // Campo apenas para exibição
     const [itensOrcamento, setItensOrcamento] = useState([]);
     const [imagens, setImagens] = useState([]);
     const [pendingImages, setPendingImages] = useState([]); // Imagens pendentes para upload
@@ -104,6 +107,7 @@ function OrcamentoCadastro() {
                 desconto: item.desconto,
                 valorFinal: item.valorFinal,
                 tipoPagamento: item.tipoPagamento,
+                analistaOrcamento: item.analistaOrcamento,
                 itens: item.itens || [],
                 imagens: item.imagens || []
             }));
@@ -131,6 +135,7 @@ function OrcamentoCadastro() {
         setDesconto(orcamento.desconto || '');
         setValorFinal(orcamento.valorFinal || '');
         setTipoPagamento(orcamento.tipoPagamento || '');
+        setAnalistaOrcamento(orcamento.analistaOrcamento || ''); // Preencher analista
         setItensOrcamento(orcamento.itens || []);
         setImagens(orcamento.imagens || []);
         setOriginalData({ ...orcamento });
@@ -189,6 +194,7 @@ function OrcamentoCadastro() {
         setDesconto('');
         setValorFinal('');
         setTipoPagamento('');
+        setAnalistaOrcamento(user?.sub || ''); // Preencher com usuário logado
         setItensOrcamento([]);
         setImagens([]);
         setPendingImages([]);
@@ -896,6 +902,16 @@ function OrcamentoCadastro() {
                                 <Search size={16} />
                             </button>
                         </div>
+                    </div>
+
+                    <div className={`${styles.formGroup} ${styles.idField}`}>
+                        <label>ANALISTA DO ORÇAMENTO</label>
+                        <input 
+                            type="text" 
+                            value={analistaOrcamento || user?.sub || ''} 
+                            disabled 
+                            placeholder="Usuário logado" 
+                        />
                     </div>
 
                     <div className={styles.formGroup}>

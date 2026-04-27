@@ -468,7 +468,7 @@ function GrupoItemCadastro() {
                         <input type="text" value={idGrupo || ''} disabled placeholder="Automático" />
                     </div>
                     <div className={styles.formGroup}>
-                        <label>NOME *</label>
+                        <label>GRUPO *</label>
                         <input
                             type="text"
                             value={nome || ''}

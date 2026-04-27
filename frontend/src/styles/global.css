@@ -1,4 +1,6 @@
 @import './variables.css';
+@import './responsive.css';
+@import './forms.css';
 
 * {
     margin: 0;
