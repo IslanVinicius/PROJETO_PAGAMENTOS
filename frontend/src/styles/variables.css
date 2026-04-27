@@ -1,29 +1,84 @@
 :root {
-    /* Cores principais - Marsala e Branco */
-    --primary-bg: #F8F5F2;        /* Fundo geral suave, quase branco com tom quente */
-    --primary-card: #FFFFFF;       /* Cards brancos */
-    --primary-input: #F0F0F0;      /* Inputs com fundo levemente cinza */
-    --primary-button: #8B4C4C;     /* Marsala principal */
-    --primary-button-hover: #6A3A3A; /* Marsala mais escuro */
-    --text-primary: #4A4A4A;       /* Texto principal cinza escuro */
-    --text-secondary: #6C6C6C;     /* Texto secundário */
-    --danger: #D9534F;             /* Vermelho (mantido) */
-    --success: #5CB85C;            /* Verde (mantido) */
-    --warning: #F0AD4E;            /* Laranja (mantido) */
-    --info: #5BC0DE;               /* Azul claro (mantido) */
+    /* ============================================
+       CORES PRINCIPAIS - MARSALA SUAVIZADO
+       ============================================ */
+    --primary-bg: #FAF8F7;           /* Fundo geral mais claro e suave */
+    --primary-card: #FFFFFF;         /* Cards brancos puros */
+    --primary-input: #F5F3F2;        /* Inputs com fundo muito sutil */
+    --primary-button: #8B4C4C;       /* Marsala principal */
+    --primary-button-hover: #7A4242; /* Marsala hover mais suave */
+    --primary-button-active: #6A3A3A;/* Marsala active */
+    
+    /* Cores de texto suavizadas */
+    --text-primary: #3D3D3D;         /* Texto principal menos agressivo */
+    --text-secondary: #6B6B6B;       /* Texto secundário */
+    --text-tertiary: #9A9A9A;        /* Texto terciário (labels, placeholders) */
+    
+    /* Cores de status mantidas mas suavizadas */
+    --danger: #D9534F;
+    --danger-light: rgba(217, 83, 79, 0.1);
+    --success: #5CB85C;
+    --success-light: rgba(92, 184, 92, 0.1);
+    --warning: #F0AD4E;
+    --warning-light: rgba(240, 173, 78, 0.1);
+    --info: #5BC0DE;
+    --info-light: rgba(91, 192, 222, 0.1);
 
-    /* Espaçamentos */
-    --spacing-xs: 5px;
-    --spacing-sm: 10px;
-    --spacing-md: 15px;
-    --spacing-lg: 20px;
-    --spacing-xl: 30px;
+    /* ============================================
+       CORES DE SUPORTE
+       ============================================ */
+    --bg-secondary: #F5F3F2;         /* Alias para primary-bg */
+    --primary-color: #8B4C4C;        /* Alias para compatibilidade */
+    --primary-dark: #6A3A3A;         /* Alias para compatibilidade */
+    --primary-light: #A67070;        /* Marsala claro para hovers */
+    --border-color: #E5E3E2;         /* Bordas suaves e sutis */
+    --border-light: #F0EEED;         /* Bordas muito claras */
+    --border-focus: rgba(139, 76, 76, 0.2); /* Glow no focus */
 
-    /* Bordas */
-    --border-radius-sm: 8px;       /* Ajustei para um pouco menor, mais moderno */
-    --border-radius-md: 12px;
-    --border-radius-lg: 20px;
+    /* ============================================
+       BORDER RADIUS CONSISTENTE
+       ============================================ */
+    --radius-sm: 8px;                /* Inputs, elementos pequenos */
+    --radius-md: 10px;               /* Botões, badges */
+    --radius-lg: 12px;               /* Cards, containers, tabelas */
+    --radius-xl: 16px;               /* Modais, popovers */
+    --radius-2xl: 20px;              /* Elementos destacados */
+    --radius-full: 9999px;           /* Pills, avatares */
 
-    /* Sombras */
-    --box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08); /* Sombra mais suave */
+    /* ============================================
+       SOMBRAS SUAVES (ESTILO SAAS MODERNO)
+       ============================================ */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.1);
+    --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+    
+    /* Sombras específicas para componentes */
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-button: 0 2px 4px rgba(139, 76, 76, 0.15);
+    --shadow-button-hover: 0 4px 8px rgba(139, 76, 76, 0.2);
+    --shadow-input-focus: 0 0 0 3px rgba(139, 76, 76, 0.1);
+    --shadow-sidebar: 2px 0 12px rgba(0, 0, 0, 0.04);
+
+    /* ============================================
+       ESPAÇAMENTOS CONSISTENTES
+       ============================================ */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
+
+    /* ============================================
+       TRANSIÇÕES SUAVES
+       ============================================ */
+    --transition-fast: 150ms ease-in-out;
+    --transition-base: 200ms ease-in-out;
+    --transition-slow: 300ms ease-in-out;
+    --transition-bounce: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }

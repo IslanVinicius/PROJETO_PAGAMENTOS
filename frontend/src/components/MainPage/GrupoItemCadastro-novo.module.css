@@ -19,7 +19,7 @@
     justify-content: space-between;
     margin-bottom: var(--spacing-2xl);
     padding-bottom: var(--spacing-lg);
-    border-bottom: 3px solid var(--primary-color);
+    border-bottom: 3px solid var(--primary-button);
     background: linear-gradient(to right, var(--bg-secondary), transparent);
     padding: var(--spacing-lg);
     border-radius: var(--radius-md);
@@ -36,7 +36,7 @@
     font-size: 28px;
     font-weight: 700;
     margin: 0;
-    color: var(--primary-color);
+    color: var(--primary-button);
 }
 
 /* Navegação com ícones do Lucide */
@@ -55,7 +55,7 @@
     height: 42px;
     border: none;
     border-radius: var(--radius-md);
-    background-color: var(--primary-color);
+    background-color: var(--primary-button);
     color: white;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -73,7 +73,7 @@
 }
 
 .navButton:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-button-hover);
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }
@@ -83,7 +83,7 @@
 }
 
 .navButton:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -143,14 +143,14 @@
 }
 
 .searchInput:focus {
-    border-color: var(--primary-color);
+    border-color: var(--primary-button);
     box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
 }
 
 .searchButton {
     height: 48px;
     padding: 0 var(--spacing-2xl);
-    background-color: var(--primary-color);
+    background-color: var(--primary-button);
     color: white;
     border: none;
     border-radius: var(--radius-md);
@@ -173,7 +173,7 @@
 }
 
 .searchButton:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-button-hover);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
@@ -183,7 +183,7 @@
 }
 
 .searchButton:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -217,7 +217,7 @@
 
 .resultItem:hover {
     background-color: var(--bg-primary);
-    border-left-color: var(--primary-color);
+    border-left-color: var(--primary-button);
     transform: translateX(6px);
     box-shadow: var(--shadow-sm);
 }
@@ -269,7 +269,7 @@
 
 .formGroup label {
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--primary-button);
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -311,7 +311,7 @@
 .formGroup input:focus,
 .formGroup select:focus,
 .formGroup textarea:focus {
-    border-color: var(--primary-color);
+    border-color: var(--primary-button);
     box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1);
     background-color: var(--bg-primary);
 }
@@ -328,7 +328,7 @@
 }
 
 .idField input {
-    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    background: linear-gradient(135deg, var(--primary-input) 0%, var(--bg-secondary) 100%);
     color: var(--text-secondary);
     font-weight: 700;
     border-color: var(--border-light);
@@ -341,7 +341,7 @@
     padding: var(--spacing-xl);
     background-color: var(--bg-primary);
     border-radius: var(--radius-md);
-    border-top: 3px solid var(--primary-color);
+    border-top: 3px solid var(--primary-button);
     box-shadow: var(--shadow-sm);
 }
 
@@ -373,56 +373,56 @@
 }
 
 .btnSave {
-    background: linear-gradient(135deg, var(--success-color) 0%, #2d8645 100%);
+    background: linear-gradient(135deg, var(--success) 0%, #2d8645 100%);
     color: white;
 }
 
 .btnSave:hover:not(:disabled) {
-    background: linear-gradient(135deg, #2d8645 0%, var(--success-color) 100%);
+    background: linear-gradient(135deg, #2d8645 0%, var(--success) 100%);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
 
 .btnDelete {
-    background: linear-gradient(135deg, var(--danger-color) 0%, #b82a20 100%);
+    background: linear-gradient(135deg, var(--danger) 0%, #b82a20 100%);
     color: white;
 }
 
 .btnDelete:hover:not(:disabled) {
-    background: linear-gradient(135deg, #b82a20 0%, var(--danger-color) 100%);
+    background: linear-gradient(135deg, #b82a20 0%, var(--danger) 100%);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
 
 .btnEdit {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-button) 0%, var(--primary-button-hover) 100%);
     color: white;
 }
 
 .btnEdit:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-button-hover) 0%, var(--primary-button) 100%);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
 
 .btnNew {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-button) 0%, var(--primary-button-hover) 100%);
     color: white;
 }
 
 .btnNew:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-button-hover) 0%, var(--primary-button) 100%);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
 
 .btnCancel {
-    background: linear-gradient(135deg, var(--secondary-light) 0%, #7a8087 100%);
+    background: linear-gradient(135deg, var(--text-tertiary) 0%, #7a8087 100%);
     color: white;
 }
 
 .btnCancel:hover:not(:disabled) {
-    background: linear-gradient(135deg, #7a8087 0%, var(--secondary-light) 100%);
+    background: linear-gradient(135deg, #7a8087 0%, var(--text-tertiary) 100%);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
@@ -434,7 +434,7 @@
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: var(--bg-tertiary);
+    background: var(--primary-input);
     color: var(--text-tertiary);
     box-shadow: none;
 }
@@ -469,7 +469,7 @@
 .success {
     background: linear-gradient(135deg, #d9f0e1 0%, #c3e6d0 100%);
     color: #1e5a3a;
-    border-left-color: var(--success-color);
+    border-left-color: var(--success);
 }
 
 .success::before {
@@ -481,7 +481,7 @@
 .error {
     background: linear-gradient(135deg, #fde8e8 0%, #fdd5d5 100%);
     color: #7a2020;
-    border-left-color: var(--danger-color);
+    border-left-color: var(--danger);
 }
 
 .error::before {
