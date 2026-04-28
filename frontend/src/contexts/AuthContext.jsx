@@ -6,16 +6,39 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-    return jwtDecode(token);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return null;
+      
+      // Verificar se o token é válido e não expirou
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000; // Tempo atual em segundos
+      
+      // Se o token expirou, remove do localStorage
+      if (decoded.exp && decoded.exp < currentTime) {
+        localStorage.removeItem("token");
+        return null;
+      }
+      
+      return decoded;
+    } catch (error) {
+      // Se houver erro ao decodificar o token, remove do localStorage
+      console.error("Erro ao validar token:", error);
+      localStorage.removeItem("token");
+      return null;
+    }
   });
 
   async function login(username, password) {
-    const token = await loginService(username, password);
-    const decoded = jwtDecode(token);
-    setUser(decoded);
-    return decoded; // 👈 importante para o componente usar
+    try {
+      const token = await loginService(username, password);
+      const decoded = jwtDecode(token);
+      setUser(decoded);
+      return decoded; // 👈 importante para o componente usar
+    } catch (error) {
+      console.error("Erro no login:", error);
+      throw error;
+    }
   }
 
   function logout() {

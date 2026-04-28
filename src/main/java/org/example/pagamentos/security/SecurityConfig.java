@@ -38,6 +38,13 @@ public class SecurityConfig {
                         // ✅ Libera OPTIONS para todas as rotas (preflight)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // 🔓 libera arquivos estáticos (frontend React)
+                        .requestMatchers("/", "/index.html", "/assets/**", "/**.ico", "/**.png", "/**.svg", "/**.js", "/**.css").permitAll()
+                        
+                        // 🔓 libera todas as rotas do frontend SPA (React Router)
+                        // A autenticação é feita no frontend via JWT token
+                        .requestMatchers("/", "/login", "/admin", "/solicitante", "/escritorio", "/aprovador", "/expansao").permitAll()
+
                         // 🔓 libera login e cadastro
                         .requestMatchers("/api/auth/**").permitAll()
 
@@ -70,15 +77,19 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ Permite todas as origens (para desenvolvimento e rede local)
-        // Em produção, substitua por allowedOrigins com domínios específicos
+        // Quando frontend e backend estão no mesmo servidor (produção),
+        // o CORS não é necessário, mas mantemos para desenvolvimento
+        
+        // Permite todas as origens para desenvolvimento
+        // Em produção com arquivos estáticos, isso não afeta pois é same-origin
         configuration.addAllowedOriginPattern("*");
-        // ✅ Permite métodos HTTP
+        
+        // Permite métodos HTTP
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
         ));
 
-        // ✅ Permite headers
+        // Permite headers
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
@@ -87,16 +98,16 @@ public class SecurityConfig {
                 "Cache-Control"
         ));
 
-        // ✅ Permite envio de credenciais (cookies, headers de autorização)
+        // Permite envio de credenciais (cookies, headers de autorização)
         configuration.setAllowCredentials(true);
 
-        // ✅ Expõe headers específicos para o cliente
+        // Expõe headers específicos para o cliente
         configuration.setExposedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Disposition"
         ));
 
-        // ✅ Define o tempo máximo de cache do preflight (em segundos)
+        // Define o tempo máximo de cache do preflight (em segundos)
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

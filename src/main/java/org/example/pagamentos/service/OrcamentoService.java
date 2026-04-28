@@ -39,6 +39,7 @@ public class OrcamentoService {
     private final ItemRepository itemRepository;
     private final FileUploadService fileUploadService;
     private final AuthenticationUtil authenticationUtil;
+    private final org.example.pagamentos.service.ItemService itemService;
 
     public OrcamentoService(OrcamentoRepository  orcamentoRepository,
                             EmpresaRespository empresaRepository,
@@ -47,7 +48,8 @@ public class OrcamentoService {
                             OrcamentoImagemRepository orcamentoImagemRepository,
                             ItemRepository itemRepository,
                             FileUploadService fileUploadService,
-                            AuthenticationUtil authenticationUtil) {
+                            AuthenticationUtil authenticationUtil,
+                            org.example.pagamentos.service.ItemService itemService) {
         this.orcamentoRepository = orcamentoRepository;
         this.empresaRepository = empresaRepository;
         this.prestadorRepository = prestadorRepository;
@@ -56,6 +58,7 @@ public class OrcamentoService {
         this.itemRepository = itemRepository;
         this.fileUploadService = fileUploadService;
         this.authenticationUtil = authenticationUtil;
+        this.itemService = itemService;
     }
 
 
@@ -107,6 +110,18 @@ public class OrcamentoService {
         // Calcular totais
         orcamentoSalvo.calcularTotais();
         orcamentoSalvo = orcamentoRepository.save(orcamentoSalvo);
+
+        // Atualizar precoMedio de todos os itens deste orçamento
+        if (orcamentoDTO.getItens() != null && !orcamentoDTO.getItens().isEmpty()) {
+            for (OrcamentoItemDTO itemDTO : orcamentoDTO.getItens()) {
+                try {
+                    itemService.calcularEAtualizarPrecoMedio(itemDTO.getItemId());
+                } catch (Exception e) {
+                    // Log error but don't fail the transaction
+                    System.err.println("Erro ao atualizar precoMedio do item " + itemDTO.getItemId() + ": " + e.getMessage());
+                }
+            }
+        }
 
         return toDTO(orcamentoSalvo);
     }
@@ -211,7 +226,21 @@ public class OrcamentoService {
         // Calcular totais
         orcamentoModel.calcularTotais();
 
-        return toDTO(orcamentoRepository.save(orcamentoModel));
+        OrcamentoDTO result = toDTO(orcamentoRepository.save(orcamentoModel));
+
+        // Atualizar precoMedio de todos os itens deste orçamento
+        if (orcamentoDTO.getItens() != null && !orcamentoDTO.getItens().isEmpty()) {
+            for (OrcamentoItemDTO itemDTO : orcamentoDTO.getItens()) {
+                try {
+                    itemService.calcularEAtualizarPrecoMedio(itemDTO.getItemId());
+                } catch (Exception e) {
+                    // Log error but don't fail the transaction
+                    System.err.println("Erro ao atualizar precoMedio do item " + itemDTO.getItemId() + ": " + e.getMessage());
+                }
+            }
+        }
+
+        return result;
     }
 
 
