@@ -5,8 +5,8 @@ PID_FILE="application.pid"
 
 if [ -f "\" ]; then
     PID=\
-    echo "Parando aplicaÃ§Ã£o (PID: \12420)..."
-    kill \12420
+    echo "Parando aplicaÃ§Ã£o (PID: \22116)..."
+    kill \22116
     rm \
     echo "AplicaÃ§Ã£o parada."
 else

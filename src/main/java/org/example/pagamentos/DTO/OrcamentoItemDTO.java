@@ -21,4 +21,7 @@ public class OrcamentoItemDTO {
     private Integer quantidade;
     private Float valorUnitario;
     private Float valorTotal;
+    private String nomeManual; // Nome para itens manuais (quando itemId é null)
+    private String descricaoManual; // Para itens manuais (quando itemId é null)
+    private String tipoUnitarioManual; // Tipo unitário para itens manuais
 }

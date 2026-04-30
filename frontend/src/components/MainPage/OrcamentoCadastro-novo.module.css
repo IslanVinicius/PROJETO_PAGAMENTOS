@@ -1102,3 +1102,112 @@
         justify-content: center;
     }
 }
+
+/* Modal de Item Manual */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modalContent {
+    background-color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 2px solid var(--primary-button);
+    background: linear-gradient(to right, var(--bg-secondary), transparent);
+}
+
+.modalHeader h3 {
+    margin: 0;
+    color: var(--primary-button);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.modalClose {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+}
+
+.modalClose:hover {
+    background-color: var(--bg-secondary);
+    color: var(--danger);
+}
+
+.modalBody {
+    padding: var(--spacing-xl);
+    background-color: white;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-top: 1px solid var(--border-light);
+    background-color: #f8f9fa;
+}
+
+/* Estilos específicos para inputs no modal */
+.modalBody .formGroup input,
+.modalBody .formGroup select,
+.modalBody .formGroup textarea {
+    background-color: white !important;
+    color: #333 !important;
+    border: 1px solid #ddd !important;
+}
+
+.modalBody .formGroup label {
+    color: #555 !important;
+}

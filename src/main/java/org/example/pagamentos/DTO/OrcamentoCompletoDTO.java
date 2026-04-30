@@ -115,19 +115,39 @@ public class OrcamentoCompletoDTO {
             dto.setItens(orcamento.getItens().stream()
                 .map(item -> {
                     ItemModel itemModel = item.getItem();
-                    Float valorOriginal = itemModel.getValorUnitario();
-                    Float valorComDesconto = item.getValorUnitario();
                     
                     OrcamentoItemDTO itemDTO = new OrcamentoItemDTO();
                     itemDTO.setIdOrcamentoItem(item.getIdOrcamentoItem());
-                    itemDTO.setItemId(itemModel.getIdItem());
-                    itemDTO.setItemNome(itemModel.getNome());
-                    itemDTO.setDescricao(itemModel.getDescricao());
-                    itemDTO.setTipoUnitario(itemModel.getTipoUnitario() != null ? itemModel.getTipoUnitario().name() : "UNIDADE");
-                    itemDTO.setPrecoMedio(itemModel.getPrecoMedio());
-                    itemDTO.setValorUnitarioOriginal(valorOriginal);
-                    // Se o valor unitário for diferente do original, significa que houve desconto aplicado pelo backend
-                    itemDTO.setValorComDesconto(!valorOriginal.equals(valorComDesconto) ? valorComDesconto : null);
+                    
+                    if (itemModel != null) {
+                        // Item cadastrado
+                        Float valorOriginal = itemModel.getValorUnitario();
+                        Float valorComDesconto = item.getValorUnitario();
+                        
+                        itemDTO.setItemId(itemModel.getIdItem());
+                        itemDTO.setItemNome(itemModel.getNome());
+                        itemDTO.setDescricao(itemModel.getDescricao());
+                        itemDTO.setTipoUnitario(itemModel.getTipoUnitario() != null ? itemModel.getTipoUnitario().name() : "UNIDADE");
+                        itemDTO.setPrecoMedio(itemModel.getPrecoMedio());
+                        itemDTO.setValorUnitarioOriginal(valorOriginal);
+                        // Se o valor unitário for diferente do original, significa que houve desconto aplicado pelo backend
+                        itemDTO.setValorComDesconto(!valorOriginal.equals(valorComDesconto) ? valorComDesconto : null);
+                        itemDTO.setDescricaoManual(null);
+                        itemDTO.setTipoUnitarioManual(null);
+                    } else {
+                        // Item manual
+                        itemDTO.setItemId(null);
+                        itemDTO.setItemNome(item.getNomeManual() != null ? item.getNomeManual() : "Item Manual");
+                        itemDTO.setDescricao(item.getDescricaoManual());
+                        itemDTO.setTipoUnitario(item.getTipoUnitarioManual() != null ? item.getTipoUnitarioManual() : "UNIDADE");
+                        itemDTO.setPrecoMedio(null);
+                        itemDTO.setValorUnitarioOriginal(item.getValorUnitario());
+                        itemDTO.setValorComDesconto(null);
+                        itemDTO.setNomeManual(item.getNomeManual());
+                        itemDTO.setDescricaoManual(item.getDescricaoManual());
+                        itemDTO.setTipoUnitarioManual(item.getTipoUnitarioManual());
+                    }
+                    
                     itemDTO.setQuantidade(item.getQuantidade());
                     itemDTO.setValorUnitario(item.getValorUnitario());
                     itemDTO.setValorTotal(item.getValorTotal());
