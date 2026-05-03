@@ -1,6 +1,22 @@
 import { api } from './api';
 
-const getBaseUrl = () => localStorage.getItem('api_url') || 'http://localhost:8080/api';
+const getBaseUrl = () => {
+    // Se houver URL configurada no localStorage, usa ela
+    const storedUrl = localStorage.getItem('api_url');
+    if (storedUrl) return storedUrl;
+    
+    // Detecta se está em produção (servido pelo Spring Boot)
+    const isProduction = !window.location.port || 
+                        window.location.port === '8080' || 
+                        window.location.hostname !== 'localhost';
+    
+    if (isProduction) {
+        return '/api'; // Caminho relativo - funciona quando servido pelo mesmo servidor
+    }
+    
+    // Fallback para desenvolvimento com Vite
+    return 'http://localhost:8080/api';
+};
 
 // Converte URL relativa para URL absoluta
 const toAbsoluteUrl = (url) => {

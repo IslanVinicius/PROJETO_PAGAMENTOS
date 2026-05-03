@@ -34,7 +34,7 @@
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-2xl);
     padding: var(--spacing-lg);
-    border-bottom: 3px solid var(--primary-color);
+    border-bottom: 3px solid var(--primary-button);
     background: linear-gradient(to right, var(--bg-secondary), transparent);
     border-radius: var(--radius-md);
 }
@@ -50,7 +50,7 @@
     font-size: 14px;
     font-weight: 700;
     margin: 0;
-    color: var(--primary-color);
+    color: var(--primary-button);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -74,7 +74,7 @@
     height: 42px;
     border: none;
     border-radius: var(--radius-md);
-    background-color: var(--primary-color);
+    background-color: var(--primary-button);
     color: white;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -92,7 +92,7 @@
 }
 
 .searchIconButton:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-button-hover);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
@@ -102,7 +102,7 @@
 }
 
 .searchIconButton:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -134,7 +134,7 @@
 }
 
 .quickSearchInput:focus {
-    border-color: var(--primary-color);
+    border-color: var(--primary-button);
     box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 
@@ -160,7 +160,7 @@
     height: 42px;
     border: none;
     border-radius: var(--radius-md);
-    background-color: var(--primary-color);
+    background-color: var(--primary-button);
     color: white;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -178,7 +178,7 @@
 }
 
 .navButton:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-button-hover);
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }
@@ -188,7 +188,7 @@
 }
 
 .navButton:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -238,62 +238,62 @@
 }
 
 .headerBtnEdit {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-button) 0%, var(--primary-button-hover) 100%);
     color: white;
 }
 
 .headerBtnEdit:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-button-hover) 0%, var(--primary-button) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .headerBtnNew {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-button) 0%, var(--primary-button-hover) 100%);
     color: white;
 }
 
 .headerBtnNew:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-button-hover) 0%, var(--primary-button) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .headerBtnSave {
-    background: linear-gradient(135deg, var(--success-color) 0%, #2d8645 100%);
+    background: linear-gradient(135deg, var(--success) 0%, #2d8645 100%);
     color: white;
 }
 
 .headerBtnSave:hover:not(:disabled) {
-    background: linear-gradient(135deg, #2d8645 0%, var(--success-color) 100%);
+    background: linear-gradient(135deg, #2d8645 0%, var(--success) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .headerBtnDelete {
-    background: linear-gradient(135deg, var(--danger-color) 0%, #b82a20 100%);
+    background: linear-gradient(135deg, var(--danger) 0%, #b82a20 100%);
     color: white;
 }
 
 .headerBtnDelete:hover:not(:disabled) {
-    background: linear-gradient(135deg, #b82a20 0%, var(--danger-color) 100%);
+    background: linear-gradient(135deg, #b82a20 0%, var(--danger) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .headerBtnCancel {
-    background: linear-gradient(135deg, var(--secondary-light) 0%, #7a8087 100%);
+    background: linear-gradient(135deg, var(--text-tertiary) 0%, #7a8087 100%);
     color: white;
 }
 
 .headerBtnCancel:hover:not(:disabled) {
-    background: linear-gradient(135deg, #7a8087 0%, var(--secondary-light) 100%);
+    background: linear-gradient(135deg, #7a8087 0%, var(--text-tertiary) 100%);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .headerBtn:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -403,7 +403,7 @@
 }
 
 .inputField:focus {
-    border-color: var(--primary-color);
+    border-color: var(--primary-button);
     box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
 }
 
@@ -428,7 +428,7 @@
     padding: 0 var(--spacing-md);
     border: none;
     border-radius: var(--radius-md);
-    background-color: var(--success-color);
+    background-color: var(--success);
     color: white;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -461,7 +461,7 @@
 }
 
 .aiButton:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -473,7 +473,7 @@
     height: 42px;
     border: none;
     border-radius: var(--radius-md);
-    background-color: var(--primary-color);
+    background-color: var(--primary-button);
     color: white;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -492,7 +492,7 @@
 }
 
 .selectButton:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-button-hover);
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
 }
@@ -502,7 +502,7 @@
 }
 
 .selectButton:disabled {
-    background-color: var(--bg-tertiary);
+    background-color: var(--primary-input);
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
@@ -516,7 +516,7 @@
     justify-content: center;
     width: 42px;
     height: 42px;
-    color: var(--primary-color);
+    color: var(--primary-button);
     flex-shrink: 0;
 }
 

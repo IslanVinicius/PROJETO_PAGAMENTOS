@@ -10,4 +10,5 @@ import java.util.List;
 public interface OrcamentoItemRepository extends JpaRepository<OrcamentoItemModel, Long> {
     List<OrcamentoItemModel> findByOrcamento_OrcamentoID(Long orcamentoId);
     void deleteByOrcamento_OrcamentoID(Long orcamentoId);
+    List<OrcamentoItemModel> findByItem_IdItem(Long itemId);
 }

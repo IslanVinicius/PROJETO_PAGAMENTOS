@@ -85,28 +85,30 @@
 .form-select,
 .form-textarea {
     width: 100%;
-    padding: var(--spacing-md);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-md);
-    font-size: 1rem; /* Previne zoom no iOS */
-    background-color: var(--bg-primary);
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    background-color: var(--primary-input);
     color: var(--text-primary);
-    transition: var(--transition-fast);
-    min-height: 48px; /* Área de toque mínima */
+    transition: all var(--transition-base);
+    min-height: 48px;
 }
 
 .form-input:hover,
 .form-select:hover,
 .form-textarea:hover {
     border-color: var(--primary-light);
+    background-color: var(--bg-secondary);
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(139, 76, 76, 0.1);
+    border-color: var(--primary-button);
+    box-shadow: var(--shadow-input-focus);
+    background-color: var(--primary-card);
 }
 
 /* Textarea específico */
@@ -135,13 +137,24 @@
 .form-button {
     width: 100%;
     min-height: 48px;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 0.875rem 1.75rem;
     border: none;
     border-radius: var(--radius-md);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.form-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.form-button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
 }
 
 @media (min-width: 480px) {
@@ -160,46 +173,79 @@
     background-color: var(--bg-secondary);
 }
 
+@media (max-width: 767px) {
+    .form-section {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+}
+
 .form-section-title {
     font-size: 1.125rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-sm);
-    border-bottom: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-button);
 }
 
-/* Tabelas responsivas */
+@media (max-width: 767px) {
+    .form-section-title {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* Tabelas responsivas - DESIGN MODERNO */
 .table-wrapper {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin-top: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .data-table {
     width: 100%;
-    border-collapse: collapse;
-    min-width: 600px; /* Garante scroll horizontal no mobile */
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 600px;
+    background-color: var(--primary-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 .data-table th,
 .data-table td {
-    padding: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     text-align: left;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-light);
 }
 
 .data-table th {
-    background-color: var(--bg-secondary);
-    font-weight: 600;
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, #f5f3f2 100%);
+    font-weight: 700;
     color: var(--text-primary);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* Zebra strip - linhas alternadas */
+.data-table tbody tr:nth-child(even) {
+    background-color: rgba(245, 243, 242, 0.5);
 }
 
 .data-table tbody tr:hover {
-    background-color: var(--bg-secondary);
+    background-color: rgba(139, 76, 76, 0.04);
+    transition: background-color var(--transition-fast);
+}
+
+/* Última linha sem borda */
+.data-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 /* Cards para visualização mobile de tabelas */

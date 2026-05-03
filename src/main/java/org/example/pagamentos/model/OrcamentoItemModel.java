@@ -25,10 +25,25 @@ public class OrcamentoItemModel {
     private OrcamentoModel orcamento;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ITEM_ID", nullable = false)
+    @JoinColumn(name = "ITEM_ID", nullable = true) // nullable = true para suportar itens manuais
     @Getter
     @Setter
     private ItemModel item;
+
+    @Column(name = "DESCRICAO_MANUAL", length = 500)
+    @Getter
+    @Setter
+    private String descricaoManual;
+
+    @Column(name = "NOME_MANUAL", length = 200)
+    @Getter
+    @Setter
+    private String nomeManual;
+
+    @Column(name = "TIPO_UNITARIO_MANUAL", length = 50)
+    @Getter
+    @Setter
+    private String tipoUnitarioManual;
 
     @Column(name = "QUANTIDADE", nullable = false)
     @Getter

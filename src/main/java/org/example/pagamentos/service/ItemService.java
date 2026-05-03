@@ -25,16 +25,19 @@ public class ItemService {
     private final GrupoItemRepository grupoItemRepository;
     private final DescontoItemRepository descontoItemRepository;
     private final AuthenticationUtil authenticationUtil;
+    private final org.example.pagamentos.repository.OrcamentoItemRepository orcamentoItemRepository;
 
     @Autowired
     public ItemService(ItemRepository itemRepository,
                        GrupoItemRepository grupoItemRepository,
                        DescontoItemRepository descontoItemRepository,
-                       AuthenticationUtil authenticationUtil) {
+                       AuthenticationUtil authenticationUtil,
+                       org.example.pagamentos.repository.OrcamentoItemRepository orcamentoItemRepository) {
         this.itemRepository = itemRepository;
         this.grupoItemRepository = grupoItemRepository;
         this.descontoItemRepository = descontoItemRepository;
         this.authenticationUtil = authenticationUtil;
+        this.orcamentoItemRepository = orcamentoItemRepository;
     }
 
     @Transactional
@@ -54,7 +57,9 @@ public class ItemService {
         itemModel.setNome(itemDTO.getNome());
         itemModel.setDescricao(itemDTO.getDescricao());
         itemModel.setValorUnitario(itemDTO.getValorUnitario());
-        itemModel.setPrecoMedio(itemDTO.getPrecoMedio());
+        // precoMedio será calculado automaticamente quando o item for usado em orçamentos
+        // Inicialmente, define como null ou o valor unitário
+        itemModel.setPrecoMedio(null);
         itemModel.setTipoUnitario(itemDTO.getTipoUnitario());
         itemModel.setGrupo(grupo);
         itemModel.setUsuarioCriador(usuarioAutenticado);
@@ -169,7 +174,8 @@ public class ItemService {
         itemModel.setNome(itemDTO.getNome());
         itemModel.setDescricao(itemDTO.getDescricao());
         itemModel.setValorUnitario(itemDTO.getValorUnitario());
-        itemModel.setPrecoMedio(itemDTO.getPrecoMedio());
+        // precoMedio é calculado automaticamente - não permite alteração manual
+        // Mantém o valor atual se já existir, ou calcula na próxima vez que um orçamento for salvo
         itemModel.setTipoUnitario(itemDTO.getTipoUnitario());
 
         // Atualizar descontos progressivos
@@ -218,6 +224,47 @@ public class ItemService {
         }
 
         itemRepository.delete(itemModel);
+    }
+
+    /**
+     * Calcula e atualiza o precoMedio de um item baseado na média dos valores unitários
+     * de todos os orçamentos que utilizam este item.
+     * Fórmula: Soma de todos os valorUnitario / Quantidade de orçamentos
+     */
+    @Transactional
+    public void calcularEAtualizarPrecoMedio(Long itemId) {
+        ItemModel itemModel = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item não encontrado"));
+
+        // Buscar todos os itens de orçamento que usam este item
+        List<org.example.pagamentos.model.OrcamentoItemModel> orcamentoItens = 
+                orcamentoItemRepository.findByItem_IdItem(itemId);
+
+        if (orcamentoItens == null || orcamentoItens.isEmpty()) {
+            // Se não há orçamentos, mantém o precoMedio como está ou define como valorUnitario
+            if (itemModel.getPrecoMedio() == null) {
+                itemModel.setPrecoMedio(itemModel.getValorUnitario());
+            }
+        } else {
+            // Calcular a média dos valores unitários de todos os orçamentos
+            float somaValores = 0f;
+            int quantidadeOrcamentos = orcamentoItens.size();
+
+            for (org.example.pagamentos.model.OrcamentoItemModel orcamentoItem : orcamentoItens) {
+                if (orcamentoItem.getValorUnitario() != null) {
+                    somaValores += orcamentoItem.getValorUnitario();
+                }
+            }
+
+            // Calcular a média
+            float precoMedioCalculado = somaValores / quantidadeOrcamentos;
+            
+            // Atualizar o precoMedio no item
+            itemModel.setPrecoMedio(precoMedioCalculado);
+        }
+
+        // Salvar a atualização
+        itemRepository.save(itemModel);
     }
 
     public List<ItemDTO> buscarPorNome(String nome) {

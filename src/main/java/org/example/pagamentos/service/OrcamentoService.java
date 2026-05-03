@@ -39,6 +39,7 @@ public class OrcamentoService {
     private final ItemRepository itemRepository;
     private final FileUploadService fileUploadService;
     private final AuthenticationUtil authenticationUtil;
+    private final org.example.pagamentos.service.ItemService itemService;
 
     public OrcamentoService(OrcamentoRepository  orcamentoRepository,
                             EmpresaRespository empresaRepository,
@@ -47,7 +48,8 @@ public class OrcamentoService {
                             OrcamentoImagemRepository orcamentoImagemRepository,
                             ItemRepository itemRepository,
                             FileUploadService fileUploadService,
-                            AuthenticationUtil authenticationUtil) {
+                            AuthenticationUtil authenticationUtil,
+                            org.example.pagamentos.service.ItemService itemService) {
         this.orcamentoRepository = orcamentoRepository;
         this.empresaRepository = empresaRepository;
         this.prestadorRepository = prestadorRepository;
@@ -56,6 +58,7 @@ public class OrcamentoService {
         this.itemRepository = itemRepository;
         this.fileUploadService = fileUploadService;
         this.authenticationUtil = authenticationUtil;
+        this.itemService = itemService;
     }
 
 
@@ -91,10 +94,24 @@ public class OrcamentoService {
                 OrcamentoItemModel itemOrcamento = new OrcamentoItemModel();
                 itemOrcamento.setOrcamento(orcamentoSalvo);
                 
-                ItemModel item = itemRepository.findById(itemDTO.getItemId())
-                    .orElseThrow(() -> new RuntimeException("Item não encontrado: " + itemDTO.getItemId()));
+                // Verificar se é item manual (itemId = null) ou item cadastrado
+                if (itemDTO.getItemId() != null) {
+                    // Item cadastrado
+                    ItemModel item = itemRepository.findById(itemDTO.getItemId())
+                        .orElseThrow(() -> new RuntimeException("Item não encontrado: " + itemDTO.getItemId()));
+                    
+                    itemOrcamento.setItem(item);
+                    itemOrcamento.setNomeManual(null);
+                    itemOrcamento.setDescricaoManual(null);
+                    itemOrcamento.setTipoUnitarioManual(null);
+                } else {
+                    // Item manual
+                    itemOrcamento.setItem(null);
+                    itemOrcamento.setNomeManual(itemDTO.getNomeManual());
+                    itemOrcamento.setDescricaoManual(itemDTO.getDescricaoManual());
+                    itemOrcamento.setTipoUnitarioManual(itemDTO.getTipoUnitarioManual());
+                }
                 
-                itemOrcamento.setItem(item);
                 itemOrcamento.setQuantidade(itemDTO.getQuantidade());
                 itemOrcamento.setValorUnitario(itemDTO.getValorUnitario());
                 itemOrcamento.setValorTotal(itemDTO.getQuantidade() * itemDTO.getValorUnitario());
@@ -107,6 +124,21 @@ public class OrcamentoService {
         // Calcular totais
         orcamentoSalvo.calcularTotais();
         orcamentoSalvo = orcamentoRepository.save(orcamentoSalvo);
+
+        // Atualizar precoMedio de todos os itens deste orçamento
+        if (orcamentoDTO.getItens() != null && !orcamentoDTO.getItens().isEmpty()) {
+            for (OrcamentoItemDTO itemDTO : orcamentoDTO.getItens()) {
+                // Pular itens manuais (itemId = null)
+                if (itemDTO.getItemId() != null) {
+                    try {
+                        itemService.calcularEAtualizarPrecoMedio(itemDTO.getItemId());
+                    } catch (Exception e) {
+                        // Log error but don't fail the transaction
+                        System.err.println("Erro ao atualizar precoMedio do item " + itemDTO.getItemId() + ": " + e.getMessage());
+                    }
+                }
+            }
+        }
 
         return toDTO(orcamentoSalvo);
     }
@@ -195,10 +227,24 @@ public class OrcamentoService {
                 OrcamentoItemModel itemOrcamento = new OrcamentoItemModel();
                 itemOrcamento.setOrcamento(orcamentoModel);
                 
-                ItemModel item = itemRepository.findById(itemDTO.getItemId())
-                    .orElseThrow(() -> new RuntimeException("Item não encontrado: " + itemDTO.getItemId()));
+                // Verificar se é item manual (itemId = null) ou item cadastrado
+                if (itemDTO.getItemId() != null) {
+                    // Item cadastrado
+                    ItemModel item = itemRepository.findById(itemDTO.getItemId())
+                        .orElseThrow(() -> new RuntimeException("Item não encontrado: " + itemDTO.getItemId()));
+                    
+                    itemOrcamento.setItem(item);
+                    itemOrcamento.setNomeManual(null);
+                    itemOrcamento.setDescricaoManual(null);
+                    itemOrcamento.setTipoUnitarioManual(null);
+                } else {
+                    // Item manual
+                    itemOrcamento.setItem(null);
+                    itemOrcamento.setNomeManual(itemDTO.getNomeManual());
+                    itemOrcamento.setDescricaoManual(itemDTO.getDescricaoManual());
+                    itemOrcamento.setTipoUnitarioManual(itemDTO.getTipoUnitarioManual());
+                }
                 
-                itemOrcamento.setItem(item);
                 itemOrcamento.setQuantidade(itemDTO.getQuantidade());
                 itemOrcamento.setValorUnitario(itemDTO.getValorUnitario());
                 itemOrcamento.setValorTotal(itemDTO.getQuantidade() * itemDTO.getValorUnitario());
@@ -211,7 +257,24 @@ public class OrcamentoService {
         // Calcular totais
         orcamentoModel.calcularTotais();
 
-        return toDTO(orcamentoRepository.save(orcamentoModel));
+        OrcamentoDTO result = toDTO(orcamentoRepository.save(orcamentoModel));
+
+        // Atualizar precoMedio de todos os itens deste orçamento
+        if (orcamentoDTO.getItens() != null && !orcamentoDTO.getItens().isEmpty()) {
+            for (OrcamentoItemDTO itemDTO : orcamentoDTO.getItens()) {
+                // Pular itens manuais (itemId = null)
+                if (itemDTO.getItemId() != null) {
+                    try {
+                        itemService.calcularEAtualizarPrecoMedio(itemDTO.getItemId());
+                    } catch (Exception e) {
+                        // Log error but don't fail the transaction
+                        System.err.println("Erro ao atualizar precoMedio do item " + itemDTO.getItemId() + ": " + e.getMessage());
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
 
@@ -235,19 +298,39 @@ public class OrcamentoService {
             List<OrcamentoItemDTO> itensDTO = orcamentoModel.getItens().stream()
                 .map(item -> {
                     ItemModel itemModel = item.getItem();
-                    Float valorOriginal = itemModel.getValorUnitario();
-                    Float valorComDesconto = item.getValorUnitario();
                     
                     OrcamentoItemDTO dto = new OrcamentoItemDTO();
                     dto.setIdOrcamentoItem(item.getIdOrcamentoItem());
-                    dto.setItemId(itemModel.getIdItem());
-                    dto.setItemNome(itemModel.getNome());
-                    dto.setDescricao(itemModel.getDescricao());
-                    dto.setTipoUnitario(itemModel.getTipoUnitario() != null ? itemModel.getTipoUnitario().name() : "UNIDADE");
-                    dto.setPrecoMedio(itemModel.getPrecoMedio());
-                    dto.setValorUnitarioOriginal(valorOriginal);
-                    // Se o valor unitário for diferente do original, significa que houve desconto aplicado pelo backend
-                    dto.setValorComDesconto(!valorOriginal.equals(valorComDesconto) ? valorComDesconto : null);
+                    
+                    if (itemModel != null) {
+                        // Item cadastrado
+                        Float valorOriginal = itemModel.getValorUnitario();
+                        Float valorComDesconto = item.getValorUnitario();
+                        
+                        dto.setItemId(itemModel.getIdItem());
+                        dto.setItemNome(itemModel.getNome());
+                        dto.setDescricao(itemModel.getDescricao());
+                        dto.setTipoUnitario(itemModel.getTipoUnitario() != null ? itemModel.getTipoUnitario().name() : "UNIDADE");
+                        dto.setPrecoMedio(itemModel.getPrecoMedio());
+                        dto.setValorUnitarioOriginal(valorOriginal);
+                        // Se o valor unitário for diferente do original, significa que houve desconto aplicado pelo backend
+                        dto.setValorComDesconto(!valorOriginal.equals(valorComDesconto) ? valorComDesconto : null);
+                        dto.setDescricaoManual(null);
+                        dto.setTipoUnitarioManual(null);
+                    } else {
+                        // Item manual
+                        dto.setItemId(null);
+                        dto.setItemNome(item.getNomeManual() != null ? item.getNomeManual() : "Item Manual");
+                        dto.setDescricao(item.getDescricaoManual());
+                        dto.setTipoUnitario(item.getTipoUnitarioManual() != null ? item.getTipoUnitarioManual() : "UNIDADE");
+                        dto.setPrecoMedio(null);
+                        dto.setValorUnitarioOriginal(item.getValorUnitario());
+                        dto.setValorComDesconto(null);
+                        dto.setNomeManual(item.getNomeManual());
+                        dto.setDescricaoManual(item.getDescricaoManual());
+                        dto.setTipoUnitarioManual(item.getTipoUnitarioManual());
+                    }
+                    
                     dto.setQuantidade(item.getQuantidade());
                     dto.setValorUnitario(item.getValorUnitario());
                     dto.setValorTotal(item.getValorTotal());

@@ -54,6 +54,16 @@ function OrcamentoCadastro() {
     const [modalPrestadorAberto, setModalPrestadorAberto] = useState(false);
     const [modalEmpresaAberto, setModalEmpresaAberto] = useState(false);
     const [modalItensAberto, setModalItensAberto] = useState(false);
+    const [modalItemManualAberto, setModalItemManualAberto] = useState(false);
+    
+    // Estado para item manual
+    const [itemManual, setItemManual] = useState({
+        nome: '',
+        descricao: '',
+        tipoUnitario: 'UNIDADE',
+        valorUnitario: '',
+        quantidade: 1
+    });
 
     const fileInputRef = useRef(null);
 
@@ -368,7 +378,10 @@ function OrcamentoCadastro() {
             itens: itensOrcamento.map(item => ({
                 itemId: item.itemId,
                 quantidade: parseInt(item.quantidade, 10),
-                valorUnitario: parseFloat(item.valorUnitario)
+                valorUnitario: parseFloat(item.valorUnitario),
+                nomeManual: item.nomeManual || null,
+                descricaoManual: item.descricaoManual || null,
+                tipoUnitarioManual: item.tipoUnitarioManual || null
             }))
         };
 
@@ -605,6 +618,56 @@ function OrcamentoCadastro() {
             console.error('Erro ao buscar detalhes do item:', error);
             setMessage({ type: 'error', text: 'Erro ao carregar detalhes do item' });
         }
+    };
+
+    // Função para adicionar item manual
+    const handleAdicionarItemManual = () => {
+        // Validar campos obrigatórios
+        if (!itemManual.nome || !itemManual.descricao || !itemManual.valorUnitario || !itemManual.quantidade) {
+            setMessage({ type: 'error', text: 'Preencha todos os campos obrigatórios!' });
+            return;
+        }
+
+        const qtd = parseInt(itemManual.quantidade, 10) || 0;
+        const valor = parseFloat(itemManual.valorUnitario.replace(',', '.')) || 0;
+
+        if (qtd <= 0 || valor <= 0) {
+            setMessage({ type: 'error', text: 'Quantidade e valor devem ser maiores que zero!' });
+            return;
+        }
+
+        const novoItem = {
+            itemId: null, // NULL indica item manual
+            itemNome: itemManual.nome,
+            nomeManual: itemManual.nome,
+            descricao: itemManual.descricao,
+            descricaoManual: itemManual.descricao,
+            tipoUnitario: itemManual.tipoUnitario,
+            tipoUnitarioManual: itemManual.tipoUnitario,
+            precoMedio: null,
+            valorUnitarioOriginal: valor,
+            valorComDesconto: null,
+            quantidade: qtd,
+            valorUnitario: valor,
+            valorTotal: parseFloat((qtd * valor).toFixed(2)),
+            descontos: []
+        };
+
+        const novosItens = [...itensOrcamento, novoItem];
+        setItensOrcamento(novosItens);
+        calcularTotais(novosItens, desconto);
+        
+        // Limpar formulário e fechar modal
+        setItemManual({
+            nome: '',
+            descricao: '',
+            tipoUnitario: 'UNIDADE',
+            valorUnitario: '',
+            quantidade: 1
+        });
+        setModalItemManualAberto(false);
+        
+        setMessage({ type: 'success', text: 'Item manual adicionado!' });
     };
 
     const handleRemoverItem = (index) => {
@@ -1222,14 +1285,27 @@ function OrcamentoCadastro() {
                     <div className={styles.itensHeader}>
                         <h3>Itens do Orçamento</h3>
                         {!camposDesabilitados && (
-                            <button
-                                className={styles.btnAddItem}
-                                onClick={() => setModalItensAberto(true)}
-                                disabled={loading}
-                                type="button"
-                            >
-                                <Plus size={16} /> Adicionar Item
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    className={styles.btnAddItem}
+                                    onClick={() => setModalItensAberto(true)}
+                                    disabled={loading}
+                                    type="button"
+                                    title="Selecionar item cadastrado"
+                                >
+                                    <Plus size={16} /> Item Cadastrado
+                                </button>
+                                <button
+                                    className={styles.btnAddItem}
+                                    onClick={() => setModalItemManualAberto(true)}
+                                    disabled={loading}
+                                    type="button"
+                                    title="Adicionar item manual"
+                                    style={{ backgroundColor: '#ff9800' }}
+                                >
+                                    <Plus size={16} /> Item Manual
+                                </button>
+                            </div>
                         )}
                     </div>
 
@@ -1550,6 +1626,145 @@ function OrcamentoCadastro() {
                         <div className={styles.previewModalInfo}>
                             <strong>{previewImage.nome}</strong><br />
                             {formatarTamanhoArquivo(previewImage.tamanho)}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Item Manual */}
+            {modalItemManualAberto && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent} style={{ maxWidth: '500px' }}>
+                        <div className={styles.modalHeader}>
+                            <h3>Adicionar Item Manual</h3>
+                            <button
+                                className={styles.modalClose}
+                                onClick={() => {
+                                    setModalItemManualAberto(false);
+                                    setItemManual({
+                                        nome: '',
+                                        descricao: '',
+                                        tipoUnitario: 'UNIDADE',
+                                        valorUnitario: '',
+                                        quantidade: 1
+                                    });
+                                }}
+                                type="button"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className={styles.modalBody}>
+                            <div className={styles.formGroup}>
+                                <label>Nome do Item *</label>
+                                <input
+                                    type="text"
+                                    value={itemManual.nome}
+                                    onChange={(e) => setItemManual({ ...itemManual, nome: e.target.value })}
+                                    placeholder="Ex: Parafuso M8 x 50mm"
+                                    maxLength={200}
+                                />
+                            </div>
+                            
+                            <div className={styles.formGroup}>
+                                <label>Descrição *</label>
+                                <input
+                                    type="text"
+                                    value={itemManual.descricao}
+                                    onChange={(e) => setItemManual({ ...itemManual, descricao: e.target.value })}
+                                    placeholder="Ex: Parafuso sextavado cabeça hexagonal"
+                                    maxLength={500}
+                                />
+                            </div>
+                            
+                            <div className={styles.formGroup}>
+                                <label>Tipo Unitário *</label>
+                                <select
+                                    value={itemManual.tipoUnitario}
+                                    onChange={(e) => setItemManual({ ...itemManual, tipoUnitario: e.target.value })}
+                                >
+                                    <option value="UNIDADE">Unidade (un)</option>
+                                    <option value="METRO">Metro (m)</option>
+                                    <option value="METRO_QUADRADO">Metro Quadrado (m²)</option>
+                                    <option value="METRO_CUBICO">Metro Cúbico (m³)</option>
+                                    <option value="CENTIMETRO">Centímetro (cm)</option>
+                                    <option value="QUILOGRAMA">Quilograma (kg)</option>
+                                    <option value="GRAMA">Grama (g)</option>
+                                    <option value="LITRO">Litro (L)</option>
+                                    <option value="MILILITRO">Mililitro (ml)</option>
+                                    <option value="PACOTE">Pacote (pct)</option>
+                                    <option value="CAIXA">Caixa (cx)</option>
+                                    <option value="GALAO">Galão (gal)</option>
+                                    <option value="TAMBOR">Tambor (tmb)</option>
+                                    <option value="ROLO">Rolo (rl)</option>
+                                    <option value="PAR">Par (par)</option>
+                                </select>
+                            </div>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div className={styles.formGroup}>
+                                    <label>Quantidade *</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={itemManual.quantidade}
+                                        onChange={(e) => setItemManual({ ...itemManual, quantidade: e.target.value })}
+                                    />
+                                </div>
+                                
+                                <div className={styles.formGroup}>
+                                    <label>Valor Unitário *</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={itemManual.valorUnitario}
+                                        onChange={(e) => setItemManual({ ...itemManual, valorUnitario: e.target.value })}
+                                        placeholder="0,00"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Preview do valor total */}
+                            {itemManual.quantidade && itemManual.valorUnitario && (
+                                <div style={{ 
+                                    marginTop: '15px', 
+                                    padding: '10px', 
+                                    backgroundColor: '#f5f5f5', 
+                                    borderRadius: '4px',
+                                    textAlign: 'center'
+                                }}>
+                                    <strong>Valor Total: </strong>
+                                    {formatarValor(
+                                        parseFloat((parseInt(itemManual.quantidade || 0) * parseFloat(itemManual.valorUnitario.replace(',', '.') || 0)).toFixed(2))
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className={styles.modalFooter}>
+                            <button
+                                className={styles.btnCancel}
+                                onClick={() => {
+                                    setModalItemManualAberto(false);
+                                    setItemManual({
+                                        nome: '',
+                                        descricao: '',
+                                        tipoUnitario: 'UNIDADE',
+                                        valorUnitario: '',
+                                        quantidade: 1
+                                    });
+                                }}
+                                type="button"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                className={styles.btnSave}
+                                onClick={handleAdicionarItemManual}
+                                type="button"
+                            >
+                                Adicionar Item
+                            </button>
                         </div>
                     </div>
                 </div>

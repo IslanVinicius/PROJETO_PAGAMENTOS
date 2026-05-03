@@ -1,10 +1,36 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+// Em desenvolvimento, usa a variável de ambiente ou localhost
+// Em produção (quando servido pelo Spring Boot), usa caminho relativo '/api'
+const getBaseUrl = () => {
+    // Se VITE_API_URL estiver definido, usa ele (desenvolvimento)
+    if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL;
+    }
+    
+    // Detecta se está em produção (servido pelo Spring Boot)
+    // Quando o React é servido como static files, window.location.origin aponta para o Spring Boot
+    const isProduction = !window.location.port || 
+                        window.location.port === '8080' || 
+                        window.location.hostname !== 'localhost';
+    
+    if (isProduction) {
+        return '/api'; // Caminho relativo - funciona quando servido pelo mesmo servidor
+    }
+    
+    // Fallback para desenvolvimento com Vite
+    return 'http://localhost:8080/api';
+};
+
+const API_URL = getBaseUrl();
 
 const getToken = () => localStorage.getItem('token');
 
-const handleLogout = () => {
+const handleLogout = (message = 'Sessão expirada. Faça login novamente.') => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Mostrar mensagem antes de redirecionar
+    alert(message);
+    
     window.location.href = '/login';
 };
 
@@ -27,10 +53,13 @@ export const apiRequest = async (endpoint, options = {}) => {
             headers,
         });
 
-        // Se for 401 e não for endpoint público, faz logout
-        if (response.status === 401 && !isPublic) {
-            handleLogout();
-            throw new Error('Sessão expirada. Faça login novamente.');
+        // Se for 401 ou 403 e não for endpoint público, faz logout
+        if ((response.status === 401 || response.status === 403) && !isPublic) {
+            const errorMessage = response.status === 403 
+                ? 'Acesso negado. Sua sessão pode ter expirado. Faça login novamente.'
+                : 'Sessão expirada. Faça login novamente.';
+            handleLogout(errorMessage);
+            throw new Error(errorMessage);
         }
 
         if (!response.ok) {
@@ -43,6 +72,17 @@ export const apiRequest = async (endpoint, options = {}) => {
         if (error.message.includes('Failed to fetch')) {
             console.error('Erro de conexão com o servidor');
         }
+        
+        // Verificar se é erro de autenticação/autorização
+        if (error.message && (
+            error.message.includes('401') || 
+            error.message.includes('403') ||
+            error.message.includes('Sessão expirada') ||
+            error.message.includes('Acesso negado')
+        )) {
+            handleLogout(error.message);
+        }
+        
         throw error;
     }
 };

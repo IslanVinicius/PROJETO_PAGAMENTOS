@@ -639,14 +639,16 @@ function ItemCadastro() {
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label>PREÇO MÉDIO</label>
+                        <label>PREÇO MÉDIO </label>
                         <input
                             type="number"
                             step="0.01"
                             value={precoMedio || ''}
                             onChange={(e) => setPrecoMedio(e.target.value)}
                             placeholder="0,00"
-                            disabled={camposDesabilitados}
+                            disabled={true}
+                            style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                            title="Este campo é calculado automaticamente com base na média dos valores unitários de todos os orçamentos"
                         />
                     </div>
                     <div className={styles.formGroup}>
