@@ -24,9 +24,13 @@ const API_URL = getBaseUrl();
 
 const getToken = () => localStorage.getItem('token');
 
-const handleLogout = () => {
+const handleLogout = (message = 'Sessão expirada. Faça login novamente.') => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Mostrar mensagem antes de redirecionar
+    alert(message);
+    
     window.location.href = '/login';
 };
 
@@ -49,10 +53,13 @@ export const apiRequest = async (endpoint, options = {}) => {
             headers,
         });
 
-        // Se for 401 e não for endpoint público, faz logout
-        if (response.status === 401 && !isPublic) {
-            handleLogout();
-            throw new Error('Sessão expirada. Faça login novamente.');
+        // Se for 401 ou 403 e não for endpoint público, faz logout
+        if ((response.status === 401 || response.status === 403) && !isPublic) {
+            const errorMessage = response.status === 403 
+                ? 'Acesso negado. Sua sessão pode ter expirado. Faça login novamente.'
+                : 'Sessão expirada. Faça login novamente.';
+            handleLogout(errorMessage);
+            throw new Error(errorMessage);
         }
 
         if (!response.ok) {
@@ -65,6 +72,17 @@ export const apiRequest = async (endpoint, options = {}) => {
         if (error.message.includes('Failed to fetch')) {
             console.error('Erro de conexão com o servidor');
         }
+        
+        // Verificar se é erro de autenticação/autorização
+        if (error.message && (
+            error.message.includes('401') || 
+            error.message.includes('403') ||
+            error.message.includes('Sessão expirada') ||
+            error.message.includes('Acesso negado')
+        )) {
+            handleLogout(error.message);
+        }
+        
         throw error;
     }
 };
