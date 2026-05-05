@@ -15,7 +15,7 @@ import java.util.List;
 @Table(name="EMPRESAS")
 public class EmpresaModel {
 
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ENTIDADE") @Getter
     Long idEmpresa;
 
