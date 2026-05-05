@@ -65,6 +65,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/empresa/**").hasAnyRole("ADMIN", "EXPANSAO")
                         .requestMatchers("/api/endereco/**").hasAnyRole("ADMIN", "ESCRITORIO", "EXPANSAO")
 
+                        // 🔐 Dashboard - somente ADMIN
+                        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+
                         // 🔐 todo resto precisa estar autenticado
                         .anyRequest().authenticated()
                 )

@@ -1,5 +1,5 @@
 import { useAuth } from "../../contexts/AuthContext";
-import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package, MapPin } from 'lucide-react';
+import { Building2, Users, CreditCard, FileText, ClipboardCheck, CheckSquare, LogOut, Home, FolderOpen, Package, MapPin, BarChart2 } from 'lucide-react';
 import styles from "./Sidebar.module.css";
 
 function Sidebar({ activePage, onPageChange, onLogout, mobileOpen }) {
@@ -15,6 +15,17 @@ function Sidebar({ activePage, onPageChange, onLogout, mobileOpen }) {
       <div className={styles.menu}>
         {role === "ROLE_ADMIN" && (
           <>
+            <div
+              className={`${styles.menuItem} ${
+                activePage === "dashboard" ? styles.active : ""
+              }`}
+              onClick={() => onPageChange("dashboard")}
+              title="Dashboard administrativo"
+            >
+              <BarChart2 size={20} />
+              <span>Dashboard</span>
+            </div>
+
             <div
               className={`${styles.menuItem} ${
                 activePage === "empresa" ? styles.active : ""

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import Dashboard from "./Dashboard";
 import EmpresaCadastro from "./EmpresaCadastro";
 import PrestadorCadastro from "./PrestadorCadastro";
 import DadosBancariosCadastro from "./DadosBancariosCadastro";
@@ -24,6 +25,7 @@ function MainPage() {
     // 🔥 Permissões por role
     const rolePermissions = {
         ROLE_ADMIN: [
+            "dashboard",
             "empresa",
             "prestador",
             "dadosBancarios",
@@ -99,15 +101,7 @@ function MainPage() {
                 return <EnderecoCadastro />;
 
             case "dashboard":
-                return (
-                    <div className={styles.card}>
-                        <div className={styles.header}>
-                            <span>📊</span>
-                            <h2>Bem-vindo!</h2>
-                        </div>
-                        <p>Selecione uma opção no menu lateral.</p>
-                    </div>
-                );
+                return <Dashboard />;
 
             default:
                 return (

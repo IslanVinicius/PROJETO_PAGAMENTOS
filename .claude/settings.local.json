@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -name *.log -type f)",
+      "Bash(find . -name *.sql -type f)"
+    ]
+  }
+}
