@@ -53,12 +53,13 @@ export const apiRequest = async (endpoint, options = {}) => {
             headers,
         });
 
-        // Se for 401 ou 403 e não for endpoint público, faz logout
+        // Se for 401 ou 403 e não for endpoint público, pode indicar problema de autenticação
+        // Mas como removemos a expiração do token, apenas logamos o erro sem fazer logout automático
         if ((response.status === 401 || response.status === 403) && !isPublic) {
             const errorMessage = response.status === 403 
-                ? 'Acesso negado. Sua sessão pode ter expirado. Faça login novamente.'
-                : 'Sessão expirada. Faça login novamente.';
-            handleLogout(errorMessage);
+                ? 'Acesso negado. Verifique suas permissões.'
+                : 'Erro de autenticação. Verifique seu login.';
+            console.error(errorMessage);
             throw new Error(errorMessage);
         }
 
@@ -74,13 +75,15 @@ export const apiRequest = async (endpoint, options = {}) => {
         }
         
         // Verificar se é erro de autenticação/autorização
+        // Como removemos a expiração do token, apenas mostramos o erro sem fazer logout
         if (error.message && (
             error.message.includes('401') || 
             error.message.includes('403') ||
-            error.message.includes('Sessão expirada') ||
+            error.message.includes('autenticação') ||
             error.message.includes('Acesso negado')
         )) {
-            handleLogout(error.message);
+            console.error('Erro de autenticação/autorização:', error.message);
+            // Não faz mais logout automático
         }
         
         throw error;

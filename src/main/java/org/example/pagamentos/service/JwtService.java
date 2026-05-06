@@ -15,8 +15,8 @@ public class JwtService {
     private static final String SECRET =
             "minha-chave-super-secreta-com-no-minimo-256-bits-aqui";
 
-    private static final long EXPIRATION =
-            System.currentTimeMillis() + 86400000; // 1 hora
+    // Token sem expiração - válido indefinidamente
+    private static final long EXPIRATION = Long.MAX_VALUE;
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());

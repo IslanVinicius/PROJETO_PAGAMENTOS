@@ -10,15 +10,8 @@ export function AuthProvider({ children }) {
       const token = localStorage.getItem("token");
       if (!token) return null;
       
-      // Verificar se o token é válido e não expirou
+      // Decodificar o token sem verificar expiração
       const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000; // Tempo atual em segundos
-      
-      // Se o token expirou, remove do localStorage
-      if (decoded.exp && decoded.exp < currentTime) {
-        localStorage.removeItem("token");
-        return null;
-      }
       
       return decoded;
     } catch (error) {
@@ -29,33 +22,7 @@ export function AuthProvider({ children }) {
     }
   });
 
-  // Verificar expiração do token periodicamente (a cada 5 minutos)
-  useEffect(() => {
-    const checkTokenExpiration = () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-        
-        // Se o token expirou, faz logout automático
-        if (decoded.exp && decoded.exp < currentTime) {
-          console.log("Token expirado, fazendo logout automático...");
-          logout();
-        }
-      } catch (error) {
-        console.error("Erro ao verificar expiração do token:", error);
-        logout();
-      }
-    };
 
-    // Verificar a cada 5 minutos (300000 ms)
-    const interval = setInterval(checkTokenExpiration, 5 * 60 * 1000);
-    
-    // Limpar interval quando componente desmontar
-    return () => clearInterval(interval);
-  }, []);
 
   async function login(username, password) {
     try {
@@ -82,10 +49,9 @@ export function AuthProvider({ children }) {
       const token = localStorage.getItem("token");
       if (!token) return false;
       
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-      
-      return decoded.exp && decoded.exp > currentTime;
+      // Apenas verifica se o token pode ser decodificado
+      jwtDecode(token);
+      return true;
     } catch (error) {
       return false;
     }
