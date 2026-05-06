@@ -1,0 +1,88 @@
+.filtrosContainer {
+    background-color: white;
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.filtrosHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.filtrosTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.btnLimparFiltros {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 6px 12px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+}
+
+.btnLimparFiltros:hover {
+    background-color: var(--border-light);
+    border-color: var(--primary-button);
+}
+
+.filtrosGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.filtroGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filtroGroup label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filtroGroup input,
+.filtroGroup select {
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+.filtroGroup input:focus,
+.filtroGroup select:focus {
+    outline: none;
+    border-color: var(--primary-button);
+    box-shadow: 0 0 0 3px rgba(139, 76, 76, 0.1);
+}
+
+.filtroGroup input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filtrosGrid {
+        grid-template-columns: 1fr;
+    }
+}

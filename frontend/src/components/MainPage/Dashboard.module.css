@@ -1,7 +1,13 @@
+.pageWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .container {
+    width: 100%;
+    max-width: 1400px;
     padding: var(--spacing-lg);
-    background-color: var(--bg-secondary);
-    min-height: 100%;
 }
 
 .header {
@@ -16,7 +22,7 @@
 }
 
 .headerTitle h1 {
-    font-size: 28px;
+    font-size: clamp(20px, 2vw, 28px);
     font-weight: 600;
     margin: 0;
 }
@@ -99,7 +105,7 @@
 /* KPI Cards */
 .kpiGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
 }
@@ -169,7 +175,7 @@
 }
 
 .kpiValue {
-    font-size: 28px;
+    font-size: clamp(20px, 2vw, 28px);
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -186,7 +192,7 @@
 }
 
 .chartsRow:nth-of-type(2) {
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .chartFull {
@@ -527,4 +533,11 @@
     .periodLabels {
         height: 200px;
     }
+}
+
+.section {
+    margin-bottom: var(--spacing-xl);
+}
+.mainContent {
+    margin-left: 250px;
 }

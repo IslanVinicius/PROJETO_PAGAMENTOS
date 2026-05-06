@@ -108,4 +108,93 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
     List<Object[]> buscarUltimosOrcamentos(@Param("dataInicio") LocalDate dataInicio,
                                            @Param("dataFim") LocalDate dataFim,
                                            @Param("limite") int limite);
+
+    // ===== QUERIES PARA TABELA AVANÇADA DE ORÇAMENTOS =====
+
+    /**
+     * Busca orçamentos com filtros avançados e paginação
+     */
+    @Query(value = "SELECT o.orcamentoid, " +
+            "TO_CHAR(o.MOVIMENTO, 'DD/MM/YYYY') as movimento, " +
+            "u.username as usuario_criador, " +
+            "p.NOME as prestador, " +
+            "e.NOME as empresa, " +
+            "o.DESCRICAO, " +
+            "o.TIPO_PAGAMENTO, " +
+            "o.VALOR_FINAL " +
+            "FROM ORCAMENTOS o " +
+            "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
+            "INNER JOIN EMPRESAS e ON o.ENTIDADE = e.ENTIDADE " +
+            "INNER JOIN USUARIOS u ON o.usuario_criador_id = u.id " +
+            "WHERE (CAST(:dataInicio AS DATE) IS NULL OR o.MOVIMENTO >= CAST(:dataInicio AS DATE)) " +
+            "AND (CAST(:dataFim AS DATE) IS NULL OR o.MOVIMENTO <= CAST(:dataFim AS DATE)) " +
+            "AND (:usuarioCriadorId IS NULL OR u.id = :usuarioCriadorId) " +
+            "AND (:prestadorId IS NULL OR p.COD_PRESTADOR = :prestadorId) " +
+            "AND (:empresaId IS NULL OR e.ENTIDADE = :empresaId) " +
+            "AND (:descricao IS NULL OR UPPER(o.DESCRICAO) LIKE UPPER(CONCAT('%', :descricao, '%'))) " +
+            "AND (:tipoPagamento IS NULL OR o.TIPO_PAGAMENTO = :tipoPagamento) " +
+            "AND (:valorMin IS NULL OR o.VALOR_FINAL >= :valorMin) " +
+            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax)",
+            countQuery = "SELECT COUNT(*) " +
+            "FROM ORCAMENTOS o " +
+            "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
+            "INNER JOIN EMPRESAS e ON o.ENTIDADE = e.ENTIDADE " +
+            "INNER JOIN USUARIOS u ON o.usuario_criador_id = u.id " +
+            "WHERE (CAST(:dataInicio AS DATE) IS NULL OR o.MOVIMENTO >= CAST(:dataInicio AS DATE)) " +
+            "AND (CAST(:dataFim AS DATE) IS NULL OR o.MOVIMENTO <= CAST(:dataFim AS DATE)) " +
+            "AND (:usuarioCriadorId IS NULL OR u.id = :usuarioCriadorId) " +
+            "AND (:prestadorId IS NULL OR p.COD_PRESTADOR = :prestadorId) " +
+            "AND (:empresaId IS NULL OR e.ENTIDADE = :empresaId) " +
+            "AND (:descricao IS NULL OR UPPER(o.DESCRICAO) LIKE UPPER(CONCAT('%', :descricao, '%'))) " +
+            "AND (:tipoPagamento IS NULL OR o.TIPO_PAGAMENTO = :tipoPagamento) " +
+            "AND (:valorMin IS NULL OR o.VALOR_FINAL >= :valorMin) " +
+            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax)",
+            nativeQuery = true)
+    org.springframework.data.domain.Page<Object[]> buscarOrcamentosComFiltros(
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("usuarioCriadorId") Long usuarioCriadorId,
+            @Param("prestadorId") Long prestadorId,
+            @Param("empresaId") Long empresaId,
+            @Param("descricao") String descricao,
+            @Param("tipoPagamento") String tipoPagamento,
+            @Param("valorMin") Float valorMin,
+            @Param("valorMax") Float valorMax,
+            org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * Busca todos os orçamentos para exportação CSV (sem paginação)
+     */
+    @Query(value = "SELECT o.orcamentoid, " +
+            "TO_CHAR(o.MOVIMENTO, 'DD/MM/YYYY') as movimento, " +
+            "u.username as usuario_criador, " +
+            "p.NOME as prestador, " +
+            "e.NOME as empresa, " +
+            "o.DESCRICAO, " +
+            "o.TIPO_PAGAMENTO, " +
+            "o.VALOR_FINAL " +
+            "FROM ORCAMENTOS o " +
+            "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
+            "INNER JOIN EMPRESAS e ON o.ENTIDADE = e.ENTIDADE " +
+            "INNER JOIN USUARIOS u ON o.usuario_criador_id = u.id " +
+            "WHERE (CAST(:dataInicio AS DATE) IS NULL OR o.MOVIMENTO >= CAST(:dataInicio AS DATE)) " +
+            "AND (CAST(:dataFim AS DATE) IS NULL OR o.MOVIMENTO <= CAST(:dataFim AS DATE)) " +
+            "AND (:usuarioCriadorId IS NULL OR u.id = :usuarioCriadorId) " +
+            "AND (:prestadorId IS NULL OR p.COD_PRESTADOR = :prestadorId) " +
+            "AND (:empresaId IS NULL OR e.ENTIDADE = :empresaId) " +
+            "AND (:descricao IS NULL OR UPPER(o.DESCRICAO) LIKE UPPER(CONCAT('%', :descricao, '%'))) " +
+            "AND (:tipoPagamento IS NULL OR o.TIPO_PAGAMENTO = :tipoPagamento) " +
+            "AND (:valorMin IS NULL OR o.VALOR_FINAL >= :valorMin) " +
+            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax)",
+            nativeQuery = true)
+    List<Object[]> buscarOrcamentosParaExportacao(
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("usuarioCriadorId") Long usuarioCriadorId,
+            @Param("prestadorId") Long prestadorId,
+            @Param("empresaId") Long empresaId,
+            @Param("descricao") String descricao,
+            @Param("tipoPagamento") String tipoPagamento,
+            @Param("valorMin") Float valorMin,
+            @Param("valorMax") Float valorMax);
 }

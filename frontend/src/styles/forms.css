@@ -6,55 +6,58 @@
 /* Container principal do formulário */
 .form-container {
     width: 100%;
-    max-width: 100%;
-    padding: var(--spacing-md);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
 }
 
 @media (min-width: 768px) {
     .form-container {
-        padding: var(--spacing-lg);
+        padding: 24px;
     }
 }
 
 @media (min-width: 1024px) {
     .form-container {
-        padding: var(--spacing-xl);
+        padding: 32px;
     }
 }
 
 /* Grid de campos do formulário */
 .form-grid {
     display: grid;
-    gap: var(--spacing-md);
+    gap: 16px;
     grid-template-columns: 1fr;
 }
 
-/* Mobile: 1 coluna */
+/* Mobile pequeno (<480px): 1 coluna */
 @media (min-width: 480px) {
     .form-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
     }
 }
 
-/* Tablet: 2-3 colunas */
+/* Tablet (768px+): 2-3 colunas */
 @media (min-width: 768px) {
     .form-grid {
-        gap: var(--spacing-lg);
-        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
 }
 
-/* Desktop: 3-4 colunas */
+/* Desktop (1024px+): 3-4 colunas */
 @media (min-width: 1024px) {
     .form-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
     }
 }
 
-/* Wide screen: até 4 colunas */
+/* Wide screen (1440px+): até 4 colunas */
 @media (min-width: 1440px) {
     .form-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 }
 
@@ -121,8 +124,8 @@
 .form-actions {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-    margin-top: var(--spacing-lg);
+    gap: 12px;
+    margin-top: 24px;
     width: 100%;
 }
 
@@ -130,6 +133,22 @@
     .form-actions {
         flex-direction: row;
         justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+
+/* Grupo de botões - nunca quebrar layout */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .button-group {
+        width: auto;
     }
 }
 
@@ -137,14 +156,15 @@
 .form-button {
     width: 100%;
     min-height: 48px;
-    padding: 0.875rem 1.75rem;
+    padding: 12px 24px;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-sm);
+    white-space: nowrap;
 }
 
 .form-button:hover {
@@ -358,4 +378,112 @@
 .form-required {
     color: var(--danger);
     margin-left: var(--spacing-xs);
+}
+
+/* ============================================
+   CLASSES UTILITÁRIAS RESPONSIVAS
+   ============================================ */
+
+/* Container centralizado com max-width */
+.container-centered {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+@media (min-width: 768px) {
+    .container-centered {
+        padding: 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container-centered {
+        padding: 32px;
+    }
+}
+
+/* Grid responsivo automático */
+.grid-responsive {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+@media (max-width: 479px) {
+    .grid-responsive {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Flex wrap para botões e ações */
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Stack vertical mobile */
+.stack-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (min-width: 768px) {
+    .stack-mobile {
+        flex-direction: row;
+        gap: 16px;
+    }
+}
+
+/* Inputs sempre 100% largura */
+.input-full {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Header responsivo */
+.header-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+}
+
+@media (min-width: 768px) {
+    .header-responsive {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Botões em header - stack no mobile */
+.header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
+@media (min-width: 480px) {
+    .header-actions {
+        width: auto;
+        justify-content: flex-end;
+    }
+}
+
+.header-actions button {
+    flex: 1;
+    min-width: 120px;
+}
+
+@media (min-width: 768px) {
+    .header-actions button {
+        flex: initial;
+        min-width: auto;
+    }
 }

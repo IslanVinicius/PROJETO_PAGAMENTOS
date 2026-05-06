@@ -10,7 +10,7 @@ import KpiCard from './Dashboard/KpiCard';
 import GraficoEvolucao from './Dashboard/GraficoEvolucao';
 import GraficoPrestadores from './Dashboard/GraficoPrestadores';
 import GraficoStatus from './Dashboard/GraficoStatus';
-import TabelaOrcamentos from './Dashboard/TabelaOrcamentos';
+import TabelaOrcamentosProfissional from './Dashboard/TabelaOrcamentosProfissional';
 
 function Dashboard() {
     const [message, setMessage] = useMensagemTemporaria(3000);
@@ -49,13 +49,6 @@ function Dashboard() {
     const { data: statusData, isLoading: loadingStatus } = useQuery({
         queryKey: ['dashboardStatus', filtrosAplicados],
         queryFn: () => dashboardService.obterStatus(filtrosAplicados),
-        staleTime: 5 * 60 * 1000,
-        retry: 2
-    });
-
-    const { data: ultimosData, isLoading: loadingUltimos } = useQuery({
-        queryKey: ['dashboardUltimos', filtrosAplicados],
-        queryFn: () => dashboardService.obterUltimos(filtrosAplicados, 10),
         staleTime: 5 * 60 * 1000,
         retry: 2
     });
@@ -194,12 +187,9 @@ function Dashboard() {
                 </div>
             </div>
 
-            {/* Tabela de Últimos Orçamentos */}
+            {/* Tabela Profissional de Orçamentos */}
             <div className={styles.tableSection}>
-                <TabelaOrcamentos 
-                    data={ultimosData || []} 
-                    loading={loadingUltimos} 
-                />
+                <TabelaOrcamentosProfissional />
             </div>
 
             {/* Estado vazio quando não há dados */}
