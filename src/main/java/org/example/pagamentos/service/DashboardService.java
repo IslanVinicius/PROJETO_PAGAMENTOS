@@ -69,13 +69,177 @@ public class DashboardService {
             }
         }
 
-        // Montar DTO de resposta com apenas KPIs
+        // Calcular taxa de aprovação
+        List<Object[]> statusData = orcamentoRepository.buscarDistribuicaoStatus(dataInicio, dataFim);
+        float taxaAprovacao = calcularTaxaAprovacao(statusData);
+
+        // Montar DTO de resposta
         DashboardDTO dashboard = new DashboardDTO();
         dashboard.setTotalOrcamentos(totalOrcamentos);
         dashboard.setValorTotal(valorTotal);
         dashboard.setTicketMedio(ticketMedio);
-
+        dashboard.setTaxaAprovacao(taxaAprovacao);
+        
         return dashboard;
+    }
+
+    /**
+     * Retorna evolução de orçamentos por período
+     */
+    public List<Map<String, Object>> getEvolucao(DashboardFiltroDTO filtro) {
+        if (!authenticationUtil.hasFullDataAccess()) {
+            throw new AccessDeniedException("Apenas administradores podem acessar o dashboard");
+        }
+
+        LocalDate dataInicio = parseData(filtro.getDataInicio());
+        LocalDate dataFim = parseData(filtro.getDataFim());
+        
+        if (dataInicio == null) {
+            dataInicio = LocalDate.of(1900, 1, 1);
+        }
+        if (dataFim == null) {
+            dataFim = LocalDate.of(9999, 12, 31);
+        }
+
+        List<Object[]> results = orcamentoRepository.buscarEvolucaoPorPeriodo(dataInicio, dataFim);
+        
+        return results.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("data", row[0].toString());
+            map.put("valor", ((Number) row[1]).floatValue());
+            map.put("quantidade", ((Number) row[2]).intValue());
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Retorna ranking de prestadores
+     */
+    public List<Map<String, Object>> getPrestadores(DashboardFiltroDTO filtro) {
+        if (!authenticationUtil.hasFullDataAccess()) {
+            throw new AccessDeniedException("Apenas administradores podem acessar o dashboard");
+        }
+
+        LocalDate dataInicio = parseData(filtro.getDataInicio());
+        LocalDate dataFim = parseData(filtro.getDataFim());
+        
+        if (dataInicio == null) {
+            dataInicio = LocalDate.of(1900, 1, 1);
+        }
+        if (dataFim == null) {
+            dataFim = LocalDate.of(9999, 12, 31);
+        }
+
+        List<Object[]> results = orcamentoRepository.buscarRankingPrestadores(dataInicio, dataFim);
+        
+        return results.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("prestadorId", ((Number) row[0]).longValue());
+            map.put("nome", row[1].toString());
+            map.put("valorTotal", ((Number) row[2]).floatValue());
+            map.put("quantidade", ((Number) row[3]).intValue());
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Retorna distribuição por status
+     */
+    public List<Map<String, Object>> getStatus(DashboardFiltroDTO filtro) {
+        if (!authenticationUtil.hasFullDataAccess()) {
+            throw new AccessDeniedException("Apenas administradores podem acessar o dashboard");
+        }
+
+        LocalDate dataInicio = parseData(filtro.getDataInicio());
+        LocalDate dataFim = parseData(filtro.getDataFim());
+        
+        if (dataInicio == null) {
+            dataInicio = LocalDate.of(1900, 1, 1);
+        }
+        if (dataFim == null) {
+            dataFim = LocalDate.of(9999, 12, 31);
+        }
+
+        List<Object[]> results = orcamentoRepository.buscarDistribuicaoStatus(dataInicio, dataFim);
+        
+        int total = results.stream().mapToInt(row -> ((Number) row[1]).intValue()).sum();
+        
+        return results.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            String status = row[0].toString();
+            int quantidade = ((Number) row[1]).intValue();
+            float percentual = total > 0 ? (quantidade * 100.0f / total) : 0;
+            
+            map.put("status", status);
+            map.put("quantidade", quantidade);
+            map.put("percentual", percentual);
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Retorna últimos orçamentos
+     */
+    public List<Map<String, Object>> getUltimosOrcamentos(DashboardFiltroDTO filtro, int limite) {
+        if (!authenticationUtil.hasFullDataAccess()) {
+            throw new AccessDeniedException("Apenas administradores podem acessar o dashboard");
+        }
+
+        LocalDate dataInicio = parseData(filtro.getDataInicio());
+        LocalDate dataFim = parseData(filtro.getDataFim());
+        
+        if (dataInicio == null) {
+            dataInicio = LocalDate.of(1900, 1, 1);
+        }
+        if (dataFim == null) {
+            dataFim = LocalDate.of(9999, 12, 31);
+        }
+
+        List<Object[]> results = orcamentoRepository.buscarUltimosOrcamentos(dataInicio, dataFim, limite);
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        
+        return results.stream().map(row -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("orcamentoId", ((Number) row[0]).longValue());
+            map.put("prestador", row[1].toString());
+            map.put("valor", ((Number) row[2]).floatValue());
+            map.put("status", row[3].toString());
+            
+            // Formatar data
+            try {
+                LocalDate data = LocalDate.parse(row[4].toString());
+                map.put("data", data.format(formatter));
+            } catch (Exception e) {
+                map.put("data", row[4].toString());
+            }
+            
+            return map;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Calcula taxa de aprovação baseada nos dados de status
+     */
+    private float calcularTaxaAprovacao(List<Object[]> statusData) {
+        if (statusData == null || statusData.isEmpty()) {
+            return 0;
+        }
+        
+        int total = 0;
+        int aprovados = 0;
+        
+        for (Object[] row : statusData) {
+            String status = row[0].toString();
+            int quantidade = ((Number) row[1]).intValue();
+            total += quantidade;
+            
+            if ("APROVADO".equalsIgnoreCase(status)) {
+                aprovados += quantidade;
+            }
+        }
+        
+        return total > 0 ? (aprovados * 100.0f / total) : 0;
     }
 
     /**

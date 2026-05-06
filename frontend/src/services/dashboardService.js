@@ -1,7 +1,10 @@
 import { api } from './api';
 
 export const dashboardService = {
-    async obterDados(filtros = {}) {
+    /**
+     * Obtém resumo/KPIs do dashboard
+     */
+    async obterResumo(filtros = {}) {
         const body = {
             dataInicio: filtros.dataInicio || null,
             dataFim: filtros.dataFim || null,
@@ -10,7 +13,59 @@ export const dashboardService = {
             tiposPagamento: filtros.tiposPagamento && filtros.tiposPagamento.length > 0 ? filtros.tiposPagamento : null
         };
 
-        const response = await api.post('/dashboard', body);
+        const response = await api.post('/dashboard/resumo', body);
+        return await response.json();
+    },
+
+    /**
+     * Obtém dados de evolução temporal
+     */
+    async obterEvolucao(filtros = {}) {
+        const body = {
+            dataInicio: filtros.dataInicio || null,
+            dataFim: filtros.dataFim || null
+        };
+
+        const response = await api.post('/dashboard/evolucao', body);
+        return await response.json();
+    },
+
+    /**
+     * Obtém ranking de prestadores
+     */
+    async obterPrestadores(filtros = {}) {
+        const body = {
+            dataInicio: filtros.dataInicio || null,
+            dataFim: filtros.dataFim || null
+        };
+
+        const response = await api.post('/dashboard/prestadores', body);
+        return await response.json();
+    },
+
+    /**
+     * Obtém distribuição por status
+     */
+    async obterStatus(filtros = {}) {
+        const body = {
+            dataInicio: filtros.dataInicio || null,
+            dataFim: filtros.dataFim || null
+        };
+
+        const response = await api.post('/dashboard/status', body);
+        return await response.json();
+    },
+
+    /**
+     * Obtém últimos orçamentos
+     */
+    async obterUltimos(filtros = {}, limite = 10) {
+        const body = {
+            dataInicio: filtros.dataInicio || null,
+            dataFim: filtros.dataFim || null
+        };
+
+        const response = await api.post(`/dashboard/ultimos?limite=${limite}`, body);
         return await response.json();
     }
 };

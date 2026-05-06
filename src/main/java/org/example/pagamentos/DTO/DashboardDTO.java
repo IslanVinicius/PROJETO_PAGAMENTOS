@@ -17,6 +17,7 @@ public class DashboardDTO {
     private Integer totalOrcamentos;
     private Float valorTotal;
     private Float ticketMedio;
+    private Float taxaAprovacao;  // Taxa de aprovação em %
     
     // Dados para gráficos
     private List<Map<String, Object>> orcamentosPorEmpresa;

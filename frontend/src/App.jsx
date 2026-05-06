@@ -1,9 +1,21 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Login from "./components/Login/Login";
 import MainPage from "./components/MainPage/MainPage";
 import "./styles/global.css";  // ✅ ÚNICO ARQUIVO CSS IMPORTADO AQUI
 import PrivateRoute from "./routes/PrivateRoute";
+
+// Criar cliente do React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+    },
+  },
+});
 
 // Componente para rotas protegidas
 function ProtectedRoute({ children }) {
@@ -32,11 +44,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(find . -name *.log -type f)",
-      "Bash(find . -name *.sql -type f)"
+      "Bash(find . -name *.sql -type f)",
+      "Bash(find /c/Users/islan/IdeaProjects/PROJETO_PAGAMENTOS/frontend/src -type f -name *.jsx -o -name *.js -o -name *.json)",
+      "Bash(/dev/stdout:*)",
+      "Read(//dev/**)"
     ]
   }
 }

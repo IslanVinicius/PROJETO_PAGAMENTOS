@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, DollarSign, FileText } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { BarChart3, TrendingUp, DollarSign, FileText, CheckCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import styles from './Dashboard.module.css';
 import { dashboardService } from '../../services/dashboardService';
 import { useMensagemTemporaria } from '../../hooks/useMensagemTemporaria';
 
+// Importar componentes do Dashboard
+import KpiCard from './Dashboard/KpiCard';
+import GraficoEvolucao from './Dashboard/GraficoEvolucao';
+import GraficoPrestadores from './Dashboard/GraficoPrestadores';
+import GraficoStatus from './Dashboard/GraficoStatus';
+import TabelaOrcamentos from './Dashboard/TabelaOrcamentos';
+
 function Dashboard() {
-    const [dados, setDados] = useState(null);
-    const [loading, setLoading] = useState(false);
     const [message, setMessage] = useMensagemTemporaria(3000);
     
     // Filtros GLOBAIS (topo) - APENAS datas
@@ -15,51 +21,67 @@ function Dashboard() {
         dataFim: ''
     });
 
-    // Carregar dados ao montar componente
-    useEffect(() => {
-        carregarDashboard();
-    }, []);
+    // Debounce para filtros - evita múltiplas requisições
+    const [filtrosAplicados, setFiltrosAplicados] = useState(filtrosGlobais);
 
-    const carregarDashboard = async () => {
-        setLoading(true);
-        try {
-            // Combina filtros globais (datas) para todos os gráficos
-            const data = await dashboardService.obterDados(filtrosGlobais);
-            setDados(data);
-        } catch (error) {
-            setMessage({ type: 'error', text: error.message || 'Erro ao carregar dashboard' });
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Queries com React Query
+    const { data: resumoData, isLoading: loadingResumo } = useQuery({
+        queryKey: ['dashboardResumo', filtrosAplicados],
+        queryFn: () => dashboardService.obterResumo(filtrosAplicados),
+        staleTime: 5 * 60 * 1000, // 5 minutos
+        retry: 2
+    });
 
-    const handleAplicarFiltros = () => {
-        carregarDashboard();
-    };
+    const { data: evolucaoData, isLoading: loadingEvolucao } = useQuery({
+        queryKey: ['dashboardEvolucao', filtrosAplicados],
+        queryFn: () => dashboardService.obterEvolucao(filtrosAplicados),
+        staleTime: 5 * 60 * 1000,
+        retry: 2
+    });
 
-    const handleLimparFiltros = () => {
-        setFiltrosGlobais({
+    const { data: prestadoresData, isLoading: loadingPrestadores } = useQuery({
+        queryKey: ['dashboardPrestadores', filtrosAplicados],
+        queryFn: () => dashboardService.obterPrestadores(filtrosAplicados),
+        staleTime: 5 * 60 * 1000,
+        retry: 2
+    });
+
+    const { data: statusData, isLoading: loadingStatus } = useQuery({
+        queryKey: ['dashboardStatus', filtrosAplicados],
+        queryFn: () => dashboardService.obterStatus(filtrosAplicados),
+        staleTime: 5 * 60 * 1000,
+        retry: 2
+    });
+
+    const { data: ultimosData, isLoading: loadingUltimos } = useQuery({
+        queryKey: ['dashboardUltimos', filtrosAplicados],
+        queryFn: () => dashboardService.obterUltimos(filtrosAplicados, 10),
+        staleTime: 5 * 60 * 1000,
+        retry: 2
+    });
+
+    // Handler para aplicar filtros com debounce
+    const handleAplicarFiltros = useCallback(() => {
+        setFiltrosAplicados(filtrosGlobais);
+    }, [filtrosGlobais]);
+
+    // Handler para limpar filtros
+    const handleLimparFiltros = useCallback(() => {
+        const filtrosVazios = {
             dataInicio: '',
             dataFim: ''
-        });
-        setTimeout(carregarDashboard, 100);
-    };
+        };
+        setFiltrosGlobais(filtrosVazios);
+        setFiltrosAplicados(filtrosVazios);
+    }, []);
 
-    const formatarMoeda = (valor) => {
+    // Formatar moeda
+    const formatarMoeda = useCallback((valor) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL'
         }).format(valor || 0);
-    };
-
-    if (loading && !dados) {
-        return (
-            <div className={styles.loading}>
-                <div className={styles.spinner}></div>
-                <p>Carregando dashboard...</p>
-            </div>
-        );
-    }
+    }, []);
 
     return (
         <div className={styles.container}>
@@ -102,69 +124,89 @@ function Dashboard() {
                     <button 
                         className={styles.btnFiltrar}
                         onClick={handleAplicarFiltros}
-                        disabled={loading}
                     >
-                        {loading ? 'Filtrando...' : 'Aplicar Filtros'}
+                        Aplicar Filtros
                     </button>
                     <button 
                         className={styles.btnLimpar}
                         onClick={handleLimparFiltros}
-                        disabled={loading}
                     >
                         Limpar
                     </button>
                 </div>
             </div>
 
-            {/* Loading ao filtrar */}
-            {loading && dados && (
-                <div className={styles.loadingOverlay}>
-                    <div className={styles.spinner}></div>
-                </div>
-            )}
-
             {/* KPIs Cards */}
-            {dados && (
-                <>
-                    <div className={styles.kpiGrid}>
-                        <div className={styles.kpiCard}>
-                            <div className={styles.kpiIcon}>
-                                <FileText size={24} />
-                            </div>
-                            <div className={styles.kpiContent}>
-                                <span className={styles.kpiLabel}>Total de Orçamentos</span>
-                                <span className={styles.kpiValue}>{dados.totalOrcamentos || 0}</span>
-                            </div>
-                        </div>
+            <div className={styles.kpiGrid}>
+                <KpiCard
+                    title="Total de Orçamentos"
+                    value={resumoData?.totalOrcamentos || 0}
+                    icon={<FileText size={24} />}
+                    color="blue"
+                />
+                
+                <KpiCard
+                    title="Valor Total"
+                    value={formatarMoeda(resumoData?.valorTotal)}
+                    icon={<DollarSign size={24} />}
+                    color="green"
+                />
+                
+                <KpiCard
+                    title="Ticket Médio"
+                    value={formatarMoeda(resumoData?.ticketMedio)}
+                    icon={<TrendingUp size={24} />}
+                    color="purple"
+                />
+                
+                <KpiCard
+                    title="Taxa de Aprovação"
+                    value={`${(resumoData?.taxaAprovacao || 0).toFixed(1)}%`}
+                    icon={<CheckCircle size={24} />}
+                    color="orange"
+                />
+            </div>
 
-                        <div className={styles.kpiCard}>
-                            <div className={styles.kpiIcon}>
-                                <DollarSign size={24} />
-                            </div>
-                            <div className={styles.kpiContent}>
-                                <span className={styles.kpiLabel}>Valor Total</span>
-                                <span className={styles.kpiValue}>{formatarMoeda(dados.valorTotal)}</span>
-                            </div>
-                        </div>
+            {/* Gráficos - Primeira Linha */}
+            <div className={styles.chartsRow}>
+                <div className={styles.chartFull}>
+                    <GraficoEvolucao 
+                        data={evolucaoData || []} 
+                        loading={loadingEvolucao} 
+                    />
+                </div>
+            </div>
 
-                        <div className={styles.kpiCard}>
-                            <div className={styles.kpiIcon}>
-                                <TrendingUp size={24} />
-                            </div>
-                            <div className={styles.kpiContent}>
-                                <span className={styles.kpiLabel}>Ticket Médio</span>
-                                <span className={styles.kpiValue}>{formatarMoeda(dados.ticketMedio)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </>
-            )}
+            {/* Gráficos - Segunda Linha */}
+            <div className={styles.chartsRow}>
+                <div className={styles.chartHalf}>
+                    <GraficoPrestadores 
+                        data={prestadoresData || []} 
+                        loading={loadingPrestadores} 
+                    />
+                </div>
+                
+                <div className={styles.chartHalf}>
+                    <GraficoStatus 
+                        data={statusData || []} 
+                        loading={loadingStatus} 
+                    />
+                </div>
+            </div>
 
-            {/* Sem dados */}
-            {!loading && dados && dados.totalOrcamentos === 0 && (
+            {/* Tabela de Últimos Orçamentos */}
+            <div className={styles.tableSection}>
+                <TabelaOrcamentos 
+                    data={ultimosData || []} 
+                    loading={loadingUltimos} 
+                />
+            </div>
+
+            {/* Estado vazio quando não há dados */}
+            {!loadingResumo && !resumoData && (
                 <div className={styles.emptyState}>
                     <BarChart3 size={64} />
-                    <h3>Nenhum orçamento encontrado</h3>
+                    <h3>Nenhum dado disponível</h3>
                     <p>Tente ajustar os filtros ou cadastre novos orçamentos</p>
                 </div>
             )}

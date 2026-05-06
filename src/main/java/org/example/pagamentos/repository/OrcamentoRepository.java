@@ -44,4 +44,68 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             nativeQuery = true)
     Object[] buscarKpis(@Param("dataInicio") LocalDate dataInicio,
                         @Param("dataFim") LocalDate dataFim);
+
+    /**
+     * Retorna evolução de orçamentos por período (dia/mês)
+     */
+    @Query(value = "SELECT DATE_TRUNC('day', o.MOVIMENTO)::date as data, " +
+            "COALESCE(SUM(o.VALOR_FINAL), 0) as valor_total, " +
+            "COUNT(*) as quantidade " +
+            "FROM ORCAMENTOS o " +
+            "WHERE o.MOVIMENTO >= :dataInicio " +
+            "AND o.MOVIMENTO <= :dataFim " +
+            "GROUP BY DATE_TRUNC('day', o.MOVIMENTO)::date " +
+            "ORDER BY data ASC",
+            nativeQuery = true)
+    List<Object[]> buscarEvolucaoPorPeriodo(@Param("dataInicio") LocalDate dataInicio,
+                                            @Param("dataFim") LocalDate dataFim);
+
+    /**
+     * Retorna ranking de prestadores por valor total
+     */
+    @Query(value = "SELECT p.COD_PRESTADOR, p.NOME, " +
+            "COALESCE(SUM(o.VALOR_FINAL), 0) as valor_total, " +
+            "COUNT(o.orcamentoid) as quantidade " +
+            "FROM ORCAMENTOS o " +
+            "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
+            "WHERE o.MOVIMENTO >= :dataInicio " +
+            "AND o.MOVIMENTO <= :dataFim " +
+            "GROUP BY p.COD_PRESTADOR, p.NOME " +
+            "ORDER BY valor_total DESC",
+            nativeQuery = true)
+    List<Object[]> buscarRankingPrestadores(@Param("dataInicio") LocalDate dataInicio,
+                                            @Param("dataFim") LocalDate dataFim);
+
+    /**
+     * Retorna distribuição por status
+     */
+    @Query(value = "SELECT COALESCE(sa.STATUS, 'PENDENTE') as status, " +
+            "COUNT(*) as quantidade " +
+            "FROM ORCAMENTOS o " +
+            "LEFT JOIN SOLICITACOES_APROVACAO sa ON o.orcamentoid = sa.orcamentoid " +
+            "WHERE o.MOVIMENTO >= :dataInicio " +
+            "AND o.MOVIMENTO <= :dataFim " +
+            "GROUP BY sa.STATUS " +
+            "ORDER BY quantidade DESC",
+            nativeQuery = true)
+    List<Object[]> buscarDistribuicaoStatus(@Param("dataInicio") LocalDate dataInicio,
+                                            @Param("dataFim") LocalDate dataFim);
+
+    /**
+     * Retorna últimos orçamentos com detalhes
+     */
+    @Query(value = "SELECT o.orcamentoid, p.NOME as prestador_nome, " +
+            "o.VALOR_FINAL, COALESCE(sa.STATUS, 'PENDENTE') as status, " +
+            "o.MOVIMENTO as data_movimento " +
+            "FROM ORCAMENTOS o " +
+            "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
+            "LEFT JOIN SOLICITACOES_APROVACAO sa ON o.orcamentoid = sa.orcamentoid " +
+            "WHERE o.MOVIMENTO >= :dataInicio " +
+            "AND o.MOVIMENTO <= :dataFim " +
+            "ORDER BY o.MOVIMENTO DESC " +
+            "LIMIT :limite",
+            nativeQuery = true)
+    List<Object[]> buscarUltimosOrcamentos(@Param("dataInicio") LocalDate dataInicio,
+                                           @Param("dataFim") LocalDate dataFim,
+                                           @Param("limite") int limite);
 }
