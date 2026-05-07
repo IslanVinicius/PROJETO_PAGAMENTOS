@@ -776,27 +776,52 @@ function OrcamentoCadastro() {
 
     // Funções para gerenciar imagens
     const handleFileSelect = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
 
-        // Validar tipo de arquivo
+        // Processar cada arquivo selecionado
         const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        if (!tiposPermitidos.includes(file.type)) {
-            setMessage({ type: 'error', text: 'Apenas arquivos de imagem são permitidos (JPEG, PNG, GIF, WebP)' });
+        const imagensValidas = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // Validar tipo de arquivo
+            if (!tiposPermitidos.includes(file.type)) {
+                setMessage({ type: 'error', text: `Arquivo "${file.name}" não é uma imagem válida. Use JPEG, PNG, GIF ou WebP.` });
+                continue;
+            }
+
+            // Validar tamanho (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setMessage({ type: 'error', text: `Arquivo "${file.name}" excede 5MB` });
+                continue;
+            }
+
+            imagensValidas.push(file);
+        }
+
+        if (imagensValidas.length === 0) {
+            // Limpar o input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
             return;
         }
 
-        // Validar tamanho (máximo 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setMessage({ type: 'error', text: 'O arquivo deve ter no máximo 5MB' });
-            return;
-        }
-
-        // Se está em modo de criação, armazena a imagem como pendente
+        // Se está em modo de criação, armazena as imagens como pendentes
         if (modo === 'criacao') {
-            const preview = URL.createObjectURL(file);
-            setPendingImages(prev => [...prev, { file, preview, name: file.name, size: file.size }]);
-            setMessage({ type: 'success', text: 'Imagem adicionada! Ela será enviada ao salvar o orçamento.' });
+            const novasImagens = imagensValidas.map(file => ({
+                file,
+                preview: URL.createObjectURL(file),
+                name: file.name,
+                size: file.size
+            }));
+            setPendingImages(prev => [...prev, ...novasImagens]);
+            setMessage({ 
+                type: 'success', 
+                text: `${imagensValidas.length} imagem(ns) adicionada(s)! Serão enviadas ao salvar.` 
+            });
             // Limpar o input
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
@@ -810,13 +835,25 @@ function OrcamentoCadastro() {
             return;
         }
 
+        // Upload das imagens
         setLoading(true);
         try {
-            const novaImagem = await orcamentoService.uploadImagem(orcamentoID, file);
-            setImagens(prevImagens => [...prevImagens, novaImagem]);
-            setMessage({ type: 'success', text: 'Imagem adicionada com sucesso!' });
+            let imagensAdicionadas = 0;
+            for (const file of imagensValidas) {
+                try {
+                    const novaImagem = await orcamentoService.uploadImagem(orcamentoID, file);
+                    setImagens(prevImagens => [...prevImagens, novaImagem]);
+                    imagensAdicionadas++;
+                } catch (error) {
+                    console.error(`Erro ao fazer upload de ${file.name}:`, error);
+                }
+            }
+            
+            if (imagensAdicionadas > 0) {
+                setMessage({ type: 'success', text: `${imagensAdicionadas} imagem(ns) adicionada(s) com sucesso!` });
+            }
         } catch (error) {
-            setMessage({ type: 'error', text: error.message || 'Erro ao fazer upload da imagem' });
+            setMessage({ type: 'error', text: 'Erro ao fazer upload das imagens' });
         } finally {
             setLoading(false);
             // Limpar o input
@@ -1457,6 +1494,7 @@ function OrcamentoCadastro() {
                                     ref={fileInputRef}
                                     onChange={handleFileSelect}
                                     accept="image/jpeg,image/png,image/gif,image/webp"
+                                    multiple
                                     style={{ display: 'none' }}
                                     id="imagem-upload"
                                 />
@@ -1464,7 +1502,7 @@ function OrcamentoCadastro() {
                                     htmlFor="imagem-upload" 
                                     className={`${styles.btnUpload} ${loading ? styles.disabled : ''}`}
                                 >
-                                    <Upload size={16} /> Anexar Imagem
+                                    <Upload size={16} /> Anexar Imagem(ns)
                                 </label>
                             </div>
                         )}
