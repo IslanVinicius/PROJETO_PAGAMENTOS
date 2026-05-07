@@ -121,6 +121,16 @@
     white-space: nowrap;
 }
 
+/* Empty rows styling */
+.emptyRow {
+    background-color: #fafafa;
+}
+
+.emptyRow td {
+    color: transparent;
+    user-select: none;
+}
+
 /* Badges */
 .badge {
     display: inline-block;

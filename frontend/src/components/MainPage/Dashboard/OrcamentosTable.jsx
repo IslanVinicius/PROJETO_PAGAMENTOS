@@ -74,6 +74,34 @@ function OrcamentosTable({
         return range;
     };
 
+    // Garantir sempre 10 linhas visíveis na tabela
+    const MIN_ROWS = 10;
+    const displayData = React.useMemo(() => {
+        if (data.length >= MIN_ROWS) {
+            return data;
+        }
+        
+        // Preencher com linhas vazias até atingir MIN_ROWS
+        const paddedData = [...data];
+        const emptyRowsNeeded = MIN_ROWS - data.length;
+        
+        for (let i = 0; i < emptyRowsNeeded; i++) {
+            paddedData.push({
+                orcamentoId: `empty-${i}`,
+                movimento: '',
+                usuarioCriador: '',
+                prestador: '',
+                empresa: '',
+                descricao: '',
+                tipoPagamento: '',
+                valorFinal: 0,
+                isEmpty: true
+            });
+        }
+        
+        return paddedData;
+    }, [data]);
+
     return (
         <div className={styles.tableContainer}>
             {loading ? (
@@ -123,19 +151,25 @@ function OrcamentosTable({
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.map((item) => (
-                                    <tr key={item.orcamentoId}>
+                                {displayData.map((item) => (
+                                    <tr key={item.orcamentoId} className={item.isEmpty ? styles.emptyRow : ''}>
                                         <td>{item.movimento}</td>
                                         <td>{item.usuarioCriador}</td>
                                         <td>{item.prestador}</td>
                                         <td>{item.empresa}</td>
                                         <td className={styles.descricaoCell}>{item.descricao}</td>
                                         <td>
-                                            <span className={`${styles.badge} ${styles[`badge${item.tipoPagamento?.toLowerCase()}`]}`}>
-                                                {formatarStatus(item.tipoPagamento)}
-                                            </span>
+                                            {item.tipoPagamento ? (
+                                                <span className={`${styles.badge} ${styles[`badge${item.tipoPagamento?.toLowerCase()}`]}`}>
+                                                    {formatarStatus(item.tipoPagamento)}
+                                                </span>
+                                            ) : (
+                                                ''
+                                            )}
                                         </td>
-                                        <td className={styles.valorCell}>{formatarMoeda(item.valorFinal)}</td>
+                                        <td className={styles.valorCell}>
+                                            {item.valorFinal > 0 ? formatarMoeda(item.valorFinal) : ''}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

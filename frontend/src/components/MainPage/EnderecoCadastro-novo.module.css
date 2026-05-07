@@ -31,7 +31,7 @@
 .header {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 16px;
     margin-bottom: var(--spacing-2xl);
     padding: var(--spacing-lg);
     border-bottom: 3px solid var(--primary-button);
@@ -57,16 +57,19 @@
 
 .headerControls {
     display: flex;
-    gap: var(--spacing-md);
-    align-items: center;
     flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
     justify-content: space-between;
 }
 
 .quickSearchGroup {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: 12px;
     align-items: center;
+    flex: 1;
+    min-width: 120px;
 }
 
 .searchIconButton {
@@ -110,7 +113,9 @@
 }
 
 .quickSearchInput {
-    width: 100px;
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
     height: 42px;
     padding: 0 var(--spacing-md);
     border: 2px solid var(--border-color);
@@ -210,10 +215,13 @@
 
 .headerActionButtons {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
 }
 
 .headerBtn {
+    min-height: 44px;
     height: 42px;
     padding: 0 var(--spacing-lg);
     border: none;
@@ -536,25 +544,42 @@
     }
 
     .header {
+        gap: 16px;
         padding: var(--spacing-md);
     }
 
     .headerControls {
+        width: 100%;
         flex-direction: column;
         align-items: stretch;
     }
 
     .quickSearchGroup {
-        justify-content: center;
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .navigationGroup {
-        justify-content: center;
-        margin-left: 0;
+    .searchIconButton,
+    .quickSearchInput {
+        width: 100%;
     }
 
     .headerActionButtons {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerBtn {
+        width: 100%;
+    }
+
+    .navigationGroup {
+        width: 100%;
         justify-content: center;
+        margin-left: 0;
+        flex-wrap: wrap;
     }
 
     .formRow {
@@ -571,8 +596,8 @@
     }
 }
 
-/* Tablet (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* Tablet (769px - 1023px) */
+@media (min-width: 769px) and (max-width: 1023px) {
     .container {
         padding: var(--spacing-xl);
         max-width: 90%;
@@ -580,6 +605,18 @@
     
     .headerTitle h2 {
         font-size: 13px;
+    }
+
+    .headerControls {
+        flex-wrap: wrap;
+    }
+
+    .quickSearchGroup {
+        flex: 1;
+    }
+
+    .headerActionButtons {
+        flex-wrap: wrap;
     }
 }
 

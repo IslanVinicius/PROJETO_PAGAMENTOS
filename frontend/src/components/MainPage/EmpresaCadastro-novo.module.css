@@ -16,7 +16,7 @@
 .header {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 16px;
     margin-bottom: var(--spacing-2xl);
     padding: var(--spacing-lg);
     border-bottom: 3px solid var(--primary-button);
@@ -42,9 +42,9 @@
 
 .headerControls {
     display: flex;
-    gap: var(--spacing-md);
-    align-items: center;
     flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
     justify-content: space-between;
 }
 
@@ -58,8 +58,11 @@
 
 .quickSearchGroup {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: 12px;
     align-items: center;
+    flex: 1;
+    min-width: 120px;
 }
 
 .searchIconButton {
@@ -103,7 +106,9 @@
 }
 
 .quickSearchInput {
-    width: 100px;
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
     height: 42px;
     padding: 0 var(--spacing-md);
     border: 2px solid var(--border-color);
@@ -207,11 +212,13 @@
 /* Botões de Ação no Header */
 .headerActionButtons {
     display: flex;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: 12px;
     align-items: center;
 }
 
 .headerBtn {
+    min-height: 44px;
     height: 42px;
     padding: 0 var(--spacing-lg);
     border: none;
@@ -834,31 +841,40 @@
     }
 
     .header {
-        gap: var(--spacing-md);
+        gap: 16px;
     }
 
     .headerControls {
+        width: 100%;
         flex-direction: column;
         align-items: stretch;
-        width: 100%;
     }
 
-    .headerSearchWrapper {
+    .quickSearchGroup {
         width: 100%;
-        min-width: unset;
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .navigationGroup {
-        align-self: center;
+    .searchIconButton,
+    .quickSearchInput {
+        width: 100%;
     }
 
     .headerActionButtons {
         width: 100%;
-        justify-content: center;
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .headerBtn {
-        flex: 1;
+        width: 100%;
+    }
+
+    .navigationGroup {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .formGrid {
@@ -872,6 +888,21 @@
     .searchButton {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .headerControls {
+        flex-wrap: wrap;
+    }
+
+    .quickSearchGroup {
+        flex: 1;
+    }
+
+    .headerActionButtons {
+        flex-wrap: wrap;
     }
 }
 
