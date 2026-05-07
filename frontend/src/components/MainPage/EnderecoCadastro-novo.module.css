@@ -556,13 +556,27 @@
 
     .quickSearchGroup {
         width: 100%;
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row; /* Manter horizontal no mobile */
+        align-items: center;
+        gap: var(--spacing-xs);
     }
 
-    .searchIconButton,
+    .searchIconButton {
+        width: 40px !important; /* Botão compacto no mobile */
+        height: 40px !important;
+        flex-shrink: 0; /* Não permitir que o botão encolha */
+        min-width: 40px;
+    }
+
+    .searchIconButton svg {
+        width: 16px;
+        height: 16px;
+    }
+
     .quickSearchInput {
-        width: 100%;
+        flex: 1; /* Ocupar espaço restante */
+        min-width: 0; /* Permitir que ocupe todo espaço disponível */
+        max-width: none; /* Remover limite máximo no mobile */
     }
 
     .headerActionButtons {

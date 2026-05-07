@@ -121,11 +121,13 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             "e.NOME as empresa, " +
             "o.DESCRICAO, " +
             "o.TIPO_PAGAMENTO, " +
-            "o.VALOR_FINAL " +
+            "o.VALOR_FINAL, " +
+            "COALESCE(sa.STATUS, 'PENDENTE') as status_aprovacao " +
             "FROM ORCAMENTOS o " +
             "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
             "INNER JOIN EMPRESAS e ON o.ENTIDADE = e.ENTIDADE " +
             "INNER JOIN USUARIOS u ON o.usuario_criador_id = u.id " +
+            "LEFT JOIN SOLICITACOES_APROVACAO sa ON o.orcamentoid = sa.orcamentoid " +
             "WHERE (CAST(:dataInicio AS DATE) IS NULL OR o.MOVIMENTO >= CAST(:dataInicio AS DATE)) " +
             "AND (CAST(:dataFim AS DATE) IS NULL OR o.MOVIMENTO <= CAST(:dataFim AS DATE)) " +
             "AND (:usuarioCriadorId IS NULL OR u.id = :usuarioCriadorId) " +
@@ -134,12 +136,14 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             "AND (:descricao IS NULL OR UPPER(o.DESCRICAO) LIKE UPPER(CONCAT('%', :descricao, '%'))) " +
             "AND (:tipoPagamento IS NULL OR o.TIPO_PAGAMENTO = :tipoPagamento) " +
             "AND (:valorMin IS NULL OR o.VALOR_FINAL >= :valorMin) " +
-            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax)",
+            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax) " +
+            "AND (:statusAprovacao IS NULL OR COALESCE(sa.STATUS, 'PENDENTE') = :statusAprovacao)",
             countQuery = "SELECT COUNT(*) " +
             "FROM ORCAMENTOS o " +
             "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
             "INNER JOIN EMPRESAS e ON o.ENTIDADE = e.ENTIDADE " +
             "INNER JOIN USUARIOS u ON o.usuario_criador_id = u.id " +
+            "LEFT JOIN SOLICITACOES_APROVACAO sa ON o.orcamentoid = sa.orcamentoid " +
             "WHERE (CAST(:dataInicio AS DATE) IS NULL OR o.MOVIMENTO >= CAST(:dataInicio AS DATE)) " +
             "AND (CAST(:dataFim AS DATE) IS NULL OR o.MOVIMENTO <= CAST(:dataFim AS DATE)) " +
             "AND (:usuarioCriadorId IS NULL OR u.id = :usuarioCriadorId) " +
@@ -148,7 +152,8 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             "AND (:descricao IS NULL OR UPPER(o.DESCRICAO) LIKE UPPER(CONCAT('%', :descricao, '%'))) " +
             "AND (:tipoPagamento IS NULL OR o.TIPO_PAGAMENTO = :tipoPagamento) " +
             "AND (:valorMin IS NULL OR o.VALOR_FINAL >= :valorMin) " +
-            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax)",
+            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax) " +
+            "AND (:statusAprovacao IS NULL OR COALESCE(sa.STATUS, 'PENDENTE') = :statusAprovacao)",
             nativeQuery = true)
     org.springframework.data.domain.Page<Object[]> buscarOrcamentosComFiltros(
             @Param("dataInicio") LocalDate dataInicio,
@@ -160,6 +165,7 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             @Param("tipoPagamento") String tipoPagamento,
             @Param("valorMin") Float valorMin,
             @Param("valorMax") Float valorMax,
+            @Param("statusAprovacao") String statusAprovacao,
             org.springframework.data.domain.Pageable pageable);
 
     /**
@@ -172,11 +178,13 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             "e.NOME as empresa, " +
             "o.DESCRICAO, " +
             "o.TIPO_PAGAMENTO, " +
-            "o.VALOR_FINAL " +
+            "o.VALOR_FINAL, " +
+            "COALESCE(sa.STATUS, 'PENDENTE') as status_aprovacao " +
             "FROM ORCAMENTOS o " +
             "INNER JOIN PRESTADORES p ON o.COD_PRESTADOR = p.COD_PRESTADOR " +
             "INNER JOIN EMPRESAS e ON o.ENTIDADE = e.ENTIDADE " +
             "INNER JOIN USUARIOS u ON o.usuario_criador_id = u.id " +
+            "LEFT JOIN SOLICITACOES_APROVACAO sa ON o.orcamentoid = sa.orcamentoid " +
             "WHERE (CAST(:dataInicio AS DATE) IS NULL OR o.MOVIMENTO >= CAST(:dataInicio AS DATE)) " +
             "AND (CAST(:dataFim AS DATE) IS NULL OR o.MOVIMENTO <= CAST(:dataFim AS DATE)) " +
             "AND (:usuarioCriadorId IS NULL OR u.id = :usuarioCriadorId) " +
@@ -185,7 +193,8 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             "AND (:descricao IS NULL OR UPPER(o.DESCRICAO) LIKE UPPER(CONCAT('%', :descricao, '%'))) " +
             "AND (:tipoPagamento IS NULL OR o.TIPO_PAGAMENTO = :tipoPagamento) " +
             "AND (:valorMin IS NULL OR o.VALOR_FINAL >= :valorMin) " +
-            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax)",
+            "AND (:valorMax IS NULL OR o.VALOR_FINAL <= :valorMax) " +
+            "AND (:statusAprovacao IS NULL OR COALESCE(sa.STATUS, 'PENDENTE') = :statusAprovacao)",
             nativeQuery = true)
     List<Object[]> buscarOrcamentosParaExportacao(
             @Param("dataInicio") LocalDate dataInicio,
@@ -196,5 +205,6 @@ public interface OrcamentoRepository extends JpaRepository<OrcamentoModel, Long>
             @Param("descricao") String descricao,
             @Param("tipoPagamento") String tipoPagamento,
             @Param("valorMin") Float valorMin,
-            @Param("valorMax") Float valorMax);
+            @Param("valorMax") Float valorMax,
+            @Param("statusAprovacao") String statusAprovacao);
 }

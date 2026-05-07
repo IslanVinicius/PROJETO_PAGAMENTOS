@@ -642,4 +642,43 @@
         width: 100%;
         justify-content: center;
     }
+
+    /* Correção do grupo de input com botão de pesquisa */
+    .inputGroup {
+        width: 100% !important;
+        gap: var(--spacing-xs) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: stretch !important;
+    }
+
+    .inputGroup input {
+        flex: 1 !important;
+        flex-grow: 1 !important;
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    .searchIconButton {
+        width: 37px !important;
+        height: 37px !important;
+        flex-shrink: 0 !important;
+        flex-grow: 0 !important;
+        min-width: 37px !important;
+        max-width: 37px !important;
+        flex-basis: 37px !important;
+    }
+
+    .searchIconButton svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* Ajuste do fieldDisplay para mobile */
+    .fieldDisplay {
+        font-size: 12px;
+        padding: var(--spacing-xs);
+        word-break: break-word;
+        white-space: normal;
+    }
 }

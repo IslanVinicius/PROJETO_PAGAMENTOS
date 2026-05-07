@@ -75,7 +75,7 @@ public class OrcamentoDashboardController {
         StringBuilder sb = new StringBuilder();
 
         // Header
-        sb.append("Movimento;Usuário Criador;Prestador;Empresa;Descrição;Tipo Pagamento;Valor Final\n");
+        sb.append("Movimento;Usuário Criador;Prestador;Empresa;Descrição;Tipo Pagamento;Status Aprovação;Valor Final\n");
 
         // Dados
         for (OrcamentoDashboardDTO orc : orcamentos) {
@@ -85,6 +85,7 @@ public class OrcamentoDashboardController {
             sb.append(escaparCSV(orc.getEmpresa())).append(";");
             sb.append(escaparCSV(orc.getDescricao())).append(";");
             sb.append(orc.getTipoPagamento()).append(";");
+            sb.append(orc.getStatusAprovacao() != null ? orc.getStatusAprovacao() : "PENDENTE").append(";");
             sb.append(String.format("%.2f", orc.getValorFinal() != null ? orc.getValorFinal() : 0)).append("\n");
         }
 

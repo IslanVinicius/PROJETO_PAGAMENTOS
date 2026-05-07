@@ -40,6 +40,15 @@ function OrcamentosTable({
         return map[tipo] || tipo;
     };
 
+    const formatarStatusAprovacao = (status) => {
+        const map = {
+            'PENDENTE': 'Pendente',
+            'APROVADO': 'Aprovado',
+            'REJEITADO': 'Rejeitado'
+        };
+        return map[status] || status || 'Pendente';
+    };
+
     const getSortIcon = (columnName) => {
         if (sortConfig.key !== columnName) {
             return <ArrowUpDown size={14} className={styles.sortIconInactive} />;
@@ -95,6 +104,7 @@ function OrcamentosTable({
                 descricao: '',
                 tipoPagamento: '',
                 valorFinal: 0,
+                statusAprovacao: '', // Sem status para linhas vazias
                 isEmpty: true
             });
         }
@@ -144,6 +154,10 @@ function OrcamentosTable({
                                         <span>Tipo Pagamento</span>
                                         {getSortIcon('tipoPagamento')}
                                     </th>
+                                    <th onClick={() => handleSort('statusAprovacao')} className={styles.sortable}>
+                                        <span>Status Aprovação</span>
+                                        {getSortIcon('statusAprovacao')}
+                                    </th>
                                     <th onClick={() => handleSort('valorFinal')} className={styles.sortable}>
                                         <span>Valor Final</span>
                                         {getSortIcon('valorFinal')}
@@ -162,6 +176,15 @@ function OrcamentosTable({
                                             {item.tipoPagamento ? (
                                                 <span className={`${styles.badge} ${styles[`badge${item.tipoPagamento?.toLowerCase()}`]}`}>
                                                     {formatarStatus(item.tipoPagamento)}
+                                                </span>
+                                            ) : (
+                                                ''
+                                            )}
+                                        </td>
+                                        <td>
+                                            {!item.isEmpty && item.statusAprovacao ? (
+                                                <span className={`${styles.badge} ${styles[`badgeStatus${item.statusAprovacao?.toLowerCase()}`]}`}>
+                                                    {formatarStatusAprovacao(item.statusAprovacao)}
                                                 </span>
                                             ) : (
                                                 ''

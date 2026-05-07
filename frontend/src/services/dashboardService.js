@@ -100,6 +100,7 @@ export const dashboardService = {
             tipoPagamento: filtros.tipoPagamento || null,
             valorMin: filtros.valorMin || null,
             valorMax: filtros.valorMax || null,
+            statusAprovacao: filtros.statusAprovacao || null,
             page: filtros.page || 0,
             size: filtros.size || 10,
             sortBy: filtros.sortBy || 'movimento',
@@ -124,6 +125,7 @@ export const dashboardService = {
             tipoPagamento: filtros.tipoPagamento || null,
             valorMin: filtros.valorMin || null,
             valorMax: filtros.valorMax || null,
+            statusAprovacao: filtros.statusAprovacao || null,
             sortBy: filtros.sortBy || 'movimento',
             sortDirection: filtros.sortDirection || 'desc'
         };

@@ -58,6 +58,7 @@ public class OrcamentoDashboardService {
                 filtro.getTipoPagamento(),
                 filtro.getValorMin(),
                 filtro.getValorMax(),
+                filtro.getStatusAprovacao(),
                 pageable
         );
 
@@ -108,7 +109,8 @@ public class OrcamentoDashboardService {
                 filtro.getDescricao(),
                 filtro.getTipoPagamento(),
                 filtro.getValorMin(),
-                filtro.getValorMax()
+                filtro.getValorMax(),
+                filtro.getStatusAprovacao()
         );
 
         // Aplicar ordenação em memória (para exportação)
@@ -161,6 +163,7 @@ public class OrcamentoDashboardService {
         dto.setDescricao(row[5] != null ? row[5].toString() : "");
         dto.setTipoPagamento(row[6] != null ? row[6].toString() : "");
         dto.setValorFinal(row[7] != null ? ((Number) row[7]).floatValue() : 0f);
+        dto.setStatusAprovacao(row[8] != null ? row[8].toString() : "PENDENTE");
         return dto;
     }
 
@@ -188,6 +191,8 @@ public class OrcamentoDashboardService {
                 return "TIPO_PAGAMENTO";
             case "valorfinal":
                 return "VALOR_FINAL";
+            case "statusaprovacao":
+                return "status_aprovacao";
             default:
                 return "MOVIMENTO"; // Default seguro
         }

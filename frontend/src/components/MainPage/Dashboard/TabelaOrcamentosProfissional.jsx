@@ -21,7 +21,8 @@ function TabelaOrcamentosProfissional() {
         descricao: '',
         tipoPagamento: '',
         valorMin: null,
-        valorMax: null
+        valorMax: null,
+        statusAprovacao: ''
     });
 
     // Estado de paginação
@@ -76,7 +77,8 @@ function TabelaOrcamentosProfissional() {
             descricao: '',
             tipoPagamento: '',
             valorMin: null,
-            valorMax: null
+            valorMax: null,
+            statusAprovacao: ''
         });
     }, []);
 

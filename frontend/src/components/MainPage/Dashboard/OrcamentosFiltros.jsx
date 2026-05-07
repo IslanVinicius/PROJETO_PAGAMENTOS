@@ -158,6 +158,20 @@ function OrcamentosFiltros({
                         onChange={(e) => handleChange('valorMax', e.target.value ? parseFloat(e.target.value) : null)}
                     />
                 </div>
+
+                {/* Filtro Status Aprovação */}
+                <div className={styles.filtroGroup}>
+                    <label>Status Aprovação</label>
+                    <select
+                        value={filtros.statusAprovacao || ''}
+                        onChange={(e) => handleChange('statusAprovacao', e.target.value || null)}
+                    >
+                        <option value="">Todos</option>
+                        <option value="PENDENTE">Pendente</option>
+                        <option value="APROVADO">Aprovado</option>
+                        <option value="REJEITADO">Rejeitado</option>
+                    </select>
+                </div>
             </div>
         </div>
     );

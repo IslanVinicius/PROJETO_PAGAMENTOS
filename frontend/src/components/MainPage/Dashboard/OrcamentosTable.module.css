@@ -162,6 +162,22 @@
     color: #374151;
 }
 
+/* Badges de Status de Aprovação */
+.badgeStatuspendente {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badgeStatusaprovado {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badgeStatusrejeitado {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
 /* Pagination */
 .pagination {
     display: flex;

@@ -852,13 +852,21 @@
 
     .quickSearchGroup {
         width: 100%;
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row; /* Manter horizontal no mobile */
+        align-items: center;
+        gap: var(--spacing-sm);
     }
 
-    .searchIconButton,
+    .searchIconButton {
+        width: 42px; /* Tamanho fixo, não 100% */
+        height: 42px;
+        flex-shrink: 0; /* Não permitir que o botão encolha */
+    }
+
     .quickSearchInput {
-        width: 100%;
+        flex: 1; /* Ocupar espaço restante */
+        min-width: 60px;
+        max-width: none; /* Remover limite máximo no mobile */
     }
 
     .headerActionButtons {

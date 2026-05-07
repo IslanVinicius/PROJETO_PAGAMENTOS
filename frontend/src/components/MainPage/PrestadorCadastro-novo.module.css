@@ -606,6 +606,111 @@
     color: var(--success);
 }
 
+/* Header Controls - Grupo de busca rápida */
+.headerControls {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.quickSearchGroup {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+.quickSearchInput {
+    flex: 1;
+    min-width: 60px;
+    max-width: 120px;
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition-fast);
+    text-align: center;
+}
+
+.quickSearchInput::placeholder {
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+.quickSearchInput:focus {
+    border-color: var(--primary-button);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+/* Botões de Ação no Header */
+.headerActionButtons {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.headerBtn {
+    min-height: 42px;
+    height: 42px;
+    padding: 0 var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    justify-content: center;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 110px;
+}
+
+.headerBtn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.headerBtnEdit {
+    background: linear-gradient(135deg, var(--primary-button) 0%, var(--primary-button-hover) 100%);
+    color: white;
+}
+
+.headerBtnSave {
+    background: linear-gradient(135deg, var(--success) 0%, #2d8645 100%);
+    color: white;
+}
+
+.headerBtnDelete {
+    background: linear-gradient(135deg, var(--danger) 0%, #b82a20 100%);
+    color: white;
+}
+
+.headerBtnCancel {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.headerBtnNew {
+    background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-button) 100%);
+    color: white;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     .container {
@@ -641,6 +746,36 @@
     .searchButton {
         width: 100%;
         justify-content: center;
+    }
+
+    /* Correção do botão de pesquisa - manter horizontal */
+    .quickSearchGroup {
+        width: 100%;
+        flex-direction: row; /* Manter horizontal no mobile */
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .searchIconButton {
+        width: 42px; /* Tamanho fixo, não 100% */
+        height: 42px;
+        flex-shrink: 0; /* Não permitir que o botão encolha */
+    }
+
+    .quickSearchInput {
+        flex: 1; /* Ocupar espaço restante */
+        min-width: 60px;
+        max-width: none; /* Remover limite máximo no mobile */
+    }
+
+    .headerActionButtons {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerBtn {
+        width: 100%;
     }
 }
 

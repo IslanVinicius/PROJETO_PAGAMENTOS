@@ -21,6 +21,7 @@ public class OrcamentoFiltroDTO {
     private String tipoPagamento;
     private Float valorMin;
     private Float valorMax;
+    private String statusAprovacao; // Filtro por status: PENDENTE, APROVADO, REJEITADO
     
     // Paginação
     private Integer page = 0;

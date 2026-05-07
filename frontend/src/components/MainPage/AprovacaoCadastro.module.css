@@ -461,12 +461,25 @@
     overflow-x: auto;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+}
+
+/* Indicador visual de scroll no mobile */
+.tableContainer::after {
+    content: '← Deslize para ver mais →';
+    display: none;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: var(--spacing-xs) 0;
+    font-style: italic;
 }
 
 .modernTable {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    min-width: 600px; /* Largura mínima para não quebrar layout */
 }
 
 .modernTable thead {
@@ -482,12 +495,22 @@
     font-size: 11px;
     letter-spacing: 0.5px;
     border-bottom: 2px solid var(--border-color);
+    white-space: nowrap; /* Evita quebra de linha nos headers */
 }
 
 .modernTable td {
     padding: var(--spacing-md) var(--spacing-lg);
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-light);
+    white-space: nowrap; /* Evita quebra de linha nas células */
+}
+
+/* Coluna de descrição pode quebrar linha */
+.modernTable td:nth-child(2) {
+    white-space: normal;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .rowEven {
@@ -871,16 +894,44 @@
     .decisionPanel {
         position: static;
     }
+
+    /* Tabela com scroll no tablet */
+    .modernTable {
+        min-width: 550px;
+    }
+}
+
+/* Tablet específico */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 100%;
+        padding: var(--spacing-xl);
+    }
+
+    .infoGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
+    /* Prevenir overflow horizontal em todos os elementos */
+    * {
+        box-sizing: border-box;
+    }
+
     .container {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
+        max-width: 100%; /* Ocupar toda a largura no mobile */
+        border-radius: 0; /* Remover bordas arredondadas no mobile */
+        overflow-x: hidden; /* Prevenir overflow horizontal */
     }
 
     .header {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
+        margin-left: calc(-1 * var(--spacing-md));
+        margin-right: calc(-1 * var(--spacing-md));
+        border-radius: 0;
     }
 
     .headerTitle h2 {
@@ -893,9 +944,38 @@
     }
 
     .tabContent {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md);
+        overflow-x: hidden; /* Prevenir overflow horizontal */
     }
 
+    /* Tabs empilhadas no mobile */
+    .tabsContainer {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .tabButton {
+        height: 44px;
+        font-size: 13px;
+    }
+
+    /* Seção de busca - empilhada */
+    .searchSection {
+        flex-direction: column;
+    }
+
+    .searchInput {
+        height: 42px;
+        font-size: 13px;
+    }
+
+    .searchButton {
+        height: 42px;
+        width: 100%;
+        font-size: 13px;
+    }
+
+    /* Lista de solicitações - header oculto */
     .listaHeader {
         display: none;
     }
@@ -903,8 +983,10 @@
     .listaItem {
         grid-template-columns: 1fr;
         gap: var(--spacing-xs);
+        padding: var(--spacing-md);
     }
 
+    /* Header do orçamento */
     .headerMainInfo {
         flex-direction: column;
         align-items: flex-start;
@@ -914,16 +996,263 @@
         font-size: 20px;
     }
 
+    /* Grid de informações - 1 coluna */
     .infoGrid {
         grid-template-columns: 1fr;
+        width: 100%;
+        overflow: hidden;
     }
 
+    /* Coluna esquerda - remover margens negativas */
+    .leftColumn {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Garantir que todas as seções fiquem dentro da tela */
+    .leftColumn > * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Seções com padding reduzido */
+    .infoSection {
+        padding: var(--spacing-md);
+        margin-left: calc(-1 * var(--spacing-md));
+        margin-right: calc(-1 * var(--spacing-md));
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .sectionTitle {
+        font-size: 14px;
+    }
+
+    /* Tabela de Itens - Scroll horizontal */
+    .tableContainer {
+        margin-left: calc(-1 * var(--spacing-md));
+        margin-right: calc(-1 * var(--spacing-md));
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 0 var(--spacing-md);
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .tableContainer::after {
+        display: block;
+    }
+
+    .modernTable {
+        font-size: 12px;
+        min-width: 500px;
+    }
+
+    .modernTable th {
+        padding: var(--spacing-sm);
+        font-size: 10px;
+    }
+
+    .modernTable td {
+        padding: var(--spacing-sm);
+        font-size: 12px;
+    }
+
+    .modernTable td:nth-child(2) {
+        max-width: 150px;
+    }
+
+    /* Resumo Financeiro */
+    .financeSection {
+        padding: var(--spacing-md);
+        margin-left: calc(-1 * var(--spacing-md));
+        margin-right: calc(-1 * var(--spacing-md));
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .financeGrid {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .financeRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .totalValue {
+        font-size: 20px;
+    }
+
+    /* Galeria de Imagens - Grid menor */
+    .imagensGrid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: var(--spacing-sm);
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .imagemCard {
+        height: 100px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Painel de Decisão */
+    .decisionPanel {
+        padding: var(--spacing-md);
+        margin-left: calc(-1 * var(--spacing-md));
+        margin-right: calc(-1 * var(--spacing-md));
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Coluna direita - garantir que fique dentro da tela */
+    .rightColumn {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Grid principal - 1 coluna no mobile */
+    .approvalGrid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .decisionTitle {
+        font-size: 14px;
+    }
+
+    .observationTextarea {
+        font-size: 13px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Botões de ação - empilhados */
     .actionButtons {
         flex-direction: column;
+        width: 100%;
     }
 
     .btnAction {
         width: 100%;
+        height: 52px;
+        font-size: 14px;
+    }
+
+    .btnBack {
+        width: 100%;
+        height: 42px;
+        font-size: 13px;
+    }
+
+    /* Modal de Imagem - Responsivo */
+    .imageModalContent {
+        max-width: 95%;
+        maxHeight: 80vh;
+    }
+
+    /* Badges e Meta Informações */
+    .statusBadge {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    .headerMetaInfo {
+        gap: var(--spacing-md);
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .metaItem {
+        font-size: 13px;
+        width: auto;
+        flex-shrink: 0;
+    }
+
+    .valorDestaque {
+        font-size: 16px;
+    }
+
+    /* Header do Orçamento */
+    .approvalHeader {
+        padding: var(--spacing-md);
+        margin-left: calc(-1 * var(--spacing-md));
+        margin-right: calc(-1 * var(--spacing-md));
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .headerLeft {
+        width: 100%;
+    }
+
+    .headerMainInfo {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    /* Mensagens e Loading */
+    .message {
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: 13px;
+    }
+
+    .loadingState {
+        padding: var(--spacing-xl);
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+    }
+
+    .emptyState {
+        padding: var(--spacing-xl);
+    }
+
+    .emptyState p {
+        font-size: 14px;
+    }
+
+    /* Imagens */
+    .imagemCard:hover {
+        transform: none; /* Remover efeito de scale no mobile */
+    }
+
+    /* Painel de Lista */
+    .listaPanel {
+        padding: var(--spacing-md);
+    }
+
+    .listaBody {
+        max-height: 400px;
+    }
+
+    .listaItem:hover {
+        transform: none; /* Remover efeito de translateX no mobile */
     }
 }
 

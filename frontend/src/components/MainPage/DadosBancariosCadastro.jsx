@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronFirst, ChevronLast, Search, Plus, Edit2, Trash2, Save, X, MapPin } from 'lucide-react';
-import styles from './EmpresaCadastro-novo.module.css';
+import styles from './DadosBancariosCadastro-novo.module.css';
 import { dadosBancariosService } from '../../services/dadosBancariosService';
 import { prestadorService } from '../../services/prestadorService';
 import ModalPesquisa from './ModalPesquisa';

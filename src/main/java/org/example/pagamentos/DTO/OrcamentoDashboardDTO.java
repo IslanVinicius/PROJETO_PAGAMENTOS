@@ -18,4 +18,5 @@ public class OrcamentoDashboardDTO {
     private String descricao;
     private String tipoPagamento; // Enum convertido para String
     private Float valorFinal;
+    private String statusAprovacao; // Status da solicitação de aprovação: PENDENTE, APROVADO, REJEITADO
 }
